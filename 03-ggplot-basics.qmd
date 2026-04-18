@@ -1,0 +1,62 @@
+---
+title: "Make a Plot"
+---
+
+```{python}
+import polars as pl
+import plotnine_polars
+
+gapminder = pl.read_csv(
+    "https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv",
+    separator="\t"
+)
+
+gapminder.head()
+```
+
+```{python}
+p = gapminder.ggplot()
+```
+
+```{python}
+p = (
+    gapminder
+    .ggplot()
+    .aes(x = "gdpPercap", y = "lifeExp")
+)
+```
+
+```{python}
+p
+```
+
+```{python}
+p.geom_point()
+```
+
+```{python}
+(
+    gapminder
+    .ggplot()
+    .aes(x = "gdpPercap",y = "lifeExp")
+    .geom_smooth(method="loess")
+)
+```
+
+```{python}
+from plotnine import ggplot, aes, geom_smooth, geom_point, labs
+from plotnine.data import mpg
+p = ggplot(data = gapminder,
+           mapping = aes(x = "gdpPercap",
+                          y = "lifeExp"))
+p + geom_point() + geom_smooth(method="loess")
+```
+
+```{python}
+(
+    ggplot(mpg, aes(x="displ", y="hwy"))
+    + geom_point()
+    + geom_smooth()
+    + labs(x="displacement", y="horsepower")
+)
+```

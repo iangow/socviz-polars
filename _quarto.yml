@@ -1,0 +1,23 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "Data Visualization: A Python/Polars Companion"
+  author: "Ian Gow"
+  chapters:
+    - index.qmd
+    - 02-intro.qmd
+    - 03-ggplot-basics.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+
+execute:
+  freeze: auto
+
+publish:
+  gh-pages:
+    branch: gh-pages

@@ -1,0 +1,31 @@
+---
+title: "Get Started"
+---
+
+```{python}
+import polars as pl
+import plotnine_polars
+
+url = "https://cdn.rawgit.com/kjhealy/dvdata/main/organs.csv"
+organs = pl.read_csv(url)
+```
+
+```{python}
+gapminder = pl.read_csv(
+    "https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv",
+    separator="\t"
+)
+gapminder
+```
+
+
+```{python}
+#| label: fig-first-plot
+#| fig-cap: "Life expectancy plotted against GDP per capita for a large number of country-years."
+(
+    gapminder
+    .ggplot()
+    .aes(x = "gdpPercap", y = "lifeExp")
+    .geom_point()
+)
+```

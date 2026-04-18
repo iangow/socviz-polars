@@ -1,0 +1,16 @@
+{
+  "hash": "a36575a9a961267ccb36b1e8bb43c1b9",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Make a Plot\"\n---\n\n::: {#72b2af46 .cell execution_count=1}\n``` {.python .cell-code}\nimport polars as pl\nfrom plotnine import *\n\ngapminder = pl.read_csv(\n    \"https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv\",\n    separator=\"\\t\"\n)\n\ngapminder.head()\n```\n\n::: {.cell-output .cell-output-display execution_count=1}\n```{=html}\n<div><style>\n.dataframe > thead > tr,\n.dataframe > tbody > tr {\n  text-align: right;\n  white-space: pre-wrap;\n}\n</style>\n<small>shape: (5, 6)</small><table border=\"1\" class=\"dataframe\"><thead><tr><th>country</th><th>continent</th><th>year</th><th>lifeExp</th><th>pop</th><th>gdpPercap</th></tr><tr><td>str</td><td>str</td><td>i64</td><td>f64</td><td>i64</td><td>f64</td></tr></thead><tbody><tr><td>&quot;Afghanistan&quot;</td><td>&quot;Asia&quot;</td><td>1952</td><td>28.801</td><td>8425333</td><td>779.445314</td></tr><tr><td>&quot;Afghanistan&quot;</td><td>&quot;Asia&quot;</td><td>1957</td><td>30.332</td><td>9240934</td><td>820.85303</td></tr><tr><td>&quot;Afghanistan&quot;</td><td>&quot;Asia&quot;</td><td>1962</td><td>31.997</td><td>10267083</td><td>853.10071</td></tr><tr><td>&quot;Afghanistan&quot;</td><td>&quot;Asia&quot;</td><td>1967</td><td>34.02</td><td>11537966</td><td>836.197138</td></tr><tr><td>&quot;Afghanistan&quot;</td><td>&quot;Asia&quot;</td><td>1972</td><td>36.088</td><td>13079460</td><td>739.981106</td></tr></tbody></table></div>\n```\n:::\n:::\n\n\n",
+    "supporting": [
+      "03-ggplot-basics_files"
+    ],
+    "filters": [],
+    "includes": {
+      "include-in-header": [
+        "<script src=\"https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js\" integrity=\"sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx\" crossorigin=\"anonymous\"></script>\n<script src=\"https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js\" integrity=\"sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2\" crossorigin=\"anonymous\" data-relocate-top=\"true\"></script>\n<script type=\"application/javascript\">define('jquery', [],function() {return window.jQuery;})</script>\n"
+      ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+---
+title: "Preface"
+---
+
+This is a Python/Polars companion to Kieran Healy's [*Data Visualization: A Practical Introduction*](https://socviz.co). It reproduces the book's examples using [Polars](https://pola.rs) for data manipulation and [plotnine](https://plotnine.org) for plotting.
