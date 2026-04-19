@@ -17,6 +17,7 @@ format:
 
 execute:
   freeze: auto
+  keep-ipynb: false
 
 publish:
   gh-pages:
