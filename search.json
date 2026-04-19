@@ -1,0 +1,182 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Data Visualization: A Python/Polars Companion",
+    "section": "",
+    "text": "This is a Python/Polars companion to Kieran Healy’s Data Visualization: A Practical Introduction. It reproduces the book’s examples using Polars for data manipulation and plotnine for plotting.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Preface</span>"
+    ]
+  },
+  {
+    "objectID": "01-look-at-data.html",
+    "href": "01-look-at-data.html",
+    "title": "2  Look at Data",
+    "section": "",
+    "text": "This chapter is largely conceptual, with only a few glancing references to R and ggplot. So I don’t have much to add here.\nAn important caveat that applies to Healy (2026) is worth emphasizing:\nObviously this is a defensible stance. But often it is unrealistic. Consider Figure 1.2 of Healy (2026). I conjecture that very few researchers would trade the strong results when South Africa is in the sample for the weak ones when it is not. Not drawing the equivalent of Figure 1.2 would be critical to getting through the review process (yes, reviewers should demand more plots). I would even go further and say that not even looking at plots is probably important for authors, lest they doubt their own “results”; believing one’s results is often important when pushing a paper through the process of getting it published. My experience is that a typical paper’s results are generally weaker than they seem, so looking at one’s data is unlikely to be helpful in an academic context, except to unearth issues that will be inevitably emerge later on.1\nAnother way of framing this is to say that Healy (2026) is aimed at people in settings where they have the luxury of seeking truth (i.e., not academics facing “publish or perish” incentives). In any case, I see no reason to deviate from Healy (2026)’s perspective in this guide; someone else can write “Data Visualization for p-Hackers”.2",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Look at Data</span>"
+    ]
+  },
+  {
+    "objectID": "01-look-at-data.html#footnotes",
+    "href": "01-look-at-data.html#footnotes",
+    "title": "2  Look at Data",
+    "section": "",
+    "text": "Though, the academic review process is not particulary effective at unearthing data issues.↩︎\nI’d guess that book should focus on Stata, as that software platform seems much more ergnomic for the “thousands of regressions” workflow used by most academic researchers.↩︎",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Look at Data</span>"
+    ]
+  },
+  {
+    "objectID": "02-intro.html",
+    "href": "02-intro.html",
+    "title": "3  Get Started",
+    "section": "",
+    "text": "3.1 Work in Plain Text\nI don’t disagree with anything that Healy (2026) says in Chapter 2.\nIn the current version of this guide, I assume that you are already familiar with Python. If you are unfamiliar with Python and just want to learn a bit about data visualization, I would recommend just using R and Healy (2026). Even if your ultimate destination is Python, whatever you learn from R will largely carry over to Python. Getting started with data analysis is simply easier with R and, if you are not destined to learn Python, it’s probably a better path for many users.\nFor example, the Python ecosystem is built around things like virtual environments and, even with tools like uv, these are not easy for newcomers to manage, especially when using Jupyter notebooks. In contrast, I would get that most R users have a single system-level installation of the packages they use and virtual environments are reserved for special use cases.\nIn writing this guide, I have made a couple of additional choices that may make it not for you.\nEverything Healy (2026) says here carries over to Python. I would recommend Quarto for Python too. While many Python users are more accustomed to using Jupyter notebooks (as they are now called), I believe that Quarto documents do a better job of separating source code from output.1 This is particularly important when using source control systems such as Git.\nThe same “three backticks” approach discussed by Healy for R applies with Python too. Just use {python} in place of {r}:",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Get Started</span>"
+    ]
+  },
+  {
+    "objectID": "02-intro.html#work-in-plain-text",
+    "href": "02-intro.html#work-in-plain-text",
+    "title": "3  Get Started",
+    "section": "",
+    "text": "```{python}\n\n```",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Get Started</span>"
+    ]
+  },
+  {
+    "objectID": "02-intro.html#use-python-with-an-ide",
+    "href": "02-intro.html#use-python-with-an-ide",
+    "title": "3  Get Started",
+    "section": "3.2 Use Python with an IDE",
+    "text": "3.2 Use Python with an IDE\nI writing this I am using Positron. This is probably a good choice for this project because it comes with Quarto.\nAt some point, I will put better instructions here.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Get Started</span>"
+    ]
+  },
+  {
+    "objectID": "02-intro.html#things-to-know-about-python",
+    "href": "02-intro.html#things-to-know-about-python",
+    "title": "3  Get Started",
+    "section": "3.3 Things to know about Python",
+    "text": "3.3 Things to know about Python\nWhile I assume that the following will be familiar, I think it is helpful to mirror a few observations from Healy (2026).\n\n3.3.1 Everything has a name\nTrue for Python too.\n\n\n3.3.2 Everything is an object\nAlso true in Python. In many ways, Python is more object-oriented than R is, with many packages implementing functionality as methods that would be functions in R.\n\n\n3.3.3 You do things using functions\nIf one recognizes that methods are simply functions attached to objects, this is also true of Python. If you’re coming from Stata or SAS, you may be used to thinking of functions (or “macros”) as a relatively advanced topic, both the R version and the Python version of Empirical Research in Accounting start with functions.\n\n\n3.3.4 Functions come in packages\nThis is even more true in Python than it is in R. While R offers tools for working with arrays and data frames out of the box, Python relies much more on third-party packages for standard data science work. For example, arrays typically come from NumPy and data frames from packages such as pandas or Polars.\nIn this chapter, I use the following two packages.\n\nimport polars as pl\nimport plotnine_polars\n\nThese lines do not make any functions part of the namespace directly; one still needs to access them using (say) pl.read_csv(). In contrast, the command library(ggplot2) in R is closer to saying from polars import *; if we took that approach, read_csv() would become available directly.\n\n\n3.3.5 “Ask vectors their type; ask complex objects their class”\nIt is difficult to do a literal translation of this to Python. To make things concrete let’s create an object.\n\ngapminder = pl.read_csv(\n    \"https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv\",\n    separator=\"\\t\"\n)\ngapminder\n\n\nshape: (1_704, 6)\n\n\n\ncountry\ncontinent\nyear\nlifeExp\npop\ngdpPercap\n\n\nstr\nstr\ni64\nf64\ni64\nf64\n\n\n\n\n\"Afghanistan\"\n\"Asia\"\n1952\n28.801\n8425333\n779.445314\n\n\n\"Afghanistan\"\n\"Asia\"\n1957\n30.332\n9240934\n820.85303\n\n\n\"Afghanistan\"\n\"Asia\"\n1962\n31.997\n10267083\n853.10071\n\n\n\"Afghanistan\"\n\"Asia\"\n1967\n34.02\n11537966\n836.197138\n\n\n\"Afghanistan\"\n\"Asia\"\n1972\n36.088\n13079460\n739.981106\n\n\n…\n…\n…\n…\n…\n…\n\n\n\"Zimbabwe\"\n\"Africa\"\n1987\n62.351\n9216418\n706.157306\n\n\n\"Zimbabwe\"\n\"Africa\"\n1992\n60.377\n10704340\n693.420786\n\n\n\"Zimbabwe\"\n\"Africa\"\n1997\n46.809\n11404948\n792.44996\n\n\n\"Zimbabwe\"\n\"Africa\"\n2002\n39.989\n11926563\n672.038623\n\n\n\"Zimbabwe\"\n\"Africa\"\n2007\n43.487\n12311143\n469.709298\n\n\n\n\n\n\nHere we can see that organs is a Polars DataFrame.\n\ntype(gapminder)\n\npolars.dataframe.frame.DataFrame\n\n\nThe analogue of the vector in R is probably either a NumPy array (np.ndarray) or a Series, whether provided by pandas or Polars. We won’t work with arrays or Series objects much. However, the idea of “type” referred to in Healy (2026) is mirrored in the .dtype attribute.\n\ngapminder[\"year\"].dtype\n\nInt64\n\n\nWe can inspect the dtype for all columns of a DataFrame using the .schema attribute:\n\ngapminder.schema\n\nSchema([('country', String),\n        ('continent', String),\n        ('year', Int64),\n        ('lifeExp', Float64),\n        ('pop', Int64),\n        ('gdpPercap', Float64)])",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Get Started</span>"
+    ]
+  },
+  {
+    "objectID": "02-intro.html#make-your-first-figure",
+    "href": "02-intro.html#make-your-first-figure",
+    "title": "3  Get Started",
+    "section": "3.4 Make Your First Figure",
+    "text": "3.4 Make Your First Figure\n\n(\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\")\n    .geom_point()\n)\n\n\n\n\n\n\n\nFigure 3.1: Life expectancy plotted against GDP per capita for a large number of country-years.\n\n\n\n\n\n\n\n\n\nHealy, Kieran. 2026. Data Visualization: A Practical Introduction. 2nd ed. Princeton University Press. https://socviz.co/.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Get Started</span>"
+    ]
+  },
+  {
+    "objectID": "02-intro.html#footnotes",
+    "href": "02-intro.html#footnotes",
+    "title": "3  Get Started",
+    "section": "",
+    "text": "Joel Grus has an entertaining discussion of the problems with notebooks, some of which are addressed by Quarto documents.↩︎",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Get Started</span>"
+    ]
+  },
+  {
+    "objectID": "03-ggplot-basics.html",
+    "href": "03-ggplot-basics.html",
+    "title": "4  Make a Plot",
+    "section": "",
+    "text": "4.1 How ggplot Works\nPerhaps this section should be how plotnine works, but ggplot() (or .ggplot() still applies, so I keep the original section title from Healy (2026). Everything from the original section applies here.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Make a Plot</span>"
+    ]
+  },
+  {
+    "objectID": "03-ggplot-basics.html#tidy-data",
+    "href": "03-ggplot-basics.html#tidy-data",
+    "title": "4  Make a Plot",
+    "section": "4.2 Tidy Data",
+    "text": "4.2 Tidy Data\nWhile the term tidy data comes from Wickham (2014) and is therefore perhaps more often associated with R, it describes ideas that predate Wickham (2014) and applies equally well to Python Polars.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Make a Plot</span>"
+    ]
+  },
+  {
+    "objectID": "03-ggplot-basics.html#mappings-link-data-to-things-you-see",
+    "href": "03-ggplot-basics.html#mappings-link-data-to-things-you-see",
+    "title": "4  Make a Plot",
+    "section": "4.3 Mappings Link Data to Things You See",
+    "text": "4.3 Mappings Link Data to Things You See\nHere I follow Healy (2026) in using the gapminder data set. While Healy (2026) accesses this data set using library(gapminder), I get it from the GitHub page for that R package.\n\nimport polars as pl\nfrom plotnine_polars import ggplot, aes\n\ngapminder = pl.read_csv(\n    \"https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv\",\n    separator=\"\\t\"\n)\n\nFrom the following code, we see that we have the same data as are shown in Healy (2026).\n\ngapminder.head(10)\n\n\nshape: (10, 6)\n\n\n\ncountry\ncontinent\nyear\nlifeExp\npop\ngdpPercap\n\n\nstr\nstr\ni64\nf64\ni64\nf64\n\n\n\n\n\"Afghanistan\"\n\"Asia\"\n1952\n28.801\n8425333\n779.445314\n\n\n\"Afghanistan\"\n\"Asia\"\n1957\n30.332\n9240934\n820.85303\n\n\n\"Afghanistan\"\n\"Asia\"\n1962\n31.997\n10267083\n853.10071\n\n\n\"Afghanistan\"\n\"Asia\"\n1967\n34.02\n11537966\n836.197138\n\n\n\"Afghanistan\"\n\"Asia\"\n1972\n36.088\n13079460\n739.981106\n\n\n\"Afghanistan\"\n\"Asia\"\n1977\n38.438\n14880372\n786.11336\n\n\n\"Afghanistan\"\n\"Asia\"\n1982\n39.854\n12881816\n978.011439\n\n\n\"Afghanistan\"\n\"Asia\"\n1987\n40.822\n13867957\n852.395945\n\n\n\"Afghanistan\"\n\"Asia\"\n1992\n41.674\n16317921\n649.341395\n\n\n\"Afghanistan\"\n\"Asia\"\n1997\n41.763\n22227415\n635.341351\n\n\n\n\n\n\nWe imported ggplot() above as a function. If we follow the R approach and access this function directly, we need to tell the function what data we want to use.\n\np = ggplot(data = gapminder)\n\nHowever, an alternative approach uses the fact that plotnine_polars added a .ggplot() method where it is clear what data set we want to use.\n\np = gapminder.ggplot()\n\nHealy (2026) says: “At this point ggplot knows our data, but not … the mapping. That is, we need to tell it which variables in the data should be represented by which visual elements in the plot. … In ggplot, mappings are specified using the aes() function.” We can use the same approach with plotnine because we have imported aes().\n\np = (\n    gapminder\n    .ggplot(aes(x = \"gdpPercap\", y = \"lifeExp\"))\n)\n\nAs an alternative, we can use the .aes() method created by plotnine_polars as follows.\n\np = (\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\")\n)\n\nAs in Healy (2026), if we type p as the console, we get the result seen below.\n\np\n\n\n\n\n\n\n\n\nAs discussed by Healy (2026), the issue is that “We haven’t yet given p any instructions about what sort of plot to draw with the information it has. We need to add a layer to the plot. This means picking a geom_ function. We will use geom_point(). It knows how to take x and y values and plot them in a scatterplot.”\nWith plotnine_polars it is more natural to use the .geom_point() method instead of importing and using the geom_point() function. The result from doing so is seen in Figure 4.1.\n\np.geom_point()\n\n\n\n\n\n\n\nFigure 4.1: A scatterplot of Life Expectancy vs GDP.\n\n\n\n\n\n\n(\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\",y = \"lifeExp\")\n    .geom_smooth(method=\"loess\")\n)\n\n\n\n\n\n\n\n\n\nfrom plotnine.data import mpg\n\np = (\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\")\n    .geom_point()\n    .geom_smooth(method=\"loess\")\n)\n\n\np = (\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\")\n)\n\np.geom_point().geom_smooth(method = \"lm\")\n\n\n\n\n\n\n\n\n\n(\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\")\n    .geom_point()\n    .geom_smooth(method = \"loess\", colour=\"blue\")\n    .scale_x_log10()\n)\n\n\n\n\n\n\n\n\n\nfrom mizani.formatters import currency_format\n\n(\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\")\n    .geom_point()\n    .geom_smooth(method = \"loess\")\n    .scale_x_log10(labels = currency_format(precision=0, big_mark=','))\n)\n\n\n\n\n\n\n\n\n\n(\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\",\n         y = \"lifeExp\",\n         color = '\"purple\"')\n    .geom_point()\n    .geom_smooth(method = \"loess\")\n    .scale_x_log10()\n)\n\n\n\n\n\n\n\n\n\n(\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\")\n    .geom_point(color = \"purple\")\n    .geom_smooth(method = \"loess\")\n    .scale_x_log10()\n)\n\n\n\n\n\n\n\n\n\n(\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\")\n    .geom_point(alpha = 0.3)\n    .geom_smooth(color = \"firebrick\", se = False,\n                 size = 8,  # not linewidth\n                 method = \"lm\")\n    .scale_x_log10()\n)\n\n\n\n\n\n\n\n\n\n(\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\")\n    .geom_point(alpha = 0.3)\n    .geom_smooth(method = \"loess\", se = False)\n    .scale_x_log10(labels = currency_format(precision=0, big_mark=','))\n    .labs(x = \"GDP Per Capita\", y = \"Life Expectancy in Years\",\n          title = \"Economic Growth and Life Expectancy\",\n          subtitle = \"Data points are country-years\",\n          caption = \"Source: Gapminder.\")\n)\n\n\n\n\n\n\n\n\n\n(\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\", color=\"continent\")\n    .geom_point()\n    .geom_smooth(method = \"loess\", se = False)\n    .scale_x_log10()\n)\n\n\n\n\n\n\n\n\n\n(\n    gapminder\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\", color=\"continent\",\n         fill=\"continent\")\n    .geom_point()\n    .geom_smooth(method = \"loess\")\n    .scale_x_log10()\n)\n\n\n\n\n\n\n\n\n\nfrom plotnine_polars import aes\n\n(\n    gapminder\n    .ggplot(aes(x = \"gdpPercap\", y = \"lifeExp\"))\n    .geom_point(aes(color = \"continent\"))\n    .geom_smooth(method = \"loess\")\n    .scale_x_log10()\n)\n\n\n\n\n\n\n\n\n\nimport numpy as np\n\n\n(\n    gapminder\n    .with_columns(log_pop=pl.col(\"pop\").log())\n    .ggplot()\n    .aes(x = \"gdpPercap\", y = \"lifeExp\", color=\"log_pop\")\n    .geom_point()\n    .scale_x_log10()\n)\n\n\n\n\n\n\n\n\n\np_out = (\n    gapminder\n    .ggplot()\n    .aes(x=\"gdpPercap\", y=\"lifeExp\")\n    .geom_point()\n    .geom_smooth(method = \"loess\")\n    .scale_x_log10()\n)\n\n\np_out.save(\"lifexp_vs_gdp_gradient.pdf\", \n           height=8, width=10, units=\"in\")\n\n\nmpg = pl.from_pandas(mpg)\n\n\n(\n    mpg\n    .ggplot()\n    .aes(x=\"displ\", y=\"hwy\")\n    .geom_point()\n    .geom_smooth(method=\"loess\")\n    .labs(x=\"displacement\", y=\"horsepower\")\n)\n\n\n\n\n\n\n\n\n\n\n\n\nHealy, Kieran. 2026. Data Visualization: A Practical Introduction. 2nd ed. Princeton University Press. https://socviz.co/.\n\n\nWickham, Hadley. 2014. “Tidy Data.” Journal of Statistical Software 59 (10): 1–23. https://doi.org/10.18637/jss.v059.i10.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Make a Plot</span>"
+    ]
+  },
+  {
+    "objectID": "05-more-on-geoms.html",
+    "href": "05-more-on-geoms.html",
+    "title": "5  Graph Tables, Add Labels, Make Notes",
+    "section": "",
+    "text": "5.1 Use Pipes to Summarize Data\nimport polars as pl\nfrom plotnine_polars import aes, position_jitter\nfrom plotnine._mpl.gridspec import p9GridSpec\n\nif not hasattr(p9GridSpec, \"locally_modified_subplot_params\"):\n    p9GridSpec.locally_modified_subplot_params = lambda self: []\n\ngss_sm = pl.read_parquet(\"data/gss_sm.parquet\")\nreligion_levels = [\"Protestant\", \"Catholic\", \"Jewish\", \"None\", \"Other\", \"NA\"]\nrel_by_region = (\n    gss_sm\n    .with_columns(religion = pl.col(\"religion\").fill_null(\"NA\"))\n    .group_by(\"bigregion\", \"religion\")\n    .agg(n=pl.len())\n    .with_columns(\n        freq=pl.col(\"n\") / pl.col(\"n\").sum().over(\"bigregion\")\n    )\n    .with_columns(\n        pct=(pl.col(\"freq\") * 100).round(0)\n    )\n    .sort(\"bigregion\", \"religion\")\n)\nrel_by_region\n\n\nshape: (24, 5)\n\n\n\nbigregion\nreligion\nn\nfreq\npct\n\n\nstr\nstr\nu32\nf64\nf64\n\n\n\n\n\"Midwest\"\n\"Catholic\"\n172\n0.247482\n25.0\n\n\n\"Midwest\"\n\"Jewish\"\n3\n0.004317\n0.0\n\n\n\"Midwest\"\n\"NA\"\n5\n0.007194\n1.0\n\n\n\"Midwest\"\n\"None\"\n157\n0.225899\n23.0\n\n\n\"Midwest\"\n\"Other\"\n33\n0.047482\n5.0\n\n\n…\n…\n…\n…\n…\n\n\n\"West\"\n\"Jewish\"\n10\n0.015823\n2.0\n\n\n\"West\"\n\"NA\"\n1\n0.001582\n0.0\n\n\n\"West\"\n\"None\"\n180\n0.28481\n28.0\n\n\n\"West\"\n\"Other\"\n48\n0.075949\n8.0\n\n\n\"West\"\n\"Protestant\"\n238\n0.376582\n38.0\nrel_by_region.group_by(\"bigregion\").agg(sum=pl.col(\"pct\").sum())\n\n\nshape: (4, 2)\n\n\n\nbigregion\nsum\n\n\nstr\nf64\n\n\n\n\n\"Midwest\"\n101.0\n\n\n\"Northeast\"\n100.0\n\n\n\"South\"\n100.0\n\n\n\"West\"\n101.0\n(\n    rel_by_region\n    .ggplot(aes(x = \"bigregion\", y = \"pct\", fill = \"religion\"))\n    .geom_col(position = \"dodge2\")\n    .labs(x = \"Region\", y = \"Percent\", fill = \"Religion\")\n    .add_theme(legend_position = \"top\")\n)\n(\n    rel_by_region\n    .ggplot(aes(y = \"pct\", x = \"religion\", fill = \"religion\"))\n    .geom_col()\n    .coord_flip()\n    .labs(y = \"Percent\", x = None, fill = \"Religion\")\n    .add_guides(fill = \"none\")\n    .scale_x_discrete(limits = religion_levels)\n    .facet_grid(cols = \"bigregion\")\n)",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Graph Tables, Add Labels, Make Notes</span>"
+    ]
+  },
+  {
+    "objectID": "05-more-on-geoms.html#more-geoms",
+    "href": "05-more-on-geoms.html#more-geoms",
+    "title": "5  Graph Tables, Add Labels, Make Notes",
+    "section": "5.2 More Geoms",
+    "text": "5.2 More Geoms\n\norgandata = pl.read_parquet(\"data/organdata.parquet\")\ncountry_order = (\n    organdata\n    .group_by(\"country\")\n    .agg(pl.col(\"donors\").median().alias(\"med\"))\n    .sort(\"med\")\n    .get_column(\"country\")\n    .to_list()\n)\norgandata = organdata.with_columns(\n    pl.col(\"country\").cast(pl.Enum(country_order))\n)\n\n\norgandata.select(pl.all().exclude(\"pop\")).sample(n = 10, seed = 123)\n\n\nshape: (10, 20)\n\n\n\ncountry\nyear\ndonors\npop_dens\ngdp\ngdp_lag\nhealth\nhealth_lag\npubhealth\nroads\ncerebvas\nassault\nexternal\ntxp_pop\nworld\nopt\nconsent_law\nconsent_practice\nconsistent\nccode\n\n\nenum\ndate\nf64\nf64\nf64\nf64\nf64\nf64\nf64\nf64\nf64\nf64\nf64\nf64\nstr\nstr\nstr\nstr\nstr\nstr\n\n\n\n\n\"Netherlands\"\n1997-01-01\n14.4\n37.589694\n23753.0\n22541.0\n1936.0\n1878.0\n5.5\n74.498751\n563.0\n13.0\n282.0\n0.704631\n\"SocDem\"\n\"In\"\n\"Informed\"\n\"Informed\"\n\"Yes\"\n\"Neth\"\n\n\n\"Sweden\"\n2000-01-01\n10.9\n1.971731\n26574.0\n25099.0\n2243.0\n2119.0\n7.2\n65.374211\n555.0\n10.0\n352.0\n0.676285\n\"SocDem\"\n\"Out\"\n\"Presumed\"\n\"Informed\"\n\"No\"\n\"Swe\"\n\n\n\"Netherlands\"\nnull\nnull\nnull\nnull\n28983.0\n2831.0\n2643.0\nnull\nnull\nnull\nnull\nnull\nnull\n\"SocDem\"\n\"In\"\n\"Informed\"\n\"Informed\"\n\"Yes\"\n\"Neth\"\n\n\n\"Italy\"\n1999-01-01\n13.7\n19.129887\n23729.0\n23291.0\n1853.0\n1800.0\n5.6\n115.064358\n627.0\n11.0\n343.0\n0.451029\n\"Corporatist\"\n\"In\"\n\"Presumed\"\n\"Informed\"\n\"No\"\n\"Ita\"\n\n\n\"Australia\"\nnull\nnull\nnull\nnull\n28168.0\n2754.0\n2629.0\nnull\nnull\nnull\nnull\nnull\nnull\n\"Liberal\"\n\"In\"\n\"Informed\"\n\"Informed\"\n\"Yes\"\n\"Oz\"\n\n\n\"Netherlands\"\nnull\nnull\n36.002889\n17707.0\n16580.0\n1419.0\n1320.0\n5.4\n92.027822\n649.0\n9.0\n310.0\n0.735688\n\"SocDem\"\n\"In\"\n\"Informed\"\n\"Informed\"\n\"Yes\"\n\"Neth\"\n\n\n\"Spain\"\n2002-01-01\n33.7\n8.275658\n21592.0\n20864.0\n1646.0\n1567.0\n5.4\n127.692602\n416.0\n11.0\n345.0\n0.668673\nnull\n\"Out\"\n\"Presumed\"\n\"Informed\"\n\"No\"\n\"Spa\"\n\n\n\"United Kingdom\"\n1995-01-01\n14.4\n23.879215\n19998.0\n18994.0\n1393.0\n1331.0\n5.8\n64.908198\n718.0\n10.0\n279.0\n0.706836\n\"Liberal\"\n\"In\"\n\"Informed\"\n\"Informed\"\n\"Yes\"\n\"UK\"\n\n\n\"United States\"\n1991-01-01\n17.89\n2.627258\n23443.0\n23038.0\n2957.0\n2738.0\n5.2\n164.075563\n457.0\n103.0\n565.0\n1.083085\n\"Liberal\"\n\"In\"\n\"Informed\"\n\"Informed\"\n\"Yes\"\n\"USA\"\n\n\n\"Netherlands\"\n2002-01-01\n12.6\n38.885143\n28983.0\n28756.0\n2643.0\n2455.0\n5.5\n61.118336\n500.0\n9.0\n258.0\n0.681157\n\"SocDem\"\n\"In\"\n\"Informed\"\n\"Informed\"\n\"Yes\"\n\"Neth\"\n\n\n\n\n\n\n\n(\n    organdata\n    .ggplot(aes(x = \"year\", y = \"donors\"))\n    .geom_point()\n)\n\n\n\n\n\n\n\n\n\n(\n    organdata\n    .ggplot(aes(x = \"year\", y = \"donors\"))\n    .geom_line(aes(group = \"country\"))\n    .facet_wrap(\"country\", ncol = 4)\n)\n\n\n\n\n\n\n\n\n\n(\n    organdata\n    .ggplot(aes(x = \"country\", y = \"donors\"))\n    .geom_boxplot()\n)\n\n\n\n\n\n\n\n\nThe R plot just flips the aes() arguments. This does not work with plotnine, but .coord_flip() does.\n\n(\n    organdata\n    .ggplot(aes(x = \"country\", y = \"donors\"))\n    .geom_boxplot()\n    .coord_flip()\n)\n\n\n\n\n\n\n\n\n\n(\n    organdata\n    .sort(\"donors\")\n    .ggplot(aes(y = \"donors\", x = \"country\"))\n    .geom_boxplot()\n    .labs(y = None)\n    .coord_flip()\n)\n\n\n\n\n\n\n\n\n\n(\n    organdata\n    .ggplot(aes(y = \"donors\", x = \"country\", fill = \"world\"))\n    .geom_boxplot()\n    .labs(y = None, fill = \"World\")\n    .add_theme(legend_position = \"top\")\n    .coord_flip()\n)\n\n\n\n\n\n\n\n\n\n(\n    organdata\n    .ggplot(aes(x = \"donors\", y = \"country\", color = \"world\"))\n    .geom_point()\n    .labs(y = None)\n    .add_theme(legend_position = \"top\")\n)\n\n\n\n\n\n\n\n\n\n(\n    organdata\n    .ggplot(aes(x = \"donors\", y = \"country\", color = \"world\"))\n    .geom_jitter()\n    .labs(y = None)\n    .add_theme(legend_position = \"top\")\n)\n\n\n\n\n\n\n\n\n\n(\n    organdata\n    .ggplot(aes(x = \"donors\", y = \"country\", color = \"world\"))\n    .geom_jitter(position = position_jitter(height = 0.15))\n    .labs(y = None)\n    .add_theme(legend_position = \"top\")\n)",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Graph Tables, Add Labels, Make Notes</span>"
+    ]
+  },
+  {
+    "objectID": "05-more-on-geoms.html#grouped-summaries",
+    "href": "05-more-on-geoms.html#grouped-summaries",
+    "title": "5  Graph Tables, Add Labels, Make Notes",
+    "section": "5.3 Grouped Summaries",
+    "text": "5.3 Grouped Summaries\n\ncols = [\"donors\", \"gdp\", \"health\", \"roads\", \"cerebvas\"]\n\nby_country = (\n    organdata\n    .group_by(\"consent_law\", \"country\")\n    .agg(\n        pl.col(cols).mean().name.suffix(\"_mean\"),\n        pl.col(cols).std().name.suffix(\"_sd\"),\n    )\n    .sort(\"donors_mean\")\n)\nby_country = by_country.with_columns(\n    pl.col(\"country\").cast(pl.Enum(by_country[\"country\"].to_list()))\n)\n\nby_country\n\n\nshape: (17, 12)\n\n\n\nconsent_law\ncountry\ndonors_mean\ngdp_mean\nhealth_mean\nroads_mean\ncerebvas_mean\ndonors_sd\ngdp_sd\nhealth_sd\nroads_sd\ncerebvas_sd\n\n\nstr\nenum\nf64\nf64\nf64\nf64\nf64\nf64\nf64\nf64\nf64\nf64\n\n\n\n\n\"Informed\"\n\"Australia\"\n10.635\n22178.538462\n1957.5\n104.875728\n557.692308\n1.142808\n3958.505665\n481.627649\n14.327316\n82.698634\n\n\n\"Presumed\"\n\"Italy\"\n11.1\n21554.153846\n1757.0\n121.942937\n712.153846\n4.277\n2781.30898\n271.237903\n10.157891\n118.032373\n\n\n\"Informed\"\n\"Germany\"\n13.041667\n22163.230769\n2348.75\n112.788734\n706.769231\n0.611196\n2501.344177\n377.227474\n25.911094\n126.03515\n\n\n\"Informed\"\n\"Denmark\"\n13.091667\n23722.307692\n2054.071429\n101.636346\n640.692308\n1.468121\n3895.685292\n371.361417\n12.421001\n46.271634\n\n\n\"Presumed\"\n\"Sweden\"\n13.125\n22415.461538\n1951.357143\n72.345753\n595.307692\n1.753503\n3213.468391\n372.978986\n13.246919\n49.684647\n\n\n…\n…\n…\n…\n…\n…\n…\n…\n…\n…\n…\n…\n\n\n\"Informed\"\n\"Ireland\"\n19.791667\n20824.384615\n1479.928571\n117.774245\n704.692308\n2.478437\n6669.580078\n565.552618\n10.761587\n87.203196\n\n\n\"Informed\"\n\"United States\"\n19.981667\n29211.769231\n3988.285714\n155.167832\n444.384615\n1.325367\n4571.159958\n864.931961\n8.35381\n16.049603\n\n\n\"Presumed\"\n\"Belgium\"\n21.9\n22499.615385\n1958.357143\n154.695038\n593.846154\n1.935787\n3170.583636\n405.114154\n20.556129\n55.249202\n\n\n\"Presumed\"\n\"Austria\"\n23.525\n23875.846154\n1875.357143\n149.865413\n768.846154\n2.415904\n3342.88944\n296.897964\n30.281692\n119.642416\n\n\n\"Presumed\"\n\"Spain\"\n28.108333\n16933.0\n1289.071429\n161.1143\n654.769231\n4.963038\n2888.342547\n265.896008\n35.251103\n138.650132\n\n\n\n\n\n\n\n(\n    by_country\n    .ggplot(aes(\n        x = \"donors_mean\",\n        y = \"country\",\n        color = \"consent_law\"\n    ))\n    .geom_point(size = 3)\n    .labs(x = \"Donor Procurement Rate\", y = None, color = \"Consent Law\")\n    .add_theme(legend_position = \"top\")\n)\n\n\n\n\n\n\n\n\n\n(\n    by_country\n    .ggplot(aes(x = \"donors_mean\", y = \"country\"))\n    .geom_point(size = 3)\n    .facet_wrap(\"consent_law\", scales = \"free_y\", ncol = 1)\n    .labs(x = \"Donor Procurement Rate\", y = None)\n)\n\n\n\n\n\n\n\n\nPlotnine’s geom_pointrange() expects vertical ranges, so the horizontal version uses geom_errorbarh() plus points.\n\n(\n    by_country\n    .ggplot(aes(x = \"donors_mean\", y = \"country\"))\n    .geom_errorbarh(\n        aes(xmin = \"donors_mean - donors_sd\",\n            xmax = \"donors_mean + donors_sd\"),\n        height = 0.2\n    )\n    .geom_point(size = 2)\n    .labs(x = \"Donor Procurement Rate\", y = None)\n)",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Graph Tables, Add Labels, Make Notes</span>"
+    ]
+  },
+  {
+    "objectID": "05-more-on-geoms.html#label-outliers",
+    "href": "05-more-on-geoms.html#label-outliers",
+    "title": "5  Graph Tables, Add Labels, Make Notes",
+    "section": "5.4 Label Outliers",
+    "text": "5.4 Label Outliers\nPlotnine does not provide geom_text_repel() directly, but geom_text() can use the adjustText package via its adjust_text argument. This gives us a close approximation.\n\n(\n    by_country\n    .ggplot(aes(x = \"gdp_mean\", y = \"health_mean\"))\n    .geom_point()\n    .geom_text(data=by_country.filter(pl.col(\"gdp_mean\") &gt; 25_000),\n               mapping=aes(label = \"country\"))\n)\n\n\n\n\n\n\n\n\n\n(\n    by_country\n    .ggplot(aes(x = \"gdp_mean\", y = \"health_mean\"))\n    .geom_point()\n    .geom_text(\n        data=by_country.filter(\n                (pl.col(\"gdp_mean\") &gt; 25_000) |\n                (pl.col(\"health_mean\") &gt; 1500) |\n                (pl.col(\"country\").is_in([\"Belgium\"]))\n            ),\n        mapping=aes(label = \"country\"))\n)\n\n\n\n\n\n\n\n\n\n(\n    by_country\n    .ggplot(aes(x = \"roads_mean\", y = \"donors_mean\"))\n    .geom_point()\n    .geom_text(aes(label=\"country\"),\n               adjust_text={\"arrowprops\": {\"arrowstyle\": \"-\"}})\n)\n\n\n\n\n\n\n\n\n\n(\n    by_country\n    .ggplot(aes(x = \"roads_mean\", y = \"donors_mean\"))\n    .geom_point()\n    .geom_text(\n        aes(label = \"country\"),\n        adjust_text = {\"arrowprops\": {\"arrowstyle\": \"-\"}}\n    )\n)\n\n\n\n\n\n\n\n\n\n(\n    by_country\n    .ggplot(aes(x = \"gdp_mean\", y = \"health_mean\"))\n    .geom_point()\n    .geom_text(\n        data = by_country.filter(pl.col(\"gdp_mean\") &gt; 25_000),\n        mapping = aes(label = \"country\"),\n        adjust_text = {\"arrowprops\": {\"arrowstyle\": \"-\"}}\n    )\n)\n\n\n\n\n\n\n\n\n\n(\n    by_country\n    .ggplot(aes(x = \"gdp_mean\", y = \"health_mean\"))\n    .geom_point()\n    .geom_text(\n        data = by_country.filter(\n            (pl.col(\"gdp_mean\") &gt; 25_000) |\n            (pl.col(\"health_mean\") &lt; 1_500) |\n            (pl.col(\"country\") == \"Belgium\")\n        ),\n        mapping = aes(label = \"country\"),\n        adjust_text = {\"arrowprops\": {\"arrowstyle\": \"-\"}}\n    )\n)\n\n\n\n\n\n\n\n\n\nmy_organdata = organdata.with_columns(\n    ind = (\n        pl.col(\"ccode\").is_in([\"Ita\", \"Spa\"]) &\n        (pl.col(\"year\").dt.year() &gt; 1998)\n    )\n)\n\n(\n    my_organdata\n    .ggplot(aes(x = \"roads\", y = \"donors\", color = \"ind\"))\n    .geom_point()\n    .geom_text(\n        data = my_organdata.filter(pl.col(\"ind\")),\n        mapping = aes(label = \"ccode\"),\n        adjust_text = {\"arrowprops\": {\"arrowstyle\": \"-\"}}\n    )\n    .add_guides(color = \"none\")\n)\n\n\n\n\n\n\n\n\n\nelections_historic = pl.read_parquet(\"data/elections_historic.parquet\")\n\np_title = \"Popular Vote and Electoral College Shares\"\np_subtitle = \"1824-2024\"\nx_label = \"Winner's share of Popular Vote\"\ny_label = \"Winner's share of Electoral College Votes\"\n\n(\n    elections_historic\n    .ggplot(aes(x = \"popular_pct\", y = \"ec_pct\"))\n    .geom_hline(yintercept = 0.5, size = 1.4, color = \"#CCCCCC\")\n    .geom_vline(xintercept = 0.5, size = 1.4, color = \"#CCCCCC\")\n    .geom_point(size = 0.4)\n    .geom_text(\n        aes(label = \"winner_label\"),\n        size = 4,\n        adjust_text = {\n            \"arrowprops\": {\"arrowstyle\": \"-\", \"color\": \"gray\"},\n            \"min_arrow_len\": 1,\n            \"force_static\": (0.01, 0.01),\n            \"force_text\": (0.01, 0.01),\n        }\n    )\n    .scale_x_continuous(labels = lambda lst: [f\"{v:.0%}\" for v in lst])\n    .scale_y_continuous(labels = lambda lst: [f\"{v:.0%}\" for v in lst])\n    .labs(x = x_label, y = y_label, title = p_title, subtitle = p_subtitle)\n)",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Graph Tables, Add Labels, Make Notes</span>"
+    ]
+  },
+  {
+    "objectID": "05-more-on-geoms.html#add-annotations",
+    "href": "05-more-on-geoms.html#add-annotations",
+    "title": "5  Graph Tables, Add Labels, Make Notes",
+    "section": "5.5 Add Annotations",
+    "text": "5.5 Add Annotations\nThe original R example also shows I() for placing annotations with relative coordinates inside the plotting area. There does not appear to be a direct I() equivalent for annotate() in plotnine, so these examples use data coordinates.\n\n(\n    organdata\n    .ggplot(aes(x = \"roads\", y = \"donors\"))\n    .geom_point()\n    .annotate(\n        \"text\",\n        x = 91,\n        y = 33,\n        size = 8,\n        label = \"A surprisingly high\\nrecovery rate.\",\n        lineheight = 0.9,\n        ha = \"left\"\n    )\n)\n\n\n\n\n\n\n\n\n\n(\n    organdata\n    .ggplot(aes(x = \"roads\", y = \"donors\"))\n    .geom_point()\n    .annotate(\n        \"rect\",\n        xmin = 125,\n        xmax = 155,\n        ymin = 30,\n        ymax = 35,\n        fill = \"red\",\n        alpha = 0.2\n    )\n    .annotate(\n        \"text\",\n        x = 157,\n        y = 33,\n        size = 8,\n        label = \"A surprisingly high\\nrecovery rate.\",\n        lineheight = 0.9,\n        ha = \"left\"\n    )\n)",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Graph Tables, Add Labels, Make Notes</span>"
+    ]
+  },
+  {
+    "objectID": "05-more-on-geoms.html#understanding-scales-guides-and-themes",
+    "href": "05-more-on-geoms.html#understanding-scales-guides-and-themes",
+    "title": "5  Graph Tables, Add Labels, Make Notes",
+    "section": "5.6 Understanding Scales, Guides, and Themes",
+    "text": "5.6 Understanding Scales, Guides, and Themes\n\n(\n    organdata\n    .ggplot(aes(x = \"roads\", y = \"donors\", color = \"world\"))\n    .geom_point()\n)\n\n\n\n\n\n\n\n\n\n(\n    organdata\n    .ggplot(aes(x = \"roads\", y = \"donors\", color = \"world\"))\n    .geom_point()\n    .scale_x_log10()\n    .scale_y_continuous(\n        breaks = [5, 15, 25],\n        labels = [\"Five\", \"Fifteen\", \"Twenty Five\"]\n    )\n)\n\n\n\n\n\n\n\n\n\n(\n    organdata\n    .ggplot(aes(x = \"roads\", y = \"donors\", color = \"world\"))\n    .geom_point()\n    .scale_color_discrete(\n        labels = [\"Corporatist\", \"Liberal\", \"Social Democratic\", \"Unclassified\"]\n    )\n    .labs(\n        x = \"Road Deaths\",\n        y = \"Donor Procurement\",\n        color = \"Welfare State\"\n    )\n)\n\n\n\n\n\n\n\n\n\n(\n    organdata\n    .ggplot(aes(x = \"roads\", y = \"donors\", color = \"world\"))\n    .geom_point()\n    .labs(x = \"Road Deaths\", y = \"Donor Procurement\")\n    .add_guides(color = \"none\")\n)",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Graph Tables, Add Labels, Make Notes</span>"
+    ]
+  }
+]
