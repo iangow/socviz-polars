@@ -7,13 +7,17 @@ book:
   author: "Ian Gow"
   chapters:
     - index.qmd
+    - 01-look-at-data.qmd
     - 02-intro.qmd
     - 03-ggplot-basics.qmd
+    - 05-more-on-geoms.qmd
 
 format:
   html:
     theme: cosmo
     toc: true
+
+bibliography: references.bib
 
 execute:
   freeze: auto

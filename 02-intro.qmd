@@ -2,13 +2,88 @@
 title: "Get Started"
 ---
 
+I don't disagree with anything that @Healy2026 says in [Chapter 2](https://socviz.co/02-intro.html).
+
+
+In the current version of this guide, I assume that you are already familiar with Python.
+If you are unfamiliar with Python and just want to learn a bit about data visualization, I would recommend just using R and @Healy2026.
+Even if your ultimate destination is Python, whatever you learn from R will largely carry over to Python.
+Getting started with data analysis is simply easier with R and, if you are not destined to learn Python, it's probably a better path for many users.
+
+For example, the Python ecosystem is built around things like virtual environments and, even with tools like `uv`, these are not easy for newcomers to manage, especially when using Jupyter notebooks.
+In contrast, I would get that most R users have a single system-level installation of the packages they use and virtual environments are reserved for special use cases.
+
+In writing this guide, I have made a couple of additional choices that may make it not for you.
+
+ - **I use Python Polars**: I have elected to use Python Polars as my data frame library rather than the more conventional choice of pandas.
+   This choice partly reflects my choice of Polars in other settings (e.g., Polars is clearly the better choice for the larger data sets used in the book [*Empirical Research in Accounting*](https://iangow.github.io/era_pl_book/)).
+   Another reason to use Polars is the second choice.
+- **I use a "fluent" implementation of `plotnine`**: While @Healy2026 uses `ggplot2` package in R, the closest equivalent in Python is `plotnine`.
+  However the `plotnine` package mimics `ggplot2` so closely that it feels a bit like writing R code in Python.
+  For a more "Pythonic" feel, I create a small package `plotnine_polars`, that provides a version of `plotnine` that creates a custom Polars data frame namespace that provides a "fluent" API for `plotnine`.
+  It seems that "fluent" is a term of art in Python used to descibe APIs that implement functions as chainable methods.
+
+## Work in Plain Text
+
+Everything @Healy2026 says here carries over to Python.
+I would recommend Quarto for Python too.
+While many Python users are more accustomed to using Jupyter notebooks (as they are now called), I believe that Quarto documents do a better job of separating source code from output.^[Joel Grus has an [entertaining discussion](https://www.youtube.com/watch?v=7jiPeIFXb6U) of the problems with notebooks, some of which are addressed by Quarto documents.]
+This is particularly important when using source control systems such as Git.
+
+The same "three backticks" approach discussed by Healy for R applies with Python too.
+Just use `{python}` in place of `{r}`:
+
+```{=html}
+<pre><code>&#96;&#96;&#96;{python}
+
+&#96;&#96;&#96;</code></pre>
+```
+
+## Use Python with an IDE
+
+I writing this I am using Positron.
+This is probably a good choice for this project because it comes with Quarto.
+
+At some point, I will put better instructions here.
+
+## Things to know about Python
+
+While I assume that the following will be familiar, I think it is helpful to mirror a few observations from @Healy2026.
+
+### Everything has a name
+
+True for Python too.
+
+### Everything is an object
+
+Also true in Python.
+In many ways, Python is more object-oriented than R is, with many packages implementing functionality as methods that would be functions in R.
+
+### You do things using functions
+
+If one recognizes that methods are simply functions attached to objects, this is also true of Python.
+If you're coming from Stata or SAS, you may be used to thinking of functions (or "macros") as a relatively advanced topic, both the [R version](https://iangow.github.io/far_book/r-intro.html#introduction-to-r) and the [Python version](https://iangow.github.io/era_pl_book/py-intro.html#an-introduction-to-python) of *Empirical Research in Accounting* start with functions.
+
+### Functions come in packages
+
+This is even more true in Python than it is in R.
+While R offers tools for working with arrays and data frames out of the box, Python relies much more on third-party packages for standard data science work.
+For example, arrays typically come from NumPy and data frames from packages such as pandas or Polars.
+
+In this chapter, I use the following two packages.
+
 ```{python}
 import polars as pl
 import plotnine_polars
-
-url = "https://cdn.rawgit.com/kjhealy/dvdata/main/organs.csv"
-organs = pl.read_csv(url)
 ```
+
+These lines do not make any functions part of the namespace directly; one still needs to access them using (say) `pl.read_csv()`.
+In contrast, the command `library(ggplot2)` in R is closer to saying `from polars import *`; if we took that approach, `read_csv()` would become available directly.
+
+### "Ask vectors their type; ask complex objects their class"
+
+It is difficult to do a literal translation of this to Python.
+To make things concrete let's create an object.
 
 ```{python}
 gapminder = pl.read_csv(
@@ -17,6 +92,30 @@ gapminder = pl.read_csv(
 )
 gapminder
 ```
+
+Here we can see that `organs` is a Polars `DataFrame`.
+
+```{python}
+type(gapminder)
+```
+
+The analogue of the vector in R is probably either a NumPy array (`np.ndarray`) or a `Series`, whether provided by pandas or Polars.
+We won't work with arrays or `Series` objects much.
+However, the idea of "type" referred to in @Healy2026 is mirrored in the `.dtype` attribute.
+
+```{python}
+gapminder["year"].dtype
+```
+
+We can inspect the `dtype` for all columns of a `DataFrame` using the `.schema` attribute:
+
+```{python}
+gapminder.schema
+```
+
+## Make Your First Figure
+
+
 
 
 ```{python}

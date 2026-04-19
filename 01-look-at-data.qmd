@@ -1,5 +1,21 @@
 ---
 title: "Look at Data"
-format: html
 ---
 
+[This chapter](https://socviz.co/01-look-at-data.html) is largely conceptual, with only a few glancing references to R and ggplot.
+So I don't have much to add here.
+
+An important caveat that applies to @Healy2026 is worth emphasizing:
+
+> I am going to assume that your goal is to draw effective graphs in an honest and reproducible way, and that you would like to understand what you are doing while writing code to meet this goal.
+
+Obviously this is a defensible stance.
+But often it is unrealistic.
+Consider [Figure 1.2](https://socviz.co/01-look-at-data.html#fig-ch-01-jackman) of @Healy2026.
+I conjecture that very few researchers would trade the strong results when South Africa is in the sample for the weak ones when it is not.
+Not drawing the equivalent of Figure 1.2 would be critical to getting through the review process (yes, reviewers should demand more plots).
+I would even go further and say that not even *looking* at plots is probably important for authors, lest they doubt their own "results"; believing one's results is often important when pushing a paper through the process of getting it published.
+My experience is that a typical paper's results are generally weaker than they seem, so looking at one's data is unlikely to be helpful in an academic context, except to unearth issues that will be inevitably emerge later on.^[Though, the academic review process is not particulary effective at unearthing data issues.]
+
+Another way of framing this is to say that @Healy2026 is aimed at people in settings where they have the luxury of seeking truth (i.e., not academics facing "publish or perish" incentives).
+In any case, I see no reason to deviate from @Healy2026's perspective in this guide; someone else can write "Data Visualization for p-Hackers".^[I'd guess that book should focus on Stata, as that software platform seems much more ergnomic for the "thousands of regressions" workflow used by most academic researchers.]

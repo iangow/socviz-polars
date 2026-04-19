@@ -1,0 +1,473 @@
+---
+title: "Graph Tables, Add Labels, Make Notes"
+execute:
+  warning: false
+  message: false
+---
+
+## Use Pipes to Summarize Data
+
+```{python}
+import polars as pl
+from plotnine_polars import aes, position_jitter
+from plotnine._mpl.gridspec import p9GridSpec
+
+if not hasattr(p9GridSpec, "locally_modified_subplot_params"):
+    p9GridSpec.locally_modified_subplot_params = lambda self: []
+
+gss_sm = pl.read_parquet("data/gss_sm.parquet")
+religion_levels = ["Protestant", "Catholic", "Jewish", "None", "Other", "NA"]
+```
+
+```{python}
+rel_by_region = (
+    gss_sm
+    .with_columns(religion = pl.col("religion").fill_null("NA"))
+    .group_by("bigregion", "religion")
+    .agg(n=pl.len())
+    .with_columns(
+        freq=pl.col("n") / pl.col("n").sum().over("bigregion")
+    )
+    .with_columns(
+        pct=(pl.col("freq") * 100).round(0)
+    )
+    .sort("bigregion", "religion")
+)
+```
+
+```{python}
+rel_by_region
+```
+
+```{python}
+rel_by_region.group_by("bigregion").agg(sum=pl.col("pct").sum())
+```
+
+```{python}
+(
+    rel_by_region
+    .ggplot(aes(x = "bigregion", y = "pct", fill = "religion"))
+    .geom_col(position = "dodge2")
+    .labs(x = "Region", y = "Percent", fill = "Religion")
+    .add_theme(legend_position = "top")
+)
+```
+
+```{python}
+(
+    rel_by_region
+    .ggplot(aes(y = "pct", x = "religion", fill = "religion"))
+    .geom_col()
+    .coord_flip()
+    .labs(y = "Percent", x = None, fill = "Religion")
+    .add_guides(fill = "none")
+    .scale_x_discrete(limits = religion_levels)
+    .facet_grid(cols = "bigregion")
+)
+```
+
+## More Geoms
+
+```{python}
+organdata = pl.read_parquet("data/organdata.parquet")
+country_order = (
+    organdata
+    .group_by("country")
+    .agg(pl.col("donors").median().alias("med"))
+    .sort("med")
+    .get_column("country")
+    .to_list()
+)
+organdata = organdata.with_columns(
+    pl.col("country").cast(pl.Enum(country_order))
+)
+```
+
+```{python}
+organdata.select(pl.all().exclude("pop")).sample(n = 10, seed = 123)
+```
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "year", y = "donors"))
+    .geom_point()
+)
+```
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "year", y = "donors"))
+    .geom_line(aes(group = "country"))
+    .facet_wrap("country", ncol = 4)
+)
+```
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "country", y = "donors"))
+    .geom_boxplot()
+)
+```
+
+The R plot just flips the `aes()` arguments.
+This does not work with `plotnine`, but `.coord_flip()` does.
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "country", y = "donors"))
+    .geom_boxplot()
+    .coord_flip()
+)
+```
+
+```{python}
+(
+    organdata
+    .sort("donors")
+    .ggplot(aes(y = "donors", x = "country"))
+    .geom_boxplot()
+    .labs(y = None)
+    .coord_flip()
+)
+```
+
+```{python}
+(
+    organdata
+    .ggplot(aes(y = "donors", x = "country", fill = "world"))
+    .geom_boxplot()
+    .labs(y = None, fill = "World")
+    .add_theme(legend_position = "top")
+    .coord_flip()
+)
+```
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "donors", y = "country", color = "world"))
+    .geom_point()
+    .labs(y = None)
+    .add_theme(legend_position = "top")
+)
+```
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "donors", y = "country", color = "world"))
+    .geom_jitter()
+    .labs(y = None)
+    .add_theme(legend_position = "top")
+)
+```
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "donors", y = "country", color = "world"))
+    .geom_jitter(position = position_jitter(height = 0.15))
+    .labs(y = None)
+    .add_theme(legend_position = "top")
+)
+```
+
+## Grouped Summaries
+
+```{python}
+cols = ["donors", "gdp", "health", "roads", "cerebvas"]
+
+by_country = (
+    organdata
+    .group_by("consent_law", "country")
+    .agg(
+        pl.col(cols).mean().name.suffix("_mean"),
+        pl.col(cols).std().name.suffix("_sd"),
+    )
+    .sort("donors_mean")
+)
+by_country = by_country.with_columns(
+    pl.col("country").cast(pl.Enum(by_country["country"].to_list()))
+)
+
+by_country
+```
+
+```{python}
+(
+    by_country
+    .ggplot(aes(
+        x = "donors_mean",
+        y = "country",
+        color = "consent_law"
+    ))
+    .geom_point(size = 3)
+    .labs(x = "Donor Procurement Rate", y = None, color = "Consent Law")
+    .add_theme(legend_position = "top")
+)
+```
+
+```{python}
+(
+    by_country
+    .ggplot(aes(x = "donors_mean", y = "country"))
+    .geom_point(size = 3)
+    .facet_wrap("consent_law", scales = "free_y", ncol = 1)
+    .labs(x = "Donor Procurement Rate", y = None)
+)
+```
+
+Plotnine's `geom_pointrange()` expects vertical ranges, so the horizontal version uses `geom_errorbarh()` plus points.
+
+```{python}
+(
+    by_country
+    .ggplot(aes(x = "donors_mean", y = "country"))
+    .geom_errorbarh(
+        aes(xmin = "donors_mean - donors_sd",
+            xmax = "donors_mean + donors_sd"),
+        height = 0.2
+    )
+    .geom_point(size = 2)
+    .labs(x = "Donor Procurement Rate", y = None)
+)
+```
+
+## Label Outliers
+
+Plotnine does not provide `geom_text_repel()` directly, but `geom_text()` can use the `adjustText` package via its `adjust_text` argument.
+This gives us a close approximation.
+
+
+
+
+
+```{python}
+(
+    by_country
+    .ggplot(aes(x = "gdp_mean", y = "health_mean"))
+    .geom_point()
+    .geom_text(data=by_country.filter(pl.col("gdp_mean") > 25_000),
+               mapping=aes(label = "country"))
+)
+```
+
+```{python}
+(
+    by_country
+    .ggplot(aes(x = "gdp_mean", y = "health_mean"))
+    .geom_point()
+    .geom_text(
+        data=by_country.filter(
+                (pl.col("gdp_mean") > 25_000) |
+                (pl.col("health_mean") > 1500) |
+                (pl.col("country").is_in(["Belgium"]))
+            ),
+        mapping=aes(label = "country"))
+)
+```
+
+
+```{python}
+(
+    by_country
+    .ggplot(aes(x = "roads_mean", y = "donors_mean"))
+    .geom_point()
+    .geom_text(aes(label="country"),
+               adjust_text={"arrowprops": {"arrowstyle": "-"}})
+)
+```
+
+```{python}
+(
+    by_country
+    .ggplot(aes(x = "roads_mean", y = "donors_mean"))
+    .geom_point()
+    .geom_text(
+        aes(label = "country"),
+        adjust_text = {"arrowprops": {"arrowstyle": "-"}}
+    )
+)
+```
+
+```{python}
+(
+    by_country
+    .ggplot(aes(x = "gdp_mean", y = "health_mean"))
+    .geom_point()
+    .geom_text(
+        data = by_country.filter(pl.col("gdp_mean") > 25_000),
+        mapping = aes(label = "country"),
+        adjust_text = {"arrowprops": {"arrowstyle": "-"}}
+    )
+)
+```
+
+```{python}
+(
+    by_country
+    .ggplot(aes(x = "gdp_mean", y = "health_mean"))
+    .geom_point()
+    .geom_text(
+        data = by_country.filter(
+            (pl.col("gdp_mean") > 25_000) |
+            (pl.col("health_mean") < 1_500) |
+            (pl.col("country") == "Belgium")
+        ),
+        mapping = aes(label = "country"),
+        adjust_text = {"arrowprops": {"arrowstyle": "-"}}
+    )
+)
+```
+
+```{python}
+my_organdata = organdata.with_columns(
+    ind = (
+        pl.col("ccode").is_in(["Ita", "Spa"]) &
+        (pl.col("year").dt.year() > 1998)
+    )
+)
+
+(
+    my_organdata
+    .ggplot(aes(x = "roads", y = "donors", color = "ind"))
+    .geom_point()
+    .geom_text(
+        data = my_organdata.filter(pl.col("ind")),
+        mapping = aes(label = "ccode"),
+        adjust_text = {"arrowprops": {"arrowstyle": "-"}}
+    )
+    .add_guides(color = "none")
+)
+```
+
+```{python}
+elections_historic = pl.read_parquet("data/elections_historic.parquet")
+
+p_title = "Popular Vote and Electoral College Shares"
+p_subtitle = "1824-2024"
+x_label = "Winner's share of Popular Vote"
+y_label = "Winner's share of Electoral College Votes"
+
+(
+    elections_historic
+    .ggplot(aes(x = "popular_pct", y = "ec_pct"))
+    .geom_hline(yintercept = 0.5, size = 1.4, color = "#CCCCCC")
+    .geom_vline(xintercept = 0.5, size = 1.4, color = "#CCCCCC")
+    .geom_point(size = 0.4)
+    .geom_text(
+        aes(label = "winner_label"),
+        size = 4,
+        adjust_text = {
+            "arrowprops": {"arrowstyle": "-", "color": "gray"},
+            "min_arrow_len": 1,
+            "force_static": (0.01, 0.01),
+            "force_text": (0.01, 0.01),
+        }
+    )
+    .scale_x_continuous(labels = lambda lst: [f"{v:.0%}" for v in lst])
+    .scale_y_continuous(labels = lambda lst: [f"{v:.0%}" for v in lst])
+    .labs(x = x_label, y = y_label, title = p_title, subtitle = p_subtitle)
+)
+```
+
+## Add Annotations
+
+The original R example also shows `I()` for placing annotations with relative coordinates inside the plotting area.
+There does not appear to be a direct `I()` equivalent for `annotate()` in plotnine, so these examples use data coordinates.
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "roads", y = "donors"))
+    .geom_point()
+    .annotate(
+        "text",
+        x = 91,
+        y = 33,
+        size = 8,
+        label = "A surprisingly high\nrecovery rate.",
+        lineheight = 0.9,
+        ha = "left"
+    )
+)
+```
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "roads", y = "donors"))
+    .geom_point()
+    .annotate(
+        "rect",
+        xmin = 125,
+        xmax = 155,
+        ymin = 30,
+        ymax = 35,
+        fill = "red",
+        alpha = 0.2
+    )
+    .annotate(
+        "text",
+        x = 157,
+        y = 33,
+        size = 8,
+        label = "A surprisingly high\nrecovery rate.",
+        lineheight = 0.9,
+        ha = "left"
+    )
+)
+```
+
+## Understanding Scales, Guides, and Themes
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "roads", y = "donors", color = "world"))
+    .geom_point()
+)
+```
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "roads", y = "donors", color = "world"))
+    .geom_point()
+    .scale_x_log10()
+    .scale_y_continuous(
+        breaks = [5, 15, 25],
+        labels = ["Five", "Fifteen", "Twenty Five"]
+    )
+)
+```
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "roads", y = "donors", color = "world"))
+    .geom_point()
+    .scale_color_discrete(
+        labels = ["Corporatist", "Liberal", "Social Democratic", "Unclassified"]
+    )
+    .labs(
+        x = "Road Deaths",
+        y = "Donor Procurement",
+        color = "Welfare State"
+    )
+)
+```
+
+```{python}
+(
+    organdata
+    .ggplot(aes(x = "roads", y = "donors", color = "world"))
+    .geom_point()
+    .labs(x = "Road Deaths", y = "Donor Procurement")
+    .add_guides(color = "none")
+)
+```
