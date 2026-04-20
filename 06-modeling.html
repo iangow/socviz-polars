@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; Work with Models – Data Visualization: A Python/Polars Companion</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./05-more-on-geoms.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5ccb035bea26c1e21f80f44cf7c27909.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./06-modeling.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Work with Models</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Data Visualization: A Python/Polars Companion</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Preface</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-look-at-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Look at Data</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Get Started</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-ggplot-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Make a Plot</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-group-facet-transform.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Show the Right Numbers</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-more-on-geoms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Graph Tables, Add Labels, Make Notes</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-modeling.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Work with Models</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#show-several-fits-at-once" id="toc-show-several-fits-at-once" class="nav-link active" data-scroll-target="#show-several-fits-at-once"><span class="header-section-number">7.1</span> Show Several Fits at Once</a></li>
+  <li><a href="#look-inside-model-objects" id="toc-look-inside-model-objects" class="nav-link" data-scroll-target="#look-inside-model-objects"><span class="header-section-number">7.2</span> Look Inside Model Objects</a></li>
+  <li><a href="#generate-predictions-to-graph" id="toc-generate-predictions-to-graph" class="nav-link" data-scroll-target="#generate-predictions-to-graph"><span class="header-section-number">7.3</span> Generate Predictions to Graph</a></li>
+  <li><a href="#tidy-model-objects" id="toc-tidy-model-objects" class="nav-link" data-scroll-target="#tidy-model-objects"><span class="header-section-number">7.4</span> Tidy Model Objects</a></li>
+  <li><a href="#grouped-analysis" id="toc-grouped-analysis" class="nav-link" data-scroll-target="#grouped-analysis"><span class="header-section-number">7.5</span> Grouped Analysis</a></li>
+  <li><a href="#plot-marginal-effects" id="toc-plot-marginal-effects" class="nav-link" data-scroll-target="#plot-marginal-effects"><span class="header-section-number">7.6</span> Plot Marginal Effects</a></li>
+  <li><a href="#complex-surveys" id="toc-complex-surveys" class="nav-link" data-scroll-target="#complex-surveys"><span class="header-section-number">7.7</span> Complex Surveys</a></li>
+  <li><a href="#where-to-go-next" id="toc-where-to-go-next" class="nav-link" data-scroll-target="#where-to-go-next"><span class="header-section-number">7.8</span> Where to Go Next</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Work with Models</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This chapter follows <a href="https://socviz.co/06-modeling.html">Chapter 6 of <span class="citation" data-cites="Healy2026">Healy (<span>2026</span>)</span></a>, translating the main model-based graphics to Python, Polars, <code>statsmodels</code>, and <code>plotnine_polars</code>. The goal is not to teach statistical modeling, but to show how model objects can be turned into tidy tables that we can graph.</p>
+<div id="e21709f2" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mizani.formatters <span class="im">import</span> currency_format</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes, position_dodge</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="6e1f15e4" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>gapminder <span class="op">=</span> pl.read_csv(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv"</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    separator<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>gapminder_pd <span class="op">=</span> gapminder.to_pandas()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>gss_sm <span class="op">=</span> pl.read_parquet(<span class="st">"data/gss_sm.parquet"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>gss_sm_pd <span class="op">=</span> gss_sm.to_pandas()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="show-several-fits-at-once" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="show-several-fits-at-once"><span class="header-section-number">7.1</span> Show Several Fits at Once</h2>
+<p>Plotnine can fit several smoothers directly inside a plot, much as ggplot does. For the robust regression smoother, plotnine currently warns that confidence intervals are not implemented, so these examples suppress the interval for that layer.</p>
+<div id="f2adf718" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> (</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    gapminder</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(log_gdp<span class="op">=</span>pl.col(<span class="st">"gdpPercap"</span>).log())</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"log_gdp"</span>, y<span class="op">=</span><span class="st">"lifeExp"</span>))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-fig-ch-06-ols-rlm" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    p</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .geom_point(alpha<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    .geom_smooth(color<span class="op">=</span><span class="st">"tomato"</span>, fill<span class="op">=</span><span class="st">"tomato"</span>, method<span class="op">=</span><span class="st">"rlm"</span>, se<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    .geom_smooth(color<span class="op">=</span><span class="st">"steelblue"</span>, fill<span class="op">=</span><span class="st">"steelblue"</span>, method<span class="op">=</span><span class="st">"lm"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div id="fig-ch-06-ols-rlm" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch-06-ols-rlm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-modeling_files/figure-html/fig-ch-06-ols-rlm-output-1.png" width="672" height="480" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-ols-rlm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.1: Comparing ordinary least squares and robust regression smoothers.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-fig-ch-06-spline" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    p</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .geom_point(alpha<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    .geom_smooth(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"tomato"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        method<span class="op">=</span><span class="st">"lm"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        formula<span class="op">=</span><span class="st">"y ~ bs(x, df=3)"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        se<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        size<span class="op">=</span><span class="fl">1.2</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div id="fig-ch-06-spline" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch-06-spline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-modeling_files/figure-html/fig-ch-06-spline-output-1.png" width="672" height="480" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-spline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.2: A cubic spline smoother.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-fig-ch-06-quantile" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    p</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .geom_point(alpha<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    .geom_quantile(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"tomato"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        size<span class="op">=</span><span class="fl">1.2</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        quantiles<span class="op">=</span>[<span class="fl">0.20</span>, <span class="fl">0.50</span>, <span class="fl">0.85</span>]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div id="fig-ch-06-quantile" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch-06-quantile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-modeling_files/figure-html/fig-ch-06-quantile-output-1.png" width="672" height="480" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-quantile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.3: Quantile regression lines.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>When separate smoother layers map <code>color</code> and <code>fill</code> to literal labels, plotnine can build a legend for the model types. As in R, this is a useful trick: the labels are not variables in the data, but one-value aesthetic mappings created for each layer.</p>
+<div id="d3e98d0f" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>model_colors <span class="op">=</span> [<span class="st">"#E41A1C"</span>, <span class="st">"#377EB8"</span>, <span class="st">"#4DAF4A"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-fig-ch-06-smoothers-legend" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    p</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .geom_point(alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    .geom_smooth(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        aes(color<span class="op">=</span><span class="st">'"OLS"'</span>, fill<span class="op">=</span><span class="st">'"OLS"'</span>),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        method<span class="op">=</span><span class="st">"lm"</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    .geom_smooth(</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        aes(color<span class="op">=</span><span class="st">'"Cubic Spline"'</span>, fill<span class="op">=</span><span class="st">'"Cubic Spline"'</span>),</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        method<span class="op">=</span><span class="st">"lm"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        formula<span class="op">=</span><span class="st">"y ~ bs(x, df=3)"</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    .geom_smooth(</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        aes(color<span class="op">=</span><span class="st">'"LOESS"'</span>, fill<span class="op">=</span><span class="st">'"LOESS"'</span>),</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        method<span class="op">=</span><span class="st">"loess"</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    .scale_color_manual(name<span class="op">=</span><span class="st">"Models"</span>, values<span class="op">=</span>model_colors)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    .scale_fill_manual(name<span class="op">=</span><span class="st">"Models"</span>, values<span class="op">=</span>model_colors)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    .add_theme(legend_position<span class="op">=</span><span class="st">"top"</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div id="fig-ch-06-smoothers-legend" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch-06-smoothers-legend-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-modeling_files/figure-html/fig-ch-06-smoothers-legend-output-1.png" width="672" height="480" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-smoothers-legend-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.4: Fitting several smoothers with a legend.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="look-inside-model-objects" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="look-inside-model-objects"><span class="header-section-number">7.2</span> Look Inside Model Objects</h2>
+<p>Statsmodels uses formulas via <code>patsy</code>, so model fitting happens most naturally against a pandas data frame. The companion keeps Polars as the main data-frame library, but converts to pandas at the modeling boundary.</p>
+<div id="507dd7ac" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> smf.ols(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lifeExp ~ gdpPercap + pop + C(continent)"</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>gapminder_pd</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>).fit()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="b3d5c387" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(out.summary())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                lifeExp   R-squared:                       0.582
+Model:                            OLS   Adj. R-squared:                  0.581
+Method:                 Least Squares   F-statistic:                     393.9
+Date:                Mon, 20 Apr 2026   Prob (F-statistic):          3.94e-317
+Time:                        10:46:11   Log-Likelihood:                -6033.8
+No. Observations:                1704   AIC:                         1.208e+04
+Df Residuals:                    1697   BIC:                         1.212e+04
+Df Model:                           6                                         
+Covariance Type:            nonrobust                                         
+============================================================================================
+                               coef    std err          t      P&gt;|t|      [0.025      0.975]
+--------------------------------------------------------------------------------------------
+Intercept                   47.8141      0.340    140.819      0.000      47.148      48.480
+C(continent)[T.Americas]    13.4759      0.600     22.458      0.000      12.299      14.653
+C(continent)[T.Asia]         8.1926      0.571     14.342      0.000       7.072       9.313
+C(continent)[T.Europe]      17.4727      0.625     27.973      0.000      16.248      18.698
+C(continent)[T.Oceania]     18.0833      1.782     10.146      0.000      14.588      21.579
+gdpPercap                    0.0004   2.35e-05     19.158      0.000       0.000       0.000
+pop                        6.57e-09   1.98e-09      3.326      0.001     2.7e-09    1.04e-08
+==============================================================================
+Omnibus:                      146.151   Durbin-Watson:                   0.480
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              332.829
+Skew:                          -0.518   Prob(JB):                     5.33e-73
+Kurtosis:                       4.901   Cond. No.                     9.76e+08
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 9.76e+08. This might indicate that there are
+strong multicollinearity or other numerical problems.</code></pre>
+</div>
+</div>
+<p>The printed summary is convenient for reading, but not convenient for plotting. The following small helpers provide the pieces of <code>broom::tidy()</code>, <code>augment()</code>, and <code>glance()</code> that this chapter needs.</p>
+<div id="832c2486" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tidy_result(result, conf_int<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"term"</span>: result.params.index,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"estimate"</span>: result.params.to_numpy(),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"std_error"</span>: result.bse.to_numpy(),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"statistic"</span>: result.tvalues.to_numpy(),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"p_value"</span>: result.pvalues.to_numpy(),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> conf_int:</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        conf <span class="op">=</span> result.conf_int()</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        out[<span class="st">"conf_low"</span>] <span class="op">=</span> conf.iloc[:, <span class="dv">0</span>].to_numpy()</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        out[<span class="st">"conf_high"</span>] <span class="op">=</span> conf.iloc[:, <span class="dv">1</span>].to_numpy()</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pl.from_pandas(out)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> augment_ols(result, data):</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    pred <span class="op">=</span> result.get_prediction(data).summary_frame()</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> data.copy()</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    out[<span class="st">"fitted"</span>] <span class="op">=</span> result.fittedvalues</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    out[<span class="st">"se_fit"</span>] <span class="op">=</span> pred[<span class="st">"mean_se"</span>].to_numpy()</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    out[<span class="st">"resid"</span>] <span class="op">=</span> result.resid</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    out[<span class="st">"hat"</span>] <span class="op">=</span> result.get_influence().hat_matrix_diag</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    out[<span class="st">"cooksd"</span>] <span class="op">=</span> result.get_influence().cooks_distance[<span class="dv">0</span>]</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pl.from_pandas(out)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> glance_ols(result):</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pl.DataFrame({</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        <span class="st">"r_squared"</span>: [result.rsquared],</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        <span class="st">"adj_r_squared"</span>: [result.rsquared_adj],</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sigma"</span>: [np.sqrt(result.mse_resid)],</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>        <span class="st">"statistic"</span>: [result.fvalue],</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>        <span class="st">"p_value"</span>: [result.f_pvalue],</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>        <span class="st">"df"</span>: [result.df_model <span class="op">+</span> <span class="dv">1</span>],</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>        <span class="st">"log_lik"</span>: [result.llf],</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>        <span class="st">"aic"</span>: [result.aic],</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>        <span class="st">"bic"</span>: [result.bic],</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>        <span class="st">"deviance"</span>: [np.<span class="bu">sum</span>(result.resid <span class="op">**</span> <span class="dv">2</span>)],</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>        <span class="st">"df_resid"</span>: [result.df_resid],</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>    })</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="395a19f3" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>tidy_result(out).with_columns(pl.selectors.numeric().<span class="bu">round</span>(<span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (7, 5)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">term</th>
+<th data-quarto-table-cell-role="th">estimate</th>
+<th data-quarto-table-cell-role="th">std_error</th>
+<th data-quarto-table-cell-role="th">statistic</th>
+<th data-quarto-table-cell-role="th">p_value</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Intercept"</td>
+<td>47.81</td>
+<td>0.34</td>
+<td>140.82</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td>"C(continent)[T.Americas]"</td>
+<td>13.48</td>
+<td>0.6</td>
+<td>22.46</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td>"C(continent)[T.Asia]"</td>
+<td>8.19</td>
+<td>0.57</td>
+<td>14.34</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td>"C(continent)[T.Europe]"</td>
+<td>17.47</td>
+<td>0.62</td>
+<td>27.97</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td>"C(continent)[T.Oceania]"</td>
+<td>18.08</td>
+<td>1.78</td>
+<td>10.15</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td>"gdpPercap"</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>19.16</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td>"pop"</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>3.33</td>
+<td>0.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="generate-predictions-to-graph" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="generate-predictions-to-graph"><span class="header-section-number">7.3</span> Generate Predictions to Graph</h2>
+<p>R’s <code>expand.grid()</code> creates all combinations of supplied values. Here Polars can do the same thing by building the columns explicitly and cross-joining them.</p>
+<div id="43915b1a" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gdp_grid <span class="op">=</span> pl.DataFrame({</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gdpPercap"</span>: np.linspace(</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        gapminder[<span class="st">"gdpPercap"</span>].<span class="bu">min</span>(),</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        gapminder[<span class="st">"gdpPercap"</span>].<span class="bu">max</span>(),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="dv">100</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>pop_grid <span class="op">=</span> pl.DataFrame({<span class="st">"pop"</span>: [gapminder[<span class="st">"pop"</span>].median()]})</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>continent_grid <span class="op">=</span> pl.DataFrame({</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"continent"</span>: [<span class="st">"Africa"</span>, <span class="st">"Americas"</span>, <span class="st">"Asia"</span>, <span class="st">"Europe"</span>, <span class="st">"Oceania"</span>]</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>pred_df <span class="op">=</span> (</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    gdp_grid</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    .join(pop_grid, how<span class="op">=</span><span class="st">"cross"</span>)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    .join(continent_grid, how<span class="op">=</span><span class="st">"cross"</span>)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>pred_df.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>(500, 3)</code></pre>
+</div>
+</div>
+<div id="ffdc7419" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pred_out <span class="op">=</span> out.get_prediction(pred_df.to_pandas()).summary_frame()</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>pred_df <span class="op">=</span> pl.concat(</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        pred_df,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        pl.from_pandas(</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>            pred_out[[<span class="st">"mean"</span>, <span class="st">"obs_ci_lower"</span>, <span class="st">"obs_ci_upper"</span>]]</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>            .rename(columns<span class="op">=</span>{</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>                <span class="st">"mean"</span>: <span class="st">"fit"</span>,</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>                <span class="st">"obs_ci_lower"</span>: <span class="st">"lwr"</span>,</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>                <span class="st">"obs_ci_upper"</span>: <span class="st">"upr"</span>,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>            })</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    how<span class="op">=</span><span class="st">"horizontal"</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>pred_df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5, 6)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">gdpPercap</th>
+<th data-quarto-table-cell-role="th">pop</th>
+<th data-quarto-table-cell-role="th">continent</th>
+<th data-quarto-table-cell-role="th">fit</th>
+<th data-quarto-table-cell-role="th">lwr</th>
+<th data-quarto-table-cell-role="th">upr</th>
+</tr>
+<tr class="even">
+<td>f64</td>
+<td>f64</td>
+<td>str</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>241.165876</td>
+<td>7023595.5</td>
+<td>"Africa"</td>
+<td>47.968628</td>
+<td>31.547749</td>
+<td>64.389507</td>
+</tr>
+<tr class="even">
+<td>241.165876</td>
+<td>7023595.5</td>
+<td>"Americas"</td>
+<td>61.444571</td>
+<td>45.00649</td>
+<td>77.882652</td>
+</tr>
+<tr class="odd">
+<td>241.165876</td>
+<td>7023595.5</td>
+<td>"Asia"</td>
+<td>56.16126</td>
+<td>39.726734</td>
+<td>72.595785</td>
+</tr>
+<tr class="even">
+<td>241.165876</td>
+<td>7023595.5</td>
+<td>"Europe"</td>
+<td>65.44132</td>
+<td>48.99789</td>
+<td>81.884751</td>
+</tr>
+<tr class="odd">
+<td>241.165876</td>
+<td>7023595.5</td>
+<td>"Oceania"</td>
+<td>66.051932</td>
+<td>49.284743</td>
+<td>82.819121</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="cell-fig-ch-06-ols-predictions" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pred_eu_af <span class="op">=</span> pred_df.<span class="bu">filter</span>(pl.col(<span class="st">"continent"</span>).is_in([<span class="st">"Europe"</span>, <span class="st">"Africa"</span>]))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>gap_eu_af <span class="op">=</span> gapminder.<span class="bu">filter</span>(pl.col(<span class="st">"continent"</span>).is_in([<span class="st">"Europe"</span>, <span class="st">"Africa"</span>]))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    pred_eu_af</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">"gdpPercap"</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"fit"</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        ymin<span class="op">=</span><span class="st">"lwr"</span>,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        ymax<span class="op">=</span><span class="st">"upr"</span>,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"continent"</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>        fill<span class="op">=</span><span class="st">"continent"</span>,</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        group<span class="op">=</span><span class="st">"continent"</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    .geom_point(</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>gap_eu_af,</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>        mapping<span class="op">=</span>aes(x<span class="op">=</span><span class="st">"gdpPercap"</span>, y<span class="op">=</span><span class="st">"lifeExp"</span>, color<span class="op">=</span><span class="st">"continent"</span>),</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>        alpha<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>        inherit_aes<span class="op">=</span><span class="va">False</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    .geom_line()</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    .geom_ribbon(alpha<span class="op">=</span><span class="fl">0.2</span>, color<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    .scale_x_log10(labels<span class="op">=</span>currency_format(precision<span class="op">=</span><span class="dv">0</span>, big_mark<span class="op">=</span><span class="st">","</span>))</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div id="fig-ch-06-ols-predictions" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch-06-ols-predictions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-modeling_files/figure-html/fig-ch-06-ols-predictions-output-1.png" width="672" height="480" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-ols-predictions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.5: OLS predictions for Europe and Africa.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="tidy-model-objects" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="tidy-model-objects"><span class="header-section-number">7.4</span> Tidy Model Objects</h2>
+<p>The coefficient table can be plotted once it is turned into a data frame. Categorical terms from statsmodels include <code>C(continent)[T.&lt;level&gt;]</code>; for display we strip that formula syntax away.</p>
+<div id="c082f013" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>out_conf <span class="op">=</span> (</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    tidy_result(out, conf_int<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"term"</span>) <span class="op">!=</span> <span class="st">"Intercept"</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        nicelabs<span class="op">=</span>(</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"term"</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">"C</span><span class="ch">\\</span><span class="st">(continent</span><span class="ch">\\</span><span class="st">)</span><span class="ch">\\</span><span class="st">[T</span><span class="ch">\\</span><span class="st">."</span>, <span class="st">""</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">"</span><span class="ch">\\</span><span class="st">]"</span>, <span class="st">""</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>term_order <span class="op">=</span> (</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    out_conf</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"estimate"</span>)</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    .get_column(<span class="st">"nicelabs"</span>)</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    .to_list()</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>out_conf <span class="op">=</span> out_conf.with_columns(pl.col(<span class="st">"nicelabs"</span>).cast(pl.Enum(term_order)))</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>out_conf</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (6, 8)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">term</th>
+<th data-quarto-table-cell-role="th">estimate</th>
+<th data-quarto-table-cell-role="th">std_error</th>
+<th data-quarto-table-cell-role="th">statistic</th>
+<th data-quarto-table-cell-role="th">p_value</th>
+<th data-quarto-table-cell-role="th">conf_low</th>
+<th data-quarto-table-cell-role="th">conf_high</th>
+<th data-quarto-table-cell-role="th">nicelabs</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>enum</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"C(continent)[T.Americas]"</td>
+<td>13.475943</td>
+<td>0.600042</td>
+<td>22.458335</td>
+<td>5.1881e-98</td>
+<td>12.299043</td>
+<td>14.652843</td>
+<td>"Americas"</td>
+</tr>
+<tr class="even">
+<td>"C(continent)[T.Asia]"</td>
+<td>8.192632</td>
+<td>0.571235</td>
+<td>14.341952</td>
+<td>4.0643e-44</td>
+<td>7.072232</td>
+<td>9.313032</td>
+<td>"Asia"</td>
+</tr>
+<tr class="odd">
+<td>"C(continent)[T.Europe]"</td>
+<td>17.472693</td>
+<td>0.624616</td>
+<td>27.973474</td>
+<td>6.3351e-142</td>
+<td>16.247593</td>
+<td>18.697792</td>
+<td>"Europe"</td>
+</tr>
+<tr class="even">
+<td>"C(continent)[T.Oceania]"</td>
+<td>18.083304</td>
+<td>1.782254</td>
+<td>10.14631</td>
+<td>1.5896e-23</td>
+<td>14.587657</td>
+<td>21.578952</td>
+<td>"Oceania"</td>
+</tr>
+<tr class="odd">
+<td>"gdpPercap"</td>
+<td>0.00045</td>
+<td>0.000023</td>
+<td>19.157877</td>
+<td>3.2390e-74</td>
+<td>0.000403</td>
+<td>0.000496</td>
+<td>"gdpPercap"</td>
+</tr>
+<tr class="even">
+<td>"pop"</td>
+<td>6.5698e-9</td>
+<td>1.9754e-9</td>
+<td>3.325736</td>
+<td>0.000901</td>
+<td>2.6953e-9</td>
+<td>1.0444e-8</td>
+<td>"pop"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="cell-fig-ch-06-coef-basic" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    out_conf</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"nicelabs"</span>, y<span class="op">=</span><span class="st">"estimate"</span>))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    .geom_point()</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div id="fig-ch-06-coef-basic" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch-06-coef-basic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-modeling_files/figure-html/fig-ch-06-coef-basic-output-1.png" width="672" height="480" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-coef-basic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.6: A basic plot of OLS estimates.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-fig-ch-06-coef-intervals" class="cell" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    out_conf</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">"nicelabs"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"estimate"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>        ymin<span class="op">=</span><span class="st">"conf_low"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        ymax<span class="op">=</span><span class="st">"conf_high"</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    .geom_pointrange()</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    .labs(x<span class="op">=</span><span class="va">None</span>, y<span class="op">=</span><span class="st">"OLS Estimate"</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<div id="fig-ch-06-coef-intervals" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch-06-coef-intervals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-modeling_files/figure-html/fig-ch-06-coef-intervals-output-1.png" width="672" height="480" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-coef-intervals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.7: OLS estimates and confidence intervals.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Observation-level statistics are also useful. The helper here omits broom’s leading dots in column names, because plain Python expressions and plotnine mappings are easier to read without them.</p>
+<div id="8d46ce1e" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>out_aug <span class="op">=</span> augment_ols(out, gapminder_pd)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>out_aug.select(<span class="st">"country"</span>, <span class="st">"continent"</span>, <span class="st">"year"</span>, <span class="st">"lifeExp"</span>, <span class="st">"fitted"</span>, <span class="st">"resid"</span>, <span class="st">"hat"</span>, <span class="st">"cooksd"</span>).head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5, 8)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">continent</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">lifeExp</th>
+<th data-quarto-table-cell-role="th">fitted</th>
+<th data-quarto-table-cell-role="th">resid</th>
+<th data-quarto-table-cell-role="th">hat</th>
+<th data-quarto-table-cell-role="th">cooksd</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Afghanistan"</td>
+<td>"Asia"</td>
+<td>1952</td>
+<td>28.801</td>
+<td>56.412428</td>
+<td>-27.611428</td>
+<td>0.003222</td>
+<td>0.005047</td>
+</tr>
+<tr class="even">
+<td>"Afghanistan"</td>
+<td>"Asia"</td>
+<td>1957</td>
+<td>30.332</td>
+<td>56.4364</td>
+<td>-26.1044</td>
+<td>0.003211</td>
+<td>0.004495</td>
+</tr>
+<tr class="odd">
+<td>"Afghanistan"</td>
+<td>"Asia"</td>
+<td>1962</td>
+<td>31.997</td>
+<td>56.457637</td>
+<td>-24.460637</td>
+<td>0.003199</td>
+<td>0.003932</td>
+</tr>
+<tr class="even">
+<td>"Afghanistan"</td>
+<td>"Asia"</td>
+<td>1967</td>
+<td>34.02</td>
+<td>56.458388</td>
+<td>-22.438388</td>
+<td>0.003191</td>
+<td>0.0033</td>
+</tr>
+<tr class="odd">
+<td>"Afghanistan"</td>
+<td>"Asia"</td>
+<td>1972</td>
+<td>36.088</td>
+<td>56.425266</td>
+<td>-20.337266</td>
+<td>0.00319</td>
+<td>0.002711</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="cell-fig-ch-06-residuals-fitted" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    out_aug</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"fitted"</span>, y<span class="op">=</span><span class="st">"resid"</span>))</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    .geom_point(alpha<span class="op">=</span><span class="fl">0.35</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<div id="fig-ch-06-residuals-fitted" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch-06-residuals-fitted-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-modeling_files/figure-html/fig-ch-06-residuals-fitted-output-1.png" width="672" height="480" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-residuals-fitted-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.8: Residuals versus fitted values.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="e0064842" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>glance_ols(out).with_columns(pl.selectors.numeric().<span class="bu">round</span>(<span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (1, 11)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">r_squared</th>
+<th data-quarto-table-cell-role="th">adj_r_squared</th>
+<th data-quarto-table-cell-role="th">sigma</th>
+<th data-quarto-table-cell-role="th">statistic</th>
+<th data-quarto-table-cell-role="th">p_value</th>
+<th data-quarto-table-cell-role="th">df</th>
+<th data-quarto-table-cell-role="th">log_lik</th>
+<th data-quarto-table-cell-role="th">aic</th>
+<th data-quarto-table-cell-role="th">bic</th>
+<th data-quarto-table-cell-role="th">deviance</th>
+<th data-quarto-table-cell-role="th">df_resid</th>
+</tr>
+<tr class="even">
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.58</td>
+<td>0.58</td>
+<td>8.37</td>
+<td>393.91</td>
+<td>0.0</td>
+<td>7.0</td>
+<td>-6033.83</td>
+<td>12081.65</td>
+<td>12119.74</td>
+<td>118754.46</td>
+<td>1697.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Statsmodels also has duration-modeling tools, including Cox proportional hazards models through <code>PHReg</code>. The survival-analysis aside from the R chapter is omitted here because it is not central to this companion’s first-pass translation.</p>
+</section>
+<section id="grouped-analysis" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="grouped-analysis"><span class="header-section-number">7.5</span> Grouped Analysis</h2>
+<p>The R chapter uses nested list columns and <code>purrr::map()</code> to fit one model per continent-year group. In Python, an explicit loop is clearer for this first pass.</p>
+<div id="9c993621" class="cell" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_life_exp_group(df):</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    fit_df <span class="op">=</span> df.assign(log_gdp<span class="op">=</span>np.log(df[<span class="st">"gdpPercap"</span>]))</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> smf.ols(<span class="st">"lifeExp ~ log_gdp"</span>, data<span class="op">=</span>fit_df).fit()</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> tidy_result(result).to_pandas()</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>group_results <span class="op">=</span> []</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (continent, year), df <span class="kw">in</span> gapminder_pd.groupby([<span class="st">"continent"</span>, <span class="st">"year"</span>], sort<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> continent <span class="op">==</span> <span class="st">"Oceania"</span>:</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    tidied <span class="op">=</span> fit_life_exp_group(df)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    tidied[<span class="st">"continent"</span>] <span class="op">=</span> continent</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    tidied[<span class="st">"year"</span>] <span class="op">=</span> year</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    group_results.append(tidied)</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>out_tidy <span class="op">=</span> (</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    pl.from_pandas(pd.concat(group_results, ignore_index<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"term"</span>) <span class="op">==</span> <span class="st">"log_gdp"</span>)</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>        ymin<span class="op">=</span>pl.col(<span class="st">"estimate"</span>) <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> pl.col(<span class="st">"std_error"</span>),</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>        ymax<span class="op">=</span>pl.col(<span class="st">"estimate"</span>) <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> pl.col(<span class="st">"std_error"</span>),</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>out_tidy.sample(<span class="dv">5</span>, seed<span class="op">=</span><span class="dv">123</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5, 9)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">term</th>
+<th data-quarto-table-cell-role="th">estimate</th>
+<th data-quarto-table-cell-role="th">std_error</th>
+<th data-quarto-table-cell-role="th">statistic</th>
+<th data-quarto-table-cell-role="th">p_value</th>
+<th data-quarto-table-cell-role="th">continent</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">ymin</th>
+<th data-quarto-table-cell-role="th">ymax</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>str</td>
+<td>i64</td>
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"log_gdp"</td>
+<td>4.444768</td>
+<td>1.008034</td>
+<td>4.409344</td>
+<td>0.000116</td>
+<td>"Asia"</td>
+<td>1972</td>
+<td>2.4287</td>
+<td>6.460835</td>
+</tr>
+<tr class="even">
+<td>"log_gdp"</td>
+<td>7.448632</td>
+<td>0.945084</td>
+<td>7.88145</td>
+<td>1.3863e-8</td>
+<td>"Europe"</td>
+<td>1957</td>
+<td>5.558464</td>
+<td>9.3388</td>
+</tr>
+<tr class="odd">
+<td>"log_gdp"</td>
+<td>4.779256</td>
+<td>0.852376</td>
+<td>5.606982</td>
+<td>0.000004</td>
+<td>"Asia"</td>
+<td>1982</td>
+<td>3.074505</td>
+<td>6.484008</td>
+</tr>
+<tr class="even">
+<td>"log_gdp"</td>
+<td>4.159673</td>
+<td>1.250705</td>
+<td>3.325863</td>
+<td>0.002277</td>
+<td>"Asia"</td>
+<td>1952</td>
+<td>1.658263</td>
+<td>6.661083</td>
+</tr>
+<tr class="odd">
+<td>"log_gdp"</td>
+<td>2.756274</td>
+<td>1.058415</td>
+<td>2.604153</td>
+<td>0.012095</td>
+<td>"Africa"</td>
+<td>1962</td>
+<td>0.639444</td>
+<td>4.873103</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="cell-fig-ch-06-grouped-ols" class="cell" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    out_tidy</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">"year"</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"estimate"</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>        ymin<span class="op">=</span><span class="st">"ymin"</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>        ymax<span class="op">=</span><span class="st">"ymax"</span>,</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>        group<span class="op">=</span><span class="st">"continent"</span>,</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"continent"</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    .geom_pointrange(position<span class="op">=</span>position_dodge(width<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    .scale_x_continuous(breaks<span class="op">=</span>gapminder[<span class="st">"year"</span>].unique().sort().to_list())</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    .add_theme(legend_position<span class="op">=</span><span class="st">"top"</span>)</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    .labs(x<span class="op">=</span><span class="st">"Year"</span>, y<span class="op">=</span><span class="st">"Estimate"</span>, color<span class="op">=</span><span class="st">"Continent"</span>)</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<div id="fig-ch-06-grouped-ols" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch-06-grouped-ols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-modeling_files/figure-html/fig-ch-06-grouped-ols-output-1.png" width="672" height="480" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-grouped-ols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.9: Yearly estimates of the association between GDP and life expectancy, pooled by continent.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="plot-marginal-effects" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="plot-marginal-effects"><span class="header-section-number">7.6</span> Plot Marginal Effects</h2>
+<p>Statsmodels can estimate logistic regression models and calculate average marginal effects. The model below mirrors the R example by predicting the binary <code>obama</code> variable from political views, sex, race, and a sex-by-race interaction.</p>
+<div id="5b8f80ca" class="cell" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>bo_df <span class="op">=</span> (</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    gss_sm_pd</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    .assign(polviews_m<span class="op">=</span>gss_sm_pd[<span class="st">"polviews"</span>])</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    [[<span class="st">"obama"</span>, <span class="st">"polviews_m"</span>, <span class="st">"sex"</span>, <span class="st">"race"</span>]]</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    .dropna()</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>out_bo <span class="op">=</span> smf.logit(</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'obama ~ C(polviews_m, Treatment(reference="Moderate")) + '</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'C(sex, Treatment(reference="Male")) * '</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'C(race, Treatment(reference="White"))'</span>,</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>bo_df</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>).fit(disp<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="a92d5d09" class="cell" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(out_bo.summary())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                           Logit Regression Results                           
+==============================================================================
+Dep. Variable:                  obama   No. Observations:                 1698
+Model:                          Logit   Df Residuals:                     1686
+Method:                           MLE   Df Model:                           11
+Date:                Mon, 20 Apr 2026   Pseudo R-squ.:                  0.4013
+Time:                        10:46:11   Log-Likelihood:                -672.94
+converged:                       True   LL-Null:                       -1124.0
+Covariance Type:            nonrobust   LLR p-value:                2.234e-186
+================================================================================================================================================================
+                                                                                                   coef    std err          z      P&gt;|z|      [0.025      0.975]
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Intercept                                                                                        0.2965      0.134      2.211      0.027       0.034       0.559
+C(polviews_m, Treatment(reference="Moderate"))[T.Conservative]                                  -2.3475      0.200    -11.715      0.000      -2.740      -1.955
+C(polviews_m, Treatment(reference="Moderate"))[T.Extremely Conservative]                        -2.7274      0.387     -7.044      0.000      -3.486      -1.968
+C(polviews_m, Treatment(reference="Moderate"))[T.Extremely Liberal]                              2.3730      0.525      4.520      0.000       1.344       3.402
+C(polviews_m, Treatment(reference="Moderate"))[T.Liberal]                                        2.6000      0.357      7.290      0.000       1.901       3.299
+C(polviews_m, Treatment(reference="Moderate"))[T.Slightly Conservative]                         -1.3553      0.181     -7.476      0.000      -1.711      -1.000
+C(polviews_m, Treatment(reference="Moderate"))[T.Slightly Liberal]                               1.2932      0.248      5.205      0.000       0.806       1.780
+C(sex, Treatment(reference="Male"))[T.Female]                                                    0.2549      0.145      1.753      0.080      -0.030       0.540
+C(race, Treatment(reference="White"))[T.Black]                                                   3.8495      0.501      7.679      0.000       2.867       4.832
+C(race, Treatment(reference="White"))[T.Other]                                                  -0.0021      0.436     -0.005      0.996      -0.856       0.852
+C(sex, Treatment(reference="Male"))[T.Female]:C(race, Treatment(reference="White"))[T.Black]    -0.1975      0.660     -0.299      0.765      -1.491       1.096
+C(sex, Treatment(reference="Male"))[T.Female]:C(race, Treatment(reference="White"))[T.Other]     1.5748      0.588      2.680      0.007       0.423       2.727
+================================================================================================================================================================</code></pre>
+</div>
+</div>
+<div id="7d2e3d55" class="cell" data-execution_count="26">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>bo_m <span class="op">=</span> out_bo.get_margeff(at<span class="op">=</span><span class="st">"overall"</span>, dummy<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>bo_gg <span class="op">=</span> (</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    pl.from_pandas(</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>        bo_m.summary_frame()</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>        .reset_index(names<span class="op">=</span><span class="st">"factor"</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>        .rename(columns<span class="op">=</span>{</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"dy/dx"</span>: <span class="st">"AME"</span>,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Std. Err."</span>: <span class="st">"SE"</span>,</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Pr(&gt;|z|)"</span>: <span class="st">"p"</span>,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Conf. Int. Low"</span>: <span class="st">"lower"</span>,</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Cont. Int. Hi."</span>: <span class="st">"upper"</span>,</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>        factor<span class="op">=</span>(</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"factor"</span>)</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">'C</span><span class="ch">\\</span><span class="st">(polviews_m, Treatment</span><span class="ch">\\</span><span class="st">(reference="Moderate"</span><span class="ch">\\</span><span class="st">)</span><span class="ch">\\</span><span class="st">)</span><span class="ch">\\</span><span class="st">[T</span><span class="ch">\\</span><span class="st">.'</span>, <span class="st">""</span>)</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">'C</span><span class="ch">\\</span><span class="st">(sex, Treatment</span><span class="ch">\\</span><span class="st">(reference="Male"</span><span class="ch">\\</span><span class="st">)</span><span class="ch">\\</span><span class="st">)</span><span class="ch">\\</span><span class="st">[T</span><span class="ch">\\</span><span class="st">.'</span>, <span class="st">""</span>)</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace(<span class="st">'C</span><span class="ch">\\</span><span class="st">(race, Treatment</span><span class="ch">\\</span><span class="st">(reference="White"</span><span class="ch">\\</span><span class="st">)</span><span class="ch">\\</span><span class="st">)</span><span class="ch">\\</span><span class="st">[T</span><span class="ch">\\</span><span class="st">.'</span>, <span class="st">"Race: "</span>)</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace_all(<span class="st">"</span><span class="ch">\\</span><span class="st">]"</span>, <span class="st">""</span>)</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>            .<span class="bu">str</span>.replace_all(<span class="st">":Race: "</span>, <span class="st">" x Race: "</span>)</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>ame_order <span class="op">=</span> bo_gg.sort(<span class="st">"AME"</span>).get_column(<span class="st">"factor"</span>).to_list()</span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>bo_gg <span class="op">=</span> bo_gg.with_columns(pl.col(<span class="st">"factor"</span>).cast(pl.Enum(ame_order)))</span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>bo_gg.select(<span class="st">"factor"</span>, <span class="st">"AME"</span>, <span class="st">"lower"</span>, <span class="st">"upper"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (11, 4)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">factor</th>
+<th data-quarto-table-cell-role="th">AME</th>
+<th data-quarto-table-cell-role="th">lower</th>
+<th data-quarto-table-cell-role="th">upper</th>
+</tr>
+<tr class="even">
+<td>enum</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Conservative"</td>
+<td>-0.341076</td>
+<td>-0.397602</td>
+<td>-0.284551</td>
+</tr>
+<tr class="even">
+<td>"Extremely Conservative"</td>
+<td>-0.346911</td>
+<td>-0.433567</td>
+<td>-0.260256</td>
+</tr>
+<tr class="odd">
+<td>"Extremely Liberal"</td>
+<td>0.270699</td>
+<td>0.183392</td>
+<td>0.358006</td>
+</tr>
+<tr class="even">
+<td>"Liberal"</td>
+<td>0.311339</td>
+<td>0.251686</td>
+<td>0.370991</td>
+</tr>
+<tr class="odd">
+<td>"Slightly Conservative"</td>
+<td>-0.186393</td>
+<td>-0.237025</td>
+<td>-0.13576</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Female"</td>
+<td>0.032534</td>
+<td>-0.00395</td>
+<td>0.069018</td>
+</tr>
+<tr class="even">
+<td>"Race: Black"</td>
+<td>0.40337</td>
+<td>0.346387</td>
+<td>0.460353</td>
+</tr>
+<tr class="odd">
+<td>"Race: Other"</td>
+<td>-0.000272</td>
+<td>-0.108661</td>
+<td>0.108117</td>
+</tr>
+<tr class="even">
+<td>"Female x Race: Black"</td>
+<td>-0.02507</td>
+<td>-0.189165</td>
+<td>0.139025</td>
+</tr>
+<tr class="odd">
+<td>"Female x Race: Other"</td>
+<td>0.188335</td>
+<td>0.065191</td>
+<td>0.311479</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Statsmodels reports marginal effects for the model matrix columns, including the interaction columns. This is not identical to the <code>margins</code> output in the R chapter, but it serves the same purpose here: turning a fitted logistic model into a tidy table of effect estimates and intervals.</p>
+<div id="cell-fig-ch-06-average-marginal-effects" class="cell" data-execution_count="27">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    bo_gg</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"factor"</span>, y<span class="op">=</span><span class="st">"AME"</span>, ymin<span class="op">=</span><span class="st">"lower"</span>, ymax<span class="op">=</span><span class="st">"upper"</span>))</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    .geom_hline(yintercept<span class="op">=</span><span class="dv">0</span>, color<span class="op">=</span><span class="st">"#CCCCCC"</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    .geom_pointrange()</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    .labs(x<span class="op">=</span><span class="va">None</span>, y<span class="op">=</span><span class="st">"Average Marginal Effect"</span>)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<div id="fig-ch-06-average-marginal-effects" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch-06-average-marginal-effects-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-modeling_files/figure-html/fig-ch-06-average-marginal-effects-output-1.png" width="672" height="480" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-average-marginal-effects-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.10: Average marginal effects from a logistic regression.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The R chapter also uses <code>margins::cplot()</code> for conditional effects. There is no close statsmodels-native analogue that keeps the example as compact, so this first pass omits that plot.</p>
+</section>
+<section id="complex-surveys" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="complex-surveys"><span class="header-section-number">7.7</span> Complex Surveys</h2>
+<p>The original chapter closes with examples using the R <code>survey</code> and <code>srvyr</code> packages. Python does not currently offer a close equivalent within this companion’s dependency stack, and a manual approximation would risk teaching the wrong thing about complex survey designs. For that reason, the complex-survey section is omitted here rather than translated loosely.</p>
+</section>
+<section id="where-to-go-next" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="where-to-go-next"><span class="header-section-number">7.8</span> Where to Go Next</h2>
+<p>The main translation lesson is that model-based graphics usually require two steps in Python: fit the model at the pandas/statsmodels boundary, then turn the result into a tidy Polars table for plotting. The hard part is still deciding what quantities should be shown.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-Healy2026" class="csl-entry" role="listitem">
+Healy, Kieran. 2026. <em>Data Visualization: A Practical Introduction</em>. 2nd ed. Princeton University Press. <a href="https://socviz.co/">https://socviz.co/</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./05-more-on-geoms.html" class="pagination-link" aria-label="Graph Tables, Add Labels, Make Notes">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Graph Tables, Add Labels, Make Notes</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
