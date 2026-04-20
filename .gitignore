@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 .quarto/
 _book/
+_freeze/
 
 /.quarto/
 **/*.quarto_ipynb
