@@ -124,7 +124,7 @@ gapminder.schema
 (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp")
+    .aes(x="gdpPercap", y="lifeExp")
     .geom_point()
 )
 ```

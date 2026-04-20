@@ -36,7 +36,7 @@ With the fluent API, the `group` mapping goes inside `.geom_line()` because it a
 #| fig-cap: "Connecting GDP per capita observations without a country grouping."
 (
     gapminder
-    .ggplot(aes(x = "year", y = "gdpPercap"))
+    .ggplot(aes(x="year", y="gdpPercap"))
     .geom_line()
 )
 ```
@@ -46,8 +46,8 @@ With the fluent API, the `group` mapping goes inside `.geom_line()` because it a
 #| fig-cap: "GDP per capita over time, grouped by country."
 (
     gapminder
-    .ggplot(aes(x = "year", y = "gdpPercap"))
-    .geom_line(aes(group = "country"))
+    .ggplot(aes(x="year", y="gdpPercap"))
+    .geom_line(aes(group="country"))
 )
 ```
 
@@ -61,8 +61,8 @@ In `plotnine_polars`, we pass the column name as a string.
 #| fig-cap: "Faceting by continent."
 (
     gapminder
-    .ggplot(aes(x = "year", y = "gdpPercap"))
-    .geom_line(aes(group = "country"))
+    .ggplot(aes(x="year", y="gdpPercap"))
+    .geom_line(aes(group="country"))
     .facet_wrap("continent")
 )
 ```
@@ -75,15 +75,15 @@ The hex color `#B3B3B3` is the equivalent shade.
 #| fig-cap: "Faceting by continent with smoother and log-scaled GDP per capita."
 (
     gapminder
-    .ggplot(aes(x = "year", y = "gdpPercap"))
-    .geom_line(aes(group = "country"), color = "#B3B3B3")
-    .geom_smooth(size = 1.1, method = "loess", se = False)
-    .scale_y_log10(labels = currency_format(precision = 0, big_mark = ","))
-    .facet_wrap("continent", ncol = 5)
+    .ggplot(aes(x="year", y="gdpPercap"))
+    .geom_line(aes(group="country"), color="#B3B3B3")
+    .geom_smooth(size=1.1, method="loess", se=False)
+    .scale_y_log10(labels=currency_format(precision=0, big_mark=","))
+    .facet_wrap("continent", ncol=5)
     .labs(
-        x = "Year",
-        y = "GDP per capita",
-        title = "GDP per capita on Five Continents"
+        x="Year",
+        y="GDP per capita",
+        title="GDP per capita on Five Continents"
     )
 )
 ```
@@ -95,10 +95,10 @@ For `facet_grid()`, the R formula `sex ~ race` becomes explicit `rows` and `cols
 #| fig-cap: "Faceting on two categorical variables."
 (
     gss_sm
-    .ggplot(aes(x = "age", y = "childs"))
-    .geom_point(alpha = 0.2)
+    .ggplot(aes(x="age", y="childs"))
+    .geom_point(alpha=0.2)
     .geom_smooth()
-    .facet_grid(rows = "sex", cols = "race")
+    .facet_grid(rows="sex", cols="race")
 )
 ```
 
@@ -112,50 +112,50 @@ This example is the direct translation of the R code, with `bigregion` mapped to
 #| fig-cap: "A bar chart of GSS respondents by census region."
 (
     gss_sm
-    .ggplot(aes(x = "bigregion"))
+    .ggplot(aes(x="bigregion"))
     .geom_bar()
 )
 ```
 
 Modern plotnine uses `after_stat("prop")` where older ggplot examples often use `..prop..`.
-As in the R example, `group = 1` asks for proportions over the whole dataset rather than within each x value.
+As in the R example, `group=1` asks for proportions over the whole dataset rather than within each x value.
 
 ```{python}
 #| label: fig-ch-04-bar-proportions
 #| fig-cap: "A bar chart with proportions over all census regions."
 (
     gss_sm
-    .ggplot(aes(x = "bigregion"))
-    .geom_bar(aes(y = after_stat("prop"), group = 1))
-    .scale_y_continuous(labels = percent_format())
+    .ggplot(aes(x="bigregion"))
+    .geom_bar(aes(y=after_stat("prop"), group=1))
+    .scale_y_continuous(labels=percent_format())
 )
 ```
 
 Mapping `fill` changes the interior of the bars.
-The fluent API uses `.add_guides(fill = "none")` to suppress a redundant legend.
+The fluent API uses `.add_guides(fill="none")` to suppress a redundant legend.
 
 ```{python}
 #| label: fig-ch-04-religion-fill
 #| fig-cap: "GSS religious preference mapped to bar fill."
 (
     gss_sm
-    .ggplot(aes(x = "religion", fill = "religion"))
+    .ggplot(aes(x="religion", fill="religion"))
     .geom_bar()
-    .add_guides(fill = "none")
+    .add_guides(fill="none")
 )
 ```
 
 ## Frequency Plots the Slightly Awkward Way
 
 The stacked bar chart is direct.
-The `position = "fill"` adjustment changes the scale from counts to within-bar proportions.
+The `position="fill"` adjustment changes the scale from counts to within-bar proportions.
 
 ```{python}
 #| label: fig-ch-04-stacked-region-religion
 #| fig-cap: "A stacked bar chart of religious preference by census region."
 (
     gss_sm
-    .ggplot(aes(x = "bigregion", fill = "religion"))
+    .ggplot(aes(x="bigregion", fill="religion"))
     .geom_bar()
 )
 ```
@@ -165,9 +165,9 @@ The `position = "fill"` adjustment changes the scale from counts to within-bar p
 #| fig-cap: "Using the fill position adjustment to compare proportions across regions."
 (
     gss_sm
-    .ggplot(aes(x = "bigregion", fill = "religion"))
-    .geom_bar(position = "fill")
-    .scale_y_continuous(labels = percent_format())
+    .ggplot(aes(x="bigregion", fill="religion"))
+    .geom_bar(position="fill")
+    .scale_y_continuous(labels=percent_format())
 )
 ```
 
@@ -179,12 +179,12 @@ Grouping by `religion` makes the proportions add up across regions for each reli
 #| fig-cap: "A dodged bar chart where proportions are grouped by religion."
 (
     gss_sm
-    .ggplot(aes(x = "bigregion", fill = "religion"))
+    .ggplot(aes(x="bigregion", fill="religion"))
     .geom_bar(
-        aes(y = after_stat("prop"), group = "religion"),
-        position = "dodge"
+        aes(y=after_stat("prop"), group="religion"),
+        position="dodge"
     )
-    .scale_y_continuous(labels = percent_format())
+    .scale_y_continuous(labels=percent_format())
 )
 ```
 
@@ -195,13 +195,13 @@ Faceting by region lets each panel calculate the proportions within the region.
 #| fig-cap: "Faceting religious preference proportions within region."
 (
     gss_sm
-    .ggplot(aes(x = "religion"))
+    .ggplot(aes(x="religion"))
     .geom_bar(
-        aes(y = after_stat("prop"), group = "bigregion"),
-        position = "dodge"
+        aes(y=after_stat("prop"), group="bigregion"),
+        position="dodge"
     )
-    .facet_wrap("bigregion", ncol = 1)
-    .scale_y_continuous(labels = percent_format())
+    .facet_wrap("bigregion", ncol=1)
+    .scale_y_continuous(labels=percent_format())
 )
 ```
 
@@ -214,7 +214,7 @@ The `midwest` data is available from `plotnine.data` as a pandas data frame, so 
 #| fig-cap: "A histogram of county area using plotnine's default bin choice."
 (
     midwest
-    .ggplot(aes(x = "area"))
+    .ggplot(aes(x="area"))
     .geom_histogram()
 )
 ```
@@ -224,8 +224,8 @@ The `midwest` data is available from `plotnine.data` as a pandas data frame, so 
 #| fig-cap: "The same county-area histogram using ten bins."
 (
     midwest
-    .ggplot(aes(x = "area"))
-    .geom_histogram(bins = 10)
+    .ggplot(aes(x="area"))
+    .geom_histogram(bins=10)
 )
 ```
 
@@ -239,8 +239,8 @@ oh_wi = ["OH", "WI"]
 (
     midwest
     .filter(pl.col("state").is_in(oh_wi))
-    .ggplot(aes(x = "percollege", fill = "state"))
-    .geom_histogram(alpha = 0.4, bins = 20)
+    .ggplot(aes(x="percollege", fill="state"))
+    .geom_histogram(alpha=0.4, bins=20)
 )
 ```
 
@@ -249,7 +249,7 @@ oh_wi = ["OH", "WI"]
 #| fig-cap: "Kernel density estimate of county area."
 (
     midwest
-    .ggplot(aes(x = "area"))
+    .ggplot(aes(x="area"))
     .geom_density()
 )
 ```
@@ -259,8 +259,8 @@ oh_wi = ["OH", "WI"]
 #| fig-cap: "Comparing area distributions by state."
 (
     midwest
-    .ggplot(aes(x = "area", fill = "state", color = "state"))
-    .geom_density(alpha = 0.3)
+    .ggplot(aes(x="area", fill="state", color="state"))
+    .geom_density(alpha=0.3)
 )
 ```
 
@@ -273,8 +273,8 @@ Here `after_stat("scaled")` is the plotnine form of the ggplot idiom `..scaled..
 (
     midwest
     .filter(pl.col("state").is_in(oh_wi))
-    .ggplot(aes(x = "area", fill = "state", color = "state"))
-    .geom_density(aes(y = after_stat("scaled")), alpha = 0.3)
+    .ggplot(aes(x="area", fill="state", color="state"))
+    .geom_density(aes(y=after_stat("scaled")), alpha=0.3)
 )
 ```
 
@@ -288,9 +288,9 @@ It is the convenient form of `geom_bar(stat = "identity")`.
 #| fig-cap: "Survival on the Titanic, by sex."
 (
     titanic
-    .ggplot(aes(x = "fate", y = "percent", fill = "sex"))
-    .geom_col(position = "dodge")
-    .add_theme(legend_position = "top")
+    .ggplot(aes(x="fate", y="percent", fill="sex"))
+    .geom_col(position="dodge")
+    .add_theme(legend_position="top")
 )
 ```
 
@@ -299,15 +299,15 @@ It is the convenient form of `geom_bar(stat = "identity")`.
 #| fig-cap: "Using geom_col() to plot negative and positive values in a bar chart."
 (
     oecd_sum
-    .ggplot(aes(x = "year", y = "diff", fill = "hi_lo"))
+    .ggplot(aes(x="year", y="diff", fill="hi_lo"))
     .geom_col()
-    .add_guides(fill = "none")
+    .add_guides(fill="none")
     .labs(
-        x = None,
-        y = "Difference in Years",
-        title = "The US Life Expectancy Gap",
-        subtitle = "Difference between US and OECD average life expectancies",
-        caption = "Data: OECD. After a chart by Christopher Ingraham."
+        x=None,
+        y="Difference in Years",
+        title="The US Life Expectancy Gap",
+        subtitle="Difference between US and OECD average life expectancies",
+        caption="Data: OECD. After a chart by Christopher Ingraham."
     )
 )
 ```

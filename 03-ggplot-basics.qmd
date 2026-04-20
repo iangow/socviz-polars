@@ -36,7 +36,7 @@ We imported `ggplot()` above as a function.
 If we follow the R approach and access this function directly, we need to tell the function what data we want to use.
 
 ```{python}
-p = ggplot(data = gapminder)
+p = ggplot(data=gapminder)
 ```
 
 However, an alternative approach uses the fact that `plotnine_polars` added a `.ggplot()` method where it is clear what data set we want to use.
@@ -52,7 +52,7 @@ We can use the same approach with `plotnine` because we have imported `aes()`.
 ```{python}
 p = (
     gapminder
-    .ggplot(aes(x = "gdpPercap", y = "lifeExp"))
+    .ggplot(aes(x="gdpPercap", y="lifeExp"))
 )
 ```
 
@@ -62,7 +62,7 @@ As an alternative, we can use the `.aes()` method created by `plotnine_polars` a
 p = (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp")
+    .aes(x="gdpPercap", y="lifeExp")
 )
 ```
 
@@ -91,7 +91,7 @@ p.geom_point()
 (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap",y = "lifeExp")
+    .aes(x="gdpPercap",y="lifeExp")
     .geom_smooth(method="loess")
 )
 ```
@@ -102,7 +102,7 @@ from plotnine.data import mpg
 p = (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp")
+    .aes(x="gdpPercap", y="lifeExp")
     .geom_point()
     .geom_smooth(method="loess")
 )
@@ -112,19 +112,19 @@ p = (
 p = (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp")
+    .aes(x="gdpPercap", y="lifeExp")
 )
 
-p.geom_point().geom_smooth(method = "lm")
+p.geom_point().geom_smooth(method="lm")
 ```
 
 ```{python}
 (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp")
+    .aes(x="gdpPercap", y="lifeExp")
     .geom_point()
-    .geom_smooth(method = "loess", colour="blue")
+    .geom_smooth(method="loess", colour="blue")
     .scale_x_log10()
 )
 ```
@@ -135,10 +135,10 @@ from mizani.formatters import currency_format
 (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp")
+    .aes(x="gdpPercap", y="lifeExp")
     .geom_point()
-    .geom_smooth(method = "loess")
-    .scale_x_log10(labels = currency_format(precision=0, big_mark=','))
+    .geom_smooth(method="loess")
+    .scale_x_log10(labels=currency_format(precision=0, big_mark=','))
 )
 ```
 
@@ -146,11 +146,11 @@ from mizani.formatters import currency_format
 (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap",
-         y = "lifeExp",
-         color = '"purple"')
+    .aes(x="gdpPercap",
+         y="lifeExp",
+         color='"purple"')
     .geom_point()
-    .geom_smooth(method = "loess")
+    .geom_smooth(method="loess")
     .scale_x_log10()
 )
 ```
@@ -159,9 +159,9 @@ from mizani.formatters import currency_format
 (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp")
-    .geom_point(color = "purple")
-    .geom_smooth(method = "loess")
+    .aes(x="gdpPercap", y="lifeExp")
+    .geom_point(color="purple")
+    .geom_smooth(method="loess")
     .scale_x_log10()
 )
 ```
@@ -170,11 +170,11 @@ from mizani.formatters import currency_format
 (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp")
-    .geom_point(alpha = 0.3)
-    .geom_smooth(color = "firebrick", se = False,
-                 size = 8,  # not linewidth
-                 method = "lm")
+    .aes(x="gdpPercap", y="lifeExp")
+    .geom_point(alpha=0.3)
+    .geom_smooth(color="firebrick", se=False,
+                 size=8,  # not linewidth
+                 method="lm")
     .scale_x_log10()
 )
 ```
@@ -183,14 +183,14 @@ from mizani.formatters import currency_format
 (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp")
-    .geom_point(alpha = 0.3)
-    .geom_smooth(method = "loess", se = False)
-    .scale_x_log10(labels = currency_format(precision=0, big_mark=','))
-    .labs(x = "GDP Per Capita", y = "Life Expectancy in Years",
-          title = "Economic Growth and Life Expectancy",
-          subtitle = "Data points are country-years",
-          caption = "Source: Gapminder.")
+    .aes(x="gdpPercap", y="lifeExp")
+    .geom_point(alpha=0.3)
+    .geom_smooth(method="loess", se=False)
+    .scale_x_log10(labels=currency_format(precision=0, big_mark=','))
+    .labs(x="GDP Per Capita", y="Life Expectancy in Years",
+          title="Economic Growth and Life Expectancy",
+          subtitle="Data points are country-years",
+          caption="Source: Gapminder.")
 )
 ```
 
@@ -198,9 +198,9 @@ from mizani.formatters import currency_format
 (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp", color="continent")
+    .aes(x="gdpPercap", y="lifeExp", color="continent")
     .geom_point()
-    .geom_smooth(method = "loess", se = False)
+    .geom_smooth(method="loess", se=False)
     .scale_x_log10()
 )
 ```
@@ -209,10 +209,10 @@ from mizani.formatters import currency_format
 (
     gapminder
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp", color="continent",
+    .aes(x="gdpPercap", y="lifeExp", color="continent",
          fill="continent")
     .geom_point()
-    .geom_smooth(method = "loess")
+    .geom_smooth(method="loess")
     .scale_x_log10()
 )
 ```
@@ -222,9 +222,9 @@ from plotnine_polars import aes
 
 (
     gapminder
-    .ggplot(aes(x = "gdpPercap", y = "lifeExp"))
-    .geom_point(aes(color = "continent"))
-    .geom_smooth(method = "loess")
+    .ggplot(aes(x="gdpPercap", y="lifeExp"))
+    .geom_point(aes(color="continent"))
+    .geom_smooth(method="loess")
     .scale_x_log10()
 )
 ```
@@ -238,7 +238,7 @@ import numpy as np
     gapminder
     .with_columns(log_pop=pl.col("pop").log())
     .ggplot()
-    .aes(x = "gdpPercap", y = "lifeExp", color="log_pop")
+    .aes(x="gdpPercap", y="lifeExp", color="log_pop")
     .geom_point()
     .scale_x_log10()
 )
@@ -250,7 +250,7 @@ p_out = (
     .ggplot()
     .aes(x="gdpPercap", y="lifeExp")
     .geom_point()
-    .geom_smooth(method = "loess")
+    .geom_smooth(method="loess")
     .scale_x_log10()
 )
 ```
