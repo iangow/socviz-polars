@@ -1,0 +1,479 @@
+---
+title: "Work with Models"
+execute:
+  warning: false
+  message: false
+---
+
+This chapter follows [Chapter 6 of @Healy2026](https://socviz.co/06-modeling.html), translating the main model-based graphics to Python, Polars, `statsmodels`, and `plotnine_polars`.
+The goal is not to teach statistical modeling, but to show how model objects can be turned into tidy tables that we can graph.
+
+```{python}
+import numpy as np
+import pandas as pd
+import polars as pl
+import statsmodels.formula.api as smf
+
+from mizani.formatters import currency_format
+from plotnine_polars import aes, position_dodge
+```
+
+```{python}
+gapminder = pl.read_csv(
+    "https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv",
+    separator="\t"
+)
+gapminder_pd = gapminder.to_pandas()
+
+gss_sm = pl.read_parquet("data/gss_sm.parquet")
+gss_sm_pd = gss_sm.to_pandas()
+```
+
+## Show Several Fits at Once
+
+Plotnine can fit several smoothers directly inside a plot, much as ggplot does.
+For the robust regression smoother, plotnine currently warns that confidence intervals are not implemented, so these examples suppress the interval for that layer.
+
+```{python}
+p = (
+    gapminder
+    .with_columns(log_gdp=pl.col("gdpPercap").log())
+    .ggplot(aes(x="log_gdp", y="lifeExp"))
+)
+```
+
+```{python}
+#| label: fig-ch-06-ols-rlm
+#| fig-cap: "Comparing ordinary least squares and robust regression smoothers."
+(
+    p
+    .geom_point(alpha=0.1)
+    .geom_smooth(color="tomato", fill="tomato", method="rlm", se=False)
+    .geom_smooth(color="steelblue", fill="steelblue", method="lm")
+)
+```
+
+```{python}
+#| label: fig-ch-06-spline
+#| fig-cap: "A cubic spline smoother."
+(
+    p
+    .geom_point(alpha=0.1)
+    .geom_smooth(
+        color="tomato",
+        method="lm",
+        formula="y ~ bs(x, df=3)",
+        se=False,
+        size=1.2
+    )
+)
+```
+
+```{python}
+#| label: fig-ch-06-quantile
+#| fig-cap: "Quantile regression lines."
+(
+    p
+    .geom_point(alpha=0.1)
+    .geom_quantile(
+        color="tomato",
+        size=1.2,
+        quantiles=[0.20, 0.50, 0.85]
+    )
+)
+```
+
+When separate smoother layers map `color` and `fill` to literal labels, plotnine can build a legend for the model types.
+As in R, this is a useful trick: the labels are not variables in the data, but one-value aesthetic mappings created for each layer.
+
+```{python}
+model_colors = ["#E41A1C", "#377EB8", "#4DAF4A"]
+```
+
+```{python}
+#| label: fig-ch-06-smoothers-legend
+#| fig-cap: "Fitting several smoothers with a legend."
+(
+    p
+    .geom_point(alpha=0.2)
+    .geom_smooth(
+        aes(color='"OLS"', fill='"OLS"'),
+        method="lm"
+    )
+    .geom_smooth(
+        aes(color='"Cubic Spline"', fill='"Cubic Spline"'),
+        method="lm",
+        formula="y ~ bs(x, df=3)"
+    )
+    .geom_smooth(
+        aes(color='"LOESS"', fill='"LOESS"'),
+        method="loess"
+    )
+    .scale_color_manual(name="Models", values=model_colors)
+    .scale_fill_manual(name="Models", values=model_colors)
+    .add_theme(legend_position="top")
+)
+```
+
+## Look Inside Model Objects
+
+Statsmodels uses formulas via `patsy`, so model fitting happens most naturally against a pandas data frame.
+The companion keeps Polars as the main data-frame library, but converts to pandas at the modeling boundary.
+
+```{python}
+out = smf.ols(
+    "lifeExp ~ gdpPercap + pop + C(continent)",
+    data=gapminder_pd
+).fit()
+```
+
+```{python}
+print(out.summary())
+```
+
+The printed summary is convenient for reading, but not convenient for plotting.
+The following small helpers provide the pieces of `broom::tidy()`, `augment()`, and `glance()` that this chapter needs.
+
+```{python}
+def tidy_result(result, conf_int=False):
+    out = pd.DataFrame({
+        "term": result.params.index,
+        "estimate": result.params.to_numpy(),
+        "std_error": result.bse.to_numpy(),
+        "statistic": result.tvalues.to_numpy(),
+        "p_value": result.pvalues.to_numpy(),
+    })
+    if conf_int:
+        conf = result.conf_int()
+        out["conf_low"] = conf.iloc[:, 0].to_numpy()
+        out["conf_high"] = conf.iloc[:, 1].to_numpy()
+    return pl.from_pandas(out)
+
+
+def augment_ols(result, data):
+    pred = result.get_prediction(data).summary_frame()
+    out = data.copy()
+    out["fitted"] = result.fittedvalues
+    out["se_fit"] = pred["mean_se"].to_numpy()
+    out["resid"] = result.resid
+    out["hat"] = result.get_influence().hat_matrix_diag
+    out["cooksd"] = result.get_influence().cooks_distance[0]
+    return pl.from_pandas(out)
+
+
+def glance_ols(result):
+    return pl.DataFrame({
+        "r_squared": [result.rsquared],
+        "adj_r_squared": [result.rsquared_adj],
+        "sigma": [np.sqrt(result.mse_resid)],
+        "statistic": [result.fvalue],
+        "p_value": [result.f_pvalue],
+        "df": [result.df_model + 1],
+        "log_lik": [result.llf],
+        "aic": [result.aic],
+        "bic": [result.bic],
+        "deviance": [np.sum(result.resid ** 2)],
+        "df_resid": [result.df_resid],
+    })
+```
+
+```{python}
+tidy_result(out).with_columns(pl.selectors.numeric().round(2))
+```
+
+## Generate Predictions to Graph
+
+R's `expand.grid()` creates all combinations of supplied values.
+Here Polars can do the same thing by building the columns explicitly and cross-joining them.
+
+```{python}
+gdp_grid = pl.DataFrame({
+    "gdpPercap": np.linspace(
+        gapminder["gdpPercap"].min(),
+        gapminder["gdpPercap"].max(),
+        100
+    )
+})
+pop_grid = pl.DataFrame({"pop": [gapminder["pop"].median()]})
+continent_grid = pl.DataFrame({
+    "continent": ["Africa", "Americas", "Asia", "Europe", "Oceania"]
+})
+
+pred_df = (
+    gdp_grid
+    .join(pop_grid, how="cross")
+    .join(continent_grid, how="cross")
+)
+pred_df.shape
+```
+
+```{python}
+pred_out = out.get_prediction(pred_df.to_pandas()).summary_frame()
+
+pred_df = pl.concat(
+    [
+        pred_df,
+        pl.from_pandas(
+            pred_out[["mean", "obs_ci_lower", "obs_ci_upper"]]
+            .rename(columns={
+                "mean": "fit",
+                "obs_ci_lower": "lwr",
+                "obs_ci_upper": "upr",
+            })
+        )
+    ],
+    how="horizontal"
+)
+pred_df.head()
+```
+
+```{python}
+#| label: fig-ch-06-ols-predictions
+#| fig-cap: "OLS predictions for Europe and Africa."
+pred_eu_af = pred_df.filter(pl.col("continent").is_in(["Europe", "Africa"]))
+gap_eu_af = gapminder.filter(pl.col("continent").is_in(["Europe", "Africa"]))
+
+(
+    pred_eu_af
+    .ggplot(aes(
+        x="gdpPercap",
+        y="fit",
+        ymin="lwr",
+        ymax="upr",
+        color="continent",
+        fill="continent",
+        group="continent"
+    ))
+    .geom_point(
+        data=gap_eu_af,
+        mapping=aes(x="gdpPercap", y="lifeExp", color="continent"),
+        alpha=0.5,
+        inherit_aes=False
+    )
+    .geom_line()
+    .geom_ribbon(alpha=0.2, color=None)
+    .scale_x_log10(labels=currency_format(precision=0, big_mark=","))
+)
+```
+
+## Tidy Model Objects
+
+The coefficient table can be plotted once it is turned into a data frame.
+Categorical terms from statsmodels include `C(continent)[T.<level>]`; for display we strip that formula syntax away.
+
+```{python}
+out_conf = (
+    tidy_result(out, conf_int=True)
+    .filter(pl.col("term") != "Intercept")
+    .with_columns(
+        nicelabs=(
+            pl.col("term")
+            .str.replace("C\\(continent\\)\\[T\\.", "")
+            .str.replace("\\]", "")
+        )
+    )
+)
+
+term_order = (
+    out_conf
+    .sort("estimate")
+    .get_column("nicelabs")
+    .to_list()
+)
+out_conf = out_conf.with_columns(pl.col("nicelabs").cast(pl.Enum(term_order)))
+
+out_conf
+```
+
+```{python}
+#| label: fig-ch-06-coef-basic
+#| fig-cap: "A basic plot of OLS estimates."
+(
+    out_conf
+    .ggplot(aes(x="nicelabs", y="estimate"))
+    .geom_point()
+    .coord_flip()
+)
+```
+
+```{python}
+#| label: fig-ch-06-coef-intervals
+#| fig-cap: "OLS estimates and confidence intervals."
+(
+    out_conf
+    .ggplot(aes(
+        x="nicelabs",
+        y="estimate",
+        ymin="conf_low",
+        ymax="conf_high"
+    ))
+    .geom_pointrange()
+    .coord_flip()
+    .labs(x=None, y="OLS Estimate")
+)
+```
+
+Observation-level statistics are also useful.
+The helper here omits broom's leading dots in column names, because plain Python expressions and plotnine mappings are easier to read without them.
+
+```{python}
+out_aug = augment_ols(out, gapminder_pd)
+out_aug.select("country", "continent", "year", "lifeExp", "fitted", "resid", "hat", "cooksd").head()
+```
+
+```{python}
+#| label: fig-ch-06-residuals-fitted
+#| fig-cap: "Residuals versus fitted values."
+(
+    out_aug
+    .ggplot(aes(x="fitted", y="resid"))
+    .geom_point(alpha=0.35)
+)
+```
+
+```{python}
+glance_ols(out).with_columns(pl.selectors.numeric().round(2))
+```
+
+Statsmodels also has duration-modeling tools, including Cox proportional hazards models through `PHReg`.
+The survival-analysis aside from the R chapter is omitted here because it is not central to this companion's first-pass translation.
+
+## Grouped Analysis
+
+The R chapter uses nested list columns and `purrr::map()` to fit one model per continent-year group.
+In Python, an explicit loop is clearer for this first pass.
+
+```{python}
+def fit_life_exp_group(df):
+    fit_df = df.assign(log_gdp=np.log(df["gdpPercap"]))
+    result = smf.ols("lifeExp ~ log_gdp", data=fit_df).fit()
+    return tidy_result(result).to_pandas()
+
+
+group_results = []
+for (continent, year), df in gapminder_pd.groupby(["continent", "year"], sort=True):
+    if continent == "Oceania":
+        continue
+    tidied = fit_life_exp_group(df)
+    tidied["continent"] = continent
+    tidied["year"] = year
+    group_results.append(tidied)
+
+out_tidy = (
+    pl.from_pandas(pd.concat(group_results, ignore_index=True))
+    .filter(pl.col("term") == "log_gdp")
+    .with_columns(
+        ymin=pl.col("estimate") - 2 * pl.col("std_error"),
+        ymax=pl.col("estimate") + 2 * pl.col("std_error"),
+    )
+)
+
+out_tidy.sample(5, seed=123)
+```
+
+```{python}
+#| label: fig-ch-06-grouped-ols
+#| fig-cap: "Yearly estimates of the association between GDP and life expectancy, pooled by continent."
+(
+    out_tidy
+    .ggplot(aes(
+        x="year",
+        y="estimate",
+        ymin="ymin",
+        ymax="ymax",
+        group="continent",
+        color="continent"
+    ))
+    .geom_pointrange(position=position_dodge(width=1))
+    .scale_x_continuous(breaks=gapminder["year"].unique().sort().to_list())
+    .add_theme(legend_position="top")
+    .labs(x="Year", y="Estimate", color="Continent")
+)
+```
+
+## Plot Marginal Effects
+
+Statsmodels can estimate logistic regression models and calculate average marginal effects.
+The model below mirrors the R example by predicting the binary `obama` variable from political views, sex, race, and a sex-by-race interaction.
+
+```{python}
+bo_df = (
+    gss_sm_pd
+    .assign(polviews_m=gss_sm_pd["polviews"])
+    [["obama", "polviews_m", "sex", "race"]]
+    .dropna()
+)
+
+out_bo = smf.logit(
+    'obama ~ C(polviews_m, Treatment(reference="Moderate")) + '
+    'C(sex, Treatment(reference="Male")) * '
+    'C(race, Treatment(reference="White"))',
+    data=bo_df
+).fit(disp=False)
+```
+
+```{python}
+print(out_bo.summary())
+```
+
+```{python}
+bo_m = out_bo.get_margeff(at="overall", dummy=True)
+bo_gg = (
+    pl.from_pandas(
+        bo_m.summary_frame()
+        .reset_index(names="factor")
+        .rename(columns={
+            "dy/dx": "AME",
+            "Std. Err.": "SE",
+            "Pr(>|z|)": "p",
+            "Conf. Int. Low": "lower",
+            "Cont. Int. Hi.": "upper",
+        })
+    )
+    .with_columns(
+        factor=(
+            pl.col("factor")
+            .str.replace('C\\(polviews_m, Treatment\\(reference="Moderate"\\)\\)\\[T\\.', "")
+            .str.replace('C\\(sex, Treatment\\(reference="Male"\\)\\)\\[T\\.', "")
+            .str.replace('C\\(race, Treatment\\(reference="White"\\)\\)\\[T\\.', "Race: ")
+            .str.replace_all("\\]", "")
+            .str.replace_all(":Race: ", " x Race: ")
+        )
+    )
+)
+
+ame_order = bo_gg.sort("AME").get_column("factor").to_list()
+bo_gg = bo_gg.with_columns(pl.col("factor").cast(pl.Enum(ame_order)))
+
+bo_gg.select("factor", "AME", "lower", "upper")
+```
+
+Statsmodels reports marginal effects for the model matrix columns, including the interaction columns.
+This is not identical to the `margins` output in the R chapter, but it serves the same purpose here: turning a fitted logistic model into a tidy table of effect estimates and intervals.
+
+```{python}
+#| label: fig-ch-06-average-marginal-effects
+#| fig-cap: "Average marginal effects from a logistic regression."
+(
+    bo_gg
+    .ggplot(aes(x="factor", y="AME", ymin="lower", ymax="upper"))
+    .geom_hline(yintercept=0, color="#CCCCCC")
+    .geom_pointrange()
+    .coord_flip()
+    .labs(x=None, y="Average Marginal Effect")
+)
+```
+
+The R chapter also uses `margins::cplot()` for conditional effects.
+There is no close statsmodels-native analogue that keeps the example as compact, so this first pass omits that plot.
+
+## Complex Surveys
+
+The original chapter closes with examples using the R `survey` and `srvyr` packages.
+Python does not currently offer a close equivalent within this companion's dependency stack, and a manual approximation would risk teaching the wrong thing about complex survey designs.
+For that reason, the complex-survey section is omitted here rather than translated loosely.
+
+## Where to Go Next
+
+The main translation lesson is that model-based graphics usually require two steps in Python: fit the model at the pandas/statsmodels boundary, then turn the result into a tidy Polars table for plotting.
+The hard part is still deciding what quantities should be shown.

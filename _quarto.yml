@@ -12,6 +12,7 @@ book:
     - 03-ggplot-basics.qmd
     - 04-group-facet-transform.qmd
     - 05-more-on-geoms.qmd
+    - 06-modeling.qmd
 
 format:
   html:

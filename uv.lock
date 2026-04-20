@@ -2111,6 +2111,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "quarto" },
     { name = "scikit-misc" },
+    { name = "statsmodels" },
 ]
 
 [package.metadata]
@@ -2123,6 +2124,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "quarto", specifier = ">=0.1.0" },
     { name = "scikit-misc" },
+    { name = "statsmodels", specifier = ">=0.14.6" },
 ]
 
 [[package]]
