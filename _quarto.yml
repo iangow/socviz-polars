@@ -10,6 +10,7 @@ book:
     - 01-look-at-data.qmd
     - 02-intro.qmd
     - 03-ggplot-basics.qmd
+    - 04-group-facet-transform.qmd
     - 05-more-on-geoms.qmd
 
 format:

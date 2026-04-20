@@ -1,0 +1,318 @@
+---
+title: "Show the Right Numbers"
+execute:
+  warning: false
+  message: false
+---
+
+This chapter follows [Chapter 4 of @Healy2026](https://socviz.co/04-group-facet-transform.html), translating the main plots to `plotnine_polars`.
+The main ideas carry over directly: grouping tells a geom how observations belong together, faceting splits one plot into a set of comparable panels, and several geoms compute summaries before drawing anything.
+
+```{python}
+import polars as pl
+from mizani.formatters import currency_format, percent_format
+from plotnine.data import midwest as midwest_pd
+from plotnine_polars import aes, after_stat
+```
+
+```{python}
+gapminder = pl.read_csv(
+    "https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv",
+    separator="\t"
+)
+gss_sm = pl.read_parquet("data/gss_sm.parquet")
+midwest = pl.from_pandas(midwest_pd)
+titanic = pl.read_parquet("data/titanic.parquet")
+oecd_sum = pl.read_parquet("data/oecd_sum.parquet")
+```
+
+## Grouped Data and the Group Aesthetic
+
+As in R, the line geom needs to know which observations should be connected.
+With the fluent API, the `group` mapping goes inside `.geom_line()` because it applies to the line layer.
+
+```{python}
+#| label: fig-ch-04-gapminder-lines-wrong
+#| fig-cap: "Connecting GDP per capita observations without a country grouping."
+(
+    gapminder
+    .ggplot(aes(x = "year", y = "gdpPercap"))
+    .geom_line()
+)
+```
+
+```{python}
+#| label: fig-ch-04-gapminder-lines
+#| fig-cap: "GDP per capita over time, grouped by country."
+(
+    gapminder
+    .ggplot(aes(x = "year", y = "gdpPercap"))
+    .geom_line(aes(group = "country"))
+)
+```
+
+## Facet to Make Small Multiples
+
+In R, the first argument to `facet_wrap()` is written as a one-sided formula, `~ continent`.
+In `plotnine_polars`, we pass the column name as a string.
+
+```{python}
+#| label: fig-ch-04-facet-continent
+#| fig-cap: "Faceting by continent."
+(
+    gapminder
+    .ggplot(aes(x = "year", y = "gdpPercap"))
+    .geom_line(aes(group = "country"))
+    .facet_wrap("continent")
+)
+```
+
+The color name `gray70` used in R is not understood by matplotlib, which is underneath plotnine.
+The hex color `#B3B3B3` is the equivalent shade.
+
+```{python}
+#| label: fig-ch-04-facet-continent-polished
+#| fig-cap: "Faceting by continent with smoother and log-scaled GDP per capita."
+(
+    gapminder
+    .ggplot(aes(x = "year", y = "gdpPercap"))
+    .geom_line(aes(group = "country"), color = "#B3B3B3")
+    .geom_smooth(size = 1.1, method = "loess", se = False)
+    .scale_y_log10(labels = currency_format(precision = 0, big_mark = ","))
+    .facet_wrap("continent", ncol = 5)
+    .labs(
+        x = "Year",
+        y = "GDP per capita",
+        title = "GDP per capita on Five Continents"
+    )
+)
+```
+
+For `facet_grid()`, the R formula `sex ~ race` becomes explicit `rows` and `cols` arguments.
+
+```{python}
+#| label: fig-ch-04-facet-grid
+#| fig-cap: "Faceting on two categorical variables."
+(
+    gss_sm
+    .ggplot(aes(x = "age", y = "childs"))
+    .geom_point(alpha = 0.2)
+    .geom_smooth()
+    .facet_grid(rows = "sex", cols = "race")
+)
+```
+
+## Geoms Can Transform Data
+
+`geom_bar()` counts observations before drawing bars.
+This example is the direct translation of the R code, with `bigregion` mapped to `x`.
+
+```{python}
+#| label: fig-ch-04-bar-counts
+#| fig-cap: "A bar chart of GSS respondents by census region."
+(
+    gss_sm
+    .ggplot(aes(x = "bigregion"))
+    .geom_bar()
+)
+```
+
+Modern plotnine uses `after_stat("prop")` where older ggplot examples often use `..prop..`.
+As in the R example, `group = 1` asks for proportions over the whole dataset rather than within each x value.
+
+```{python}
+#| label: fig-ch-04-bar-proportions
+#| fig-cap: "A bar chart with proportions over all census regions."
+(
+    gss_sm
+    .ggplot(aes(x = "bigregion"))
+    .geom_bar(aes(y = after_stat("prop"), group = 1))
+    .scale_y_continuous(labels = percent_format())
+)
+```
+
+Mapping `fill` changes the interior of the bars.
+The fluent API uses `.add_guides(fill = "none")` to suppress a redundant legend.
+
+```{python}
+#| label: fig-ch-04-religion-fill
+#| fig-cap: "GSS religious preference mapped to bar fill."
+(
+    gss_sm
+    .ggplot(aes(x = "religion", fill = "religion"))
+    .geom_bar()
+    .add_guides(fill = "none")
+)
+```
+
+## Frequency Plots the Slightly Awkward Way
+
+The stacked bar chart is direct.
+The `position = "fill"` adjustment changes the scale from counts to within-bar proportions.
+
+```{python}
+#| label: fig-ch-04-stacked-region-religion
+#| fig-cap: "A stacked bar chart of religious preference by census region."
+(
+    gss_sm
+    .ggplot(aes(x = "bigregion", fill = "religion"))
+    .geom_bar()
+)
+```
+
+```{python}
+#| label: fig-ch-04-filled-region-religion
+#| fig-cap: "Using the fill position adjustment to compare proportions across regions."
+(
+    gss_sm
+    .ggplot(aes(x = "bigregion", fill = "religion"))
+    .geom_bar(position = "fill")
+    .scale_y_continuous(labels = percent_format())
+)
+```
+
+The next plot mirrors the book's "not quite what we wanted" example.
+Grouping by `religion` makes the proportions add up across regions for each religion rather than within each region.
+
+```{python}
+#| label: fig-ch-04-dodged-proportions
+#| fig-cap: "A dodged bar chart where proportions are grouped by religion."
+(
+    gss_sm
+    .ggplot(aes(x = "bigregion", fill = "religion"))
+    .geom_bar(
+        aes(y = after_stat("prop"), group = "religion"),
+        position = "dodge"
+    )
+    .scale_y_continuous(labels = percent_format())
+)
+```
+
+Faceting by region lets each panel calculate the proportions within the region.
+
+```{python}
+#| label: fig-ch-04-faceted-proportions
+#| fig-cap: "Faceting religious preference proportions within region."
+(
+    gss_sm
+    .ggplot(aes(x = "religion"))
+    .geom_bar(
+        aes(y = after_stat("prop"), group = "bigregion"),
+        position = "dodge"
+    )
+    .facet_wrap("bigregion", ncol = 1)
+    .scale_y_continuous(labels = percent_format())
+)
+```
+
+## Histograms and Density Plots
+
+The `midwest` data is available from `plotnine.data` as a pandas data frame, so we convert it to Polars with `pl.from_pandas()`.
+
+```{python}
+#| label: fig-ch-04-hist-area-default
+#| fig-cap: "A histogram of county area using plotnine's default bin choice."
+(
+    midwest
+    .ggplot(aes(x = "area"))
+    .geom_histogram()
+)
+```
+
+```{python}
+#| label: fig-ch-04-hist-area-bins
+#| fig-cap: "The same county-area histogram using ten bins."
+(
+    midwest
+    .ggplot(aes(x = "area"))
+    .geom_histogram(bins = 10)
+)
+```
+
+In Polars, filtering to more than one value uses `.filter(pl.col("state").is_in([...]))`.
+
+```{python}
+#| label: fig-ch-04-hist-oh-wi
+#| fig-cap: "Comparing percent college educated in Ohio and Wisconsin counties."
+oh_wi = ["OH", "WI"]
+
+(
+    midwest
+    .filter(pl.col("state").is_in(oh_wi))
+    .ggplot(aes(x = "percollege", fill = "state"))
+    .geom_histogram(alpha = 0.4, bins = 20)
+)
+```
+
+```{python}
+#| label: fig-ch-04-density-area
+#| fig-cap: "Kernel density estimate of county area."
+(
+    midwest
+    .ggplot(aes(x = "area"))
+    .geom_density()
+)
+```
+
+```{python}
+#| label: fig-ch-04-density-state
+#| fig-cap: "Comparing area distributions by state."
+(
+    midwest
+    .ggplot(aes(x = "area", fill = "state", color = "state"))
+    .geom_density(alpha = 0.3)
+)
+```
+
+The density statistic also exposes computed values.
+Here `after_stat("scaled")` is the plotnine form of the ggplot idiom `..scaled..`.
+
+```{python}
+#| label: fig-ch-04-density-scaled
+#| fig-cap: "Scaled density estimates for Ohio and Wisconsin counties."
+(
+    midwest
+    .filter(pl.col("state").is_in(oh_wi))
+    .ggplot(aes(x = "area", fill = "state", color = "state"))
+    .geom_density(aes(y = after_stat("scaled")), alpha = 0.3)
+)
+```
+
+## Avoid Transformations When Necessary
+
+When the data already contains the values to draw, use `.geom_col()`.
+It is the convenient form of `geom_bar(stat = "identity")`.
+
+```{python}
+#| label: fig-ch-04-titanic
+#| fig-cap: "Survival on the Titanic, by sex."
+(
+    titanic
+    .ggplot(aes(x = "fate", y = "percent", fill = "sex"))
+    .geom_col(position = "dodge")
+    .add_theme(legend_position = "top")
+)
+```
+
+```{python}
+#| label: fig-ch-04-oecd-gap
+#| fig-cap: "Using geom_col() to plot negative and positive values in a bar chart."
+(
+    oecd_sum
+    .ggplot(aes(x = "year", y = "diff", fill = "hi_lo"))
+    .geom_col()
+    .add_guides(fill = "none")
+    .labs(
+        x = None,
+        y = "Difference in Years",
+        title = "The US Life Expectancy Gap",
+        subtitle = "Difference between US and OECD average life expectancies",
+        caption = "Data: OECD. After a chart by Christopher Ingraham."
+    )
+)
+```
+
+## Where to Go Next
+
+The exercises in @Healy2026 mostly carry over.
+The main translation points are to use strings instead of formulas for facets, `after_stat()` for computed statistics, and Polars expressions such as `.filter(pl.col("state").is_in(oh_wi))` for data preparation.

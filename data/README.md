@@ -8,6 +8,8 @@ Regenerate them with:
 curl -L -o /tmp/gss_sm.rda https://github.com/kjhealy/socviz/raw/refs/heads/main/data/gss_sm.rda
 curl -L -o /tmp/organdata.rda https://github.com/kjhealy/socviz/raw/refs/heads/main/data/organdata.rda
 curl -L -o /tmp/elections_historic.rda https://github.com/kjhealy/socviz/raw/refs/heads/main/data/elections_historic.rda
+curl -L -o /tmp/titanic.rda https://github.com/kjhealy/socviz/raw/refs/heads/main/data/titanic.rda
+curl -L -o /tmp/oecd_sum.rda https://github.com/kjhealy/socviz/raw/refs/heads/main/data/oecd_sum.rda
 Rscript -e '
   write_clean_parquet <- function(rda_path, object_name, parquet_path) {
     load(rda_path)
@@ -28,6 +30,8 @@ Rscript -e '
     "elections_historic",
     "data/elections_historic.parquet"
   )
+  write_clean_parquet("/tmp/titanic.rda", "titanic", "data/titanic.parquet")
+  write_clean_parquet("/tmp/oecd_sum.rda", "oecd_sum", "data/oecd_sum.parquet")
 '
 ```
 
