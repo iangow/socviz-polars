@@ -12,4 +12,5 @@ _freeze/
 *_files/
 lifexp_vs_gdp_gradient.pdf
 data/gss_sm.csv
+data/_cache/
 _freeze/*/libs/
