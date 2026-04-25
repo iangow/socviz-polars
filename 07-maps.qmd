@@ -12,36 +12,394 @@ That keeps the data work in Polars and avoids adding a full GIS stack for this i
 ```{python}
 import polars as pl
 
+import plotnine_polars as p9
+
 from plotnine_polars import (
     aes,
-    element_blank,
-    element_rect,
-    element_text,
-    guide_legend,
-    guides,
-    labs,
-    scale_color_manual,
-    scale_fill_brewer,
-    scale_fill_cmap,
-    scale_fill_gradient,
-    scale_fill_gradient2,
-    scale_fill_manual,
-    scale_x_continuous,
-    theme,
-    theme_minimal,
-    theme_void,
 )
+
+def theme_map():
+    return (
+        p9.theme_void()
+        + p9.theme(
+            dpi=100,
+            legend_position="bottom",
+            plot_title=p9.element_text(ha="left", size=12),
+            strip_background=p9.element_rect(fill="white", color="white"),
+        )
+    )
 ```
 
 ```{python}
-election = pl.read_parquet("data/election.parquet").with_columns(
-    fips_str=pl.col("fips").cast(pl.Int64).cast(pl.Utf8).str.zfill(2),
+#| include: false
+from pathlib import Path
+from zipfile import ZipFile
+
+import duckdb
+import requests
+
+
+def _download_file(url, path):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        return path
+
+    response = requests.get(url, timeout=120)
+    response.raise_for_status()
+    path.write_bytes(response.content)
+    return path
+
+
+def _county_boundary_path(year, resolution, cache_dir):
+    cache_dir = Path(cache_dir)
+    zip_path = cache_dir / f"cb_{year}_us_county_{resolution}.zip"
+    shp_dir = cache_dir / f"cb_{year}_us_county_{resolution}"
+    shp_path = shp_dir / f"cb_{year}_us_county_{resolution}.shp"
+    url = (
+        f"https://www2.census.gov/geo/tiger/GENZ{year}/shp/"
+        f"cb_{year}_us_county_{resolution}.zip"
+    )
+
+    _download_file(url, zip_path)
+    if not shp_path.exists():
+        shp_dir.mkdir(parents=True, exist_ok=True)
+        with ZipFile(zip_path) as zf:
+            zf.extractall(shp_dir)
+    return shp_path
+
+
+def _acs_county_data(year, api_key=None):
+    acs_vars = {
+        "B01003_001E": "pop",
+        "B01001B_001E": "black",
+        "B01001A_001E": "white",
+        "B01001H_001E": "nh_white",
+        "B01001I_001E": "hispanic",
+        "B01001D_001E": "asian",
+    }
+    params = {
+        "get": "NAME," + ",".join(acs_vars),
+        "for": "county:*",
+    }
+    if api_key is not None:
+        params["key"] = api_key
+
+    response = requests.get(
+        f"https://api.census.gov/data/{year}/acs/acs5",
+        params=params,
+        timeout=120,
+    )
+    response.raise_for_status()
+    rows = response.json()
+
+    data = (
+        pl.DataFrame(rows[1:], schema=rows[0], orient="row")
+        .rename(acs_vars)
+        .with_columns(
+            pl.col(list(acs_vars.values())).cast(pl.Int64),
+            id=pl.col("state") + pl.col("county"),
+        )
+        .drop("county")
+        .filter(pl.col("state") != "72")
+    )
+
+    return data
+
+
+def build_counties(
+    year=2023,
+    resolution="500k",
+    out_dir="data",
+    cache_dir="data/_cache/census",
+    api_key=None,
+    shift=True,
+    crop=True,
+    simplify_tolerance=1000,
+    legacy_county_data_path="data/county_data.parquet",
+):
+    """Build county_data.parquet and county_map.parquet from Census sources.
+
+    This mirrors the chapter's lightweight plotting interface: attributes live
+    in county_data.parquet, while county_map.parquet is a fortified polygon
+    table with one row per exterior-ring vertex.
+    """
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    county_data_path = out_dir / "county_data.parquet"
+    county_map_path = out_dir / "county_map.parquet"
+
+    boundaries = _county_boundary_path(year, resolution, cache_dir)
+    acs = _acs_county_data(year, api_key=api_key)
+
+    state_lookup = {
+        "01": ("AL", "South"), "02": ("AK", "West"), "04": ("AZ", "West"),
+        "05": ("AR", "South"), "06": ("CA", "West"), "08": ("CO", "West"),
+        "09": ("CT", "Northeast"), "10": ("DE", "South"),
+        "11": ("DC", "South"), "12": ("FL", "South"), "13": ("GA", "South"),
+        "15": ("HI", "West"), "16": ("ID", "West"), "17": ("IL", "Midwest"),
+        "18": ("IN", "Midwest"), "19": ("IA", "Midwest"),
+        "20": ("KS", "Midwest"), "21": ("KY", "South"),
+        "22": ("LA", "South"), "23": ("ME", "Northeast"),
+        "24": ("MD", "South"), "25": ("MA", "Northeast"),
+        "26": ("MI", "Midwest"), "27": ("MN", "Midwest"),
+        "28": ("MS", "South"), "29": ("MO", "Midwest"),
+        "30": ("MT", "West"), "31": ("NE", "Midwest"),
+        "32": ("NV", "West"), "33": ("NH", "Northeast"),
+        "34": ("NJ", "Northeast"), "35": ("NM", "West"),
+        "36": ("NY", "Northeast"), "37": ("NC", "South"),
+        "38": ("ND", "Midwest"), "39": ("OH", "Midwest"),
+        "40": ("OK", "South"), "41": ("OR", "West"),
+        "42": ("PA", "Northeast"), "44": ("RI", "Northeast"),
+        "45": ("SC", "South"), "46": ("SD", "Midwest"),
+        "47": ("TN", "South"), "48": ("TX", "South"),
+        "49": ("UT", "West"), "50": ("VT", "Northeast"),
+        "51": ("VA", "South"), "53": ("WA", "West"),
+        "54": ("WV", "South"), "55": ("WI", "Midwest"),
+        "56": ("WY", "West"),
+    }
+    states = pl.DataFrame(
+        {
+            "state": list(state_lookup),
+            "st": [v[0] for v in state_lookup.values()],
+            "census_region": [v[1] for v in state_lookup.values()],
+        }
+    )
+
+    con = duckdb.connect()
+    try:
+        con.sql("LOAD spatial")
+    except Exception:
+        con.sql("INSTALL spatial")
+        con.sql("LOAD spatial")
+    con.register("acs", acs)
+
+    con.sql(f"""
+        CREATE OR REPLACE TABLE counties_raw AS
+        SELECT
+            GEOID AS id,
+            STATEFP AS state,
+            ST_Transform(geom, 'EPSG:4269', 'ESRI:102003', always_xy := true) AS geom_us,
+            ST_Transform(geom, 'EPSG:4269', 'EPSG:3338', always_xy := true) AS geom_ak,
+            ST_Transform(geom, 'EPSG:4269', 'ESRI:102007', always_xy := true) AS geom_hi
+        FROM ST_Read('{boundaries.as_posix()}')
+        WHERE STATEFP != '72'
+    """)
+
+    con.sql("""
+        CREATE OR REPLACE TABLE lower48_bbox AS
+        SELECT
+            ST_XMin(ST_Extent_Agg(geom_us)) AS xmin,
+            ST_XMax(ST_Extent_Agg(geom_us)) AS xmax,
+            ST_YMin(ST_Extent_Agg(geom_us)) AS ymin,
+            ST_YMax(ST_Extent_Agg(geom_us)) AS ymax
+        FROM counties_raw
+        WHERE state NOT IN ('02', '15')
+    """)
+
+    con.sql("""
+        CREATE OR REPLACE TABLE shift_params AS
+        WITH
+        bb AS (
+            SELECT *, xmax - xmin AS width, ymax - ymin AS height
+            FROM lower48_bbox
+        ),
+        centroids AS (
+            SELECT
+                ST_X(ST_Centroid(ST_Union_Agg(geom_ak))) AS ak_x,
+                ST_Y(ST_Centroid(ST_Union_Agg(geom_ak))) AS ak_y,
+                ST_X(ST_Centroid(ST_Union_Agg(geom_hi))) AS hi_x,
+                ST_Y(ST_Centroid(ST_Union_Agg(geom_hi))) AS hi_y
+            FROM counties_raw
+        )
+        SELECT
+            bb.xmin + 0.08 * bb.width AS ak_target_x,
+            bb.ymin + 0.07 * bb.height AS ak_target_y,
+            bb.xmin + 0.35 * bb.width AS hi_target_x,
+            bb.ymin + 0.00 * bb.height AS hi_target_y,
+            centroids.*
+        FROM bb, centroids
+    """)
+
+    if shift:
+        geometry_expr = """
+            CASE
+                WHEN state = '02' THEN
+                    ST_Affine(
+                        geom_ak,
+                        0.5, 0.0, 0.0, 0.5,
+                        ak_target_x - 0.5 * ak_x,
+                        ak_target_y - 0.5 * ak_y
+                    )
+                WHEN state = '15' THEN
+                    ST_Affine(
+                        geom_hi,
+                        1.5, 0.0, 0.0, 1.5,
+                        hi_target_x - 1.5 * hi_x,
+                        hi_target_y - 1.5 * hi_y
+                    )
+                ELSE geom_us
+            END
+        """
+    else:
+        geometry_expr = "geom_us"
+
+    con.sql(f"""
+        CREATE OR REPLACE TABLE counties_projected AS
+        SELECT
+            id,
+            state,
+            {geometry_expr} AS geometry
+        FROM counties_raw, shift_params
+    """)
+
+    geom_for_map = "geometry"
+    if crop:
+        geom_for_map = """
+            ST_Intersection(
+                geometry,
+                ST_MakeEnvelope(-2500000, -1697746, 2258200, 1565782)
+            )
+        """
+
+    if simplify_tolerance is not None and simplify_tolerance > 0:
+        geom_for_map = f"ST_Simplify({geom_for_map}, {float(simplify_tolerance)})"
+
+    con.sql(f"""
+        CREATE OR REPLACE TABLE counties_map_geom AS
+        SELECT
+            id,
+            {geom_for_map} AS geometry
+        FROM counties_projected
+        WHERE NOT ST_IsEmpty({geom_for_map})
+    """)
+
+    area = con.sql("""
+        SELECT
+            id,
+            ST_Area(geometry) / 2589988.110336 AS area_sqmi
+        FROM counties_projected
+    """).pl()
+
+    county_data = (
+        acs.join(area, on="id", how="left")
+        .join(states, on="state", how="left")
+        .with_columns(
+            name=pl.col("NAME").str.replace(r", .*$", ""),
+            pop_dens_value=pl.col("pop") / pl.col("area_sqmi"),
+            pct_black_value=pl.col("black") / pl.col("pop") * 100,
+        )
+        .with_columns(
+            pop_dens=(
+                pl.when(pl.col("pop_dens_value") < 10).then(pl.lit("[    0,   10)"))
+                .when(pl.col("pop_dens_value") < 50).then(pl.lit("[   10,   50)"))
+                .when(pl.col("pop_dens_value") < 100).then(pl.lit("[   50,  100)"))
+                .when(pl.col("pop_dens_value") < 500).then(pl.lit("[  100,  500)"))
+                .when(pl.col("pop_dens_value") < 1000).then(pl.lit("[  500, 1000)"))
+                .when(pl.col("pop_dens_value") < 5000).then(pl.lit("[ 1000, 5000)"))
+                .otherwise(pl.lit("[ 5000,71672]"))
+            ),
+            pct_black=(
+                pl.when(pl.col("pct_black_value") < 2).then(pl.lit("[ 0.0, 2.0)"))
+                .when(pl.col("pct_black_value") < 5).then(pl.lit("[ 2.0, 5.0)"))
+                .when(pl.col("pct_black_value") < 10).then(pl.lit("[ 5.0,10.0)"))
+                .when(pl.col("pct_black_value") < 15).then(pl.lit("[10.0,15.0)"))
+                .when(pl.col("pct_black_value") < 25).then(pl.lit("[15.0,25.0)"))
+                .when(pl.col("pct_black_value") < 50).then(pl.lit("[25.0,50.0)"))
+                .otherwise(pl.lit("[50.0,85.3]"))
+            ),
+        )
+        .select(
+            "id", "name", "st", "state", "census_region",
+            "area_sqmi", "white", "black", "asian", "nh_white", "hispanic",
+            "pop", "pop_dens_value", "pct_black_value", "pop_dens", "pct_black",
+        )
+    )
+
+    legacy_path = Path(legacy_county_data_path) if legacy_county_data_path else None
+    if legacy_path and legacy_path.exists():
+        legacy_source = pl.read_parquet(legacy_path)
+        legacy = legacy_source.select(
+            [c for c in ["id", "su_gun6", "pop_dens6"] if c in legacy_source.columns]
+        )
+        if legacy.columns != ["id"]:
+            county_data = county_data.join(legacy, on="id", how="left")
+
+    county_data.write_parquet(county_data_path)
+
+    con.sql(f"""
+        COPY (
+            WITH
+            raw_parts AS (
+                SELECT
+                    id,
+                    dump.geom AS geom,
+                    dump.path AS path
+                FROM counties_map_geom,
+                UNNEST(ST_Dump(geometry)) AS t(dump)
+            ),
+            parts AS (
+                SELECT
+                    id,
+                    geom,
+                    row_number() OVER (
+                        PARTITION BY id
+                        ORDER BY CAST(path AS VARCHAR)
+                    ) AS piece
+                FROM raw_parts
+                WHERE ST_GeometryType(geom) = 'POLYGON'
+            ),
+            rings AS (
+                SELECT
+                    id,
+                    piece,
+                    ST_ExteriorRing(geom) AS ring
+                FROM parts
+            ),
+            points AS (
+                SELECT
+                    id,
+                    piece,
+                    i AS ord,
+                    ST_PointN(ring, i::INTEGER) AS pt
+                FROM rings,
+                generate_series(1, ST_NumPoints(ring)::INTEGER) AS t(i)
+            )
+            SELECT
+                ST_X(pt) AS long,
+                ST_Y(pt) AS lat,
+                ord::DOUBLE AS "order",
+                false AS hole,
+                piece::VARCHAR AS piece,
+                '0500000US' || id || '.' || piece::VARCHAR AS "group",
+                id
+            FROM points
+            ORDER BY id, piece, ord
+        )
+        TO '{county_map_path.as_posix()}'
+        (FORMAT PARQUET)
+    """)
+
+    return {
+        "county_data": county_data_path,
+        "county_map": county_map_path,
+    }
+```
+
+```{python}
+build_counties(year=2023, resolution="500k")
+```
+
+```{python}
+election24 = pl.read_parquet("data/election24.parquet").with_columns(
+    fips_str=pl.col("fips").cast(pl.Utf8).str.zfill(2),
     region=pl.col("state").str.to_lowercase(),
 )
 
 county_map = pl.read_parquet("data/county_map.parquet").with_columns(
     state_fips=pl.col("id").str.slice(0, 2),
 )
+us_states = pl.read_parquet("data/us_states.parquet")
 county_data = pl.read_parquet("data/county_data.parquet")
 
 opiates = (
@@ -51,47 +409,37 @@ opiates = (
         state_fips=pl.col("fips"),
     )
     .join(
-        election.select("fips_str", "state"),
+        election24.select("fips_str", "state"),
         left_on="state_fips",
         right_on="fips_str",
         how="left",
     )
+    .with_columns(region=pl.col("state").str.to_lowercase())
 )
 ```
 
-```{python}
-party_colors = ["#2E74C0", "#CB454A"]
-
-
-def theme_map():
-    return (
-        theme_void()
-        + theme(
-            dpi=100,
-            legend_position="bottom",
-            plot_title=element_text(ha="left", size=12),
-            strip_background=element_rect(fill="white", color="white"),
-        )
-    )
-```
-
-## Map U.S. State-Level Data
+## Draw a Map of US States
 
 The first thing to remember about spatial data is that you do not have to represent it spatially.
-Here is the 2016 U.S. presidential election data as a faceted dot plot.
+Here are the 2024 US presidential election data as a faceted dot plot.
 This view makes the margins by state more directly comparable than a two-color choropleth would.
 
 ```{python}
-election.select(
+election24.select(
     "state", "total_vote", "r_points", "pct_trump", "party", "census"
 ).sample(5, seed=7)
 ```
 
 ```{python}
+party_colors = ["#2E74C0", "#CB454A"]
+```
+
+```{python}
 #| label: fig-ch-07-election-dotplot
-#| fig-cap: "2016 election results by state and census region."
+#| fig-cap: "2024 election results by state and census region."
+#| fig-height: 11
 (
-    election
+    election24
     .filter(pl.col("st") != "DC")
     .ggplot(aes(x="r_points", y="reorder(state, r_points)", color="party"))
     .geom_vline(xintercept=0, color="#4D4D4D")
@@ -100,62 +448,212 @@ election.select(
     .scale_x_continuous(
         breaks=[-30, -20, -10, 0, 10, 20, 30, 40],
         labels=[
-            "30\n(Clinton)", "20", "10", "0",
+            "30\n(Harris)", "20", "10", "0",
             "10", "20", "30", "40\n(Trump)"
         ],
     )
     .facet_wrap("census", ncol=1, scales="free_y")
     .add_guides(color="none")
     .labs(x="Point Margin", y="")
-    .add_theme(axis_text_y=element_text(size=7))
+    .add_theme(axis_text_y=p9.element_text(size=7))
+    .add_theme(figure_size=(6, 11))
 )
 ```
 
 In R, the chapter begins by loading state outlines from the `maps` package.
-The Python version uses the preprojected `county_map` object from `socviz`.
-Because the table has one polygon per county, state-level values are joined to the county polygons through the first two digits of the county FIPS code.
-The result is still a state-level choropleth, but it is drawn with a county-level map frame.
+The Python version uses the same state outline data exported from R's `ggplot2::map_data("state")`.
+The result is an ordinary polygon table with one row per outline vertex and a lower-case `region` column for joining to state-level data.
 
 ```{python}
-county_map.head()
+us_states
 ```
 
 ```{python}
-us_elec = county_map.join(
-    election,
-    left_on="state_fips",
-    right_on="fips_str",
-    how="left",
-)
-```
-
-```{python}
-#| label: fig-ch-07-blank-map
-#| fig-cap: "The preprojected U.S. county map frame."
-(
-    county_map
+#| label: fig-7-3
+#| fig-caption: A map of the continental US made out of points.
+( 
+    us_states
     .ggplot(aes(x="long", y="lat", group="group"))
-    .geom_polygon(fill="white", color="#D9D9D9", size=0.05)
-    .coord_equal()
-    + theme_map()
+    .geom_point(size = 0.1)
+    .add_theme(figure_size=(6, 4))
 )
+```
+
+
+```{python}
+#| label: fig-7-4
+#| fig-caption: A map of US state borders.
+( 
+    us_states
+    .ggplot(aes(x="long", y="lat", group="group"))
+    .geom_polygon(fill="white", color="black")
+    .add_theme(figure_size=(6, 4))
+)
+```
+
+
+```{python}
+from pyproj import Transformer
+
+albers = Transformer.from_crs(
+    "EPSG:4326",
+    "+proj=aea +lat_1=39 +lat_2=45 +lon_0=-96 +datum=WGS84 +units=m +no_defs",
+    always_xy=True,
+)
+
+x, y = albers.transform(us_states["long"], us_states["lat"])
+
+us_states_albers = us_states.with_columns(
+    pl.Series("x", x),
+    pl.Series("y", y),
+)
+```
+
+```{python}
+#| label: fig-7-5
+#| fig-caption: Adding a fill and improving the projection.
+( 
+    us_states_albers
+    .ggplot(aes(x="x", y="y", group="group", fill="region"))
+    .geom_polygon(color="gray", size=0.1)
+    .coord_equal()
+    .add_guides(fill="none")
+    .add_theme(figure_size=(6, 4))
+)
+```
+
+## Use Simple Features to Draw Maps
+
+```{python}
+(
+    election24
+    .select("state", "st", "fips", "total_vote", 
+            "winner", "pct_margin")
+)
+```
+
+Rather than using `states_sf` from the `socviz` R package, I grab similar data from the `geodatasets` package.
+
+```{python}
+import geodatasets
+path = geodatasets.get_path("geoda.ncovr")
+```
+
+I then load the `spatial` extension of DuckDB.
+
+```{python}
+import duckdb
+con = duckdb.connect()
+con.sql("INSTALL spatial")
+con.sql("LOAD spatial")
+```
+
+I use DuckDB to process the data into the required form.
+Here `states` is roughly equivalent to `states_sf` from `socviz`.
+
+```{python}
+states = con.sql(f"""
+    SELECT
+        STATE_NAME AS state,
+        ST_Transform(
+            ST_Union_Agg(geom),
+            'EPSG:4326',
+            '+proj=aea +lat_1=39 +lat_2=45 +lon_0=-96 +datum=WGS84 +units=m +no_defs',
+            always_xy := true
+        ) AS geom
+    FROM ST_Read('{path}')
+    GROUP BY state
+    ORDER BY state
+""")
+```
+
+```{python}
+con.sql("""
+    SELECT
+        state,
+        left(ST_AsText(geom), 30) || '...' AS geom
+    FROM states
+    ORDER BY state
+    LIMIT 10
+""")
+```
+
+```{python}
+state_vertices = con.sql("""
+WITH 
+raw_parts AS (
+  SELECT
+    state,
+    dump.geom AS geom,
+    dump.path AS path
+  FROM states,
+  UNNEST(ST_Dump(geom)) AS t(dump)
+),
+parts AS (
+  SELECT
+    state,
+    geom,
+    row_number() OVER (
+      PARTITION BY state
+      ORDER BY CAST(path AS VARCHAR)
+    ) AS part_id
+  FROM raw_parts
+),
+rings AS (
+  SELECT
+    state,
+    state || '_' || part_id::VARCHAR AS group_id,
+    ST_ExteriorRing(geom) AS ring
+  FROM parts
+),
+points AS (
+  SELECT
+    state,
+    group_id,
+    i AS ord,
+    ST_PointN(ring, i::INTEGER) AS pt
+  FROM rings,
+  generate_series(1, ST_NumPoints(ring)::INTEGER) AS t(i)
+)
+SELECT
+  state,
+  group_id,
+  ord,
+  ST_X(pt) AS x,
+  ST_Y(pt) AS y
+FROM points
+ORDER BY state, group_id, ord
+""").pl()
+
+state_vertices
+```
+
+```{python}
+elections24_sf = (
+    election24
+    .join(state_vertices, on="state", how="inner")
+)
+```
+
+```{python}
+#| include: false
+p9.theme_set(theme_map())
 ```
 
 Once the data are joined, we can fill the polygons by the winning party.
 The important practical point is the same as in ggplot: make sure the keys used for the join really match.
-Here those keys are the state FIPS codes in `election` and the first two digits of the county FIPS codes in `county_map`.
+Here those keys are the lower-case state names in `region`.
 
 ```{python}
 #| label: fig-ch-07-election-map
-#| fig-cap: "2016 election results by state, drawn with county polygons."
+#| fig-cap: "2024 election results by state."
 (
-    us_elec
-    .ggplot(aes(x="long", y="lat", group="group", fill="party"))
-    .geom_polygon(color="#F2F2F2", size=0.03)
+    elections24_sf
+    .ggplot(aes(x="x", y="y", group="group_id", fill="party"))
+    .geom_polygon(color="white", size=0.05)
     .coord_equal()
     .scale_fill_manual(values=party_colors)
-    .labs(title="Election Results 2016", fill=None)
-    + theme_map()
+    .labs(fill=None)
 )
 ```
 
@@ -166,31 +664,29 @@ The default continuous fill is not ideal for election data, so we specify the gr
 #| label: fig-ch-07-trump-vote
 #| fig-cap: "Trump vote share by state."
 (
-    us_elec
-    .ggplot(aes(x="long", y="lat", group="group", fill="pct_trump"))
-    .geom_polygon(color="#F2F2F2", size=0.03)
+    elections24_sf
+    .ggplot(aes(x="x", y="y", group="group_id", fill="pct_trump"))
+    .geom_polygon(color="white", size=0.05)
     .coord_equal()
-    .scale_fill_gradient(low="white", high="#CB454A")
-    .labs(title="Trump vote", fill="Percent")
-    + theme_map()
+    .scale_fill_gradient(low="white", high="#CB454A", labels=lambda lst: [f"{v:.0%}" for v in lst])
+    .labs(fill="Percent")
 )
 ```
 
 For margins, a diverging scale is more appropriate.
-The `d_points` variable is positive when Clinton's margin is larger and negative when Trump's is larger.
+The `d_points` variable is positive when Harris's margin is larger and negative when Trump's is larger.
 
 ```{python}
 #| label: fig-ch-07-purple-america
-#| fig-cap: "A Purple America version of the 2016 winning margins."
+#| fig-cap: "A Purple America version of the 2024 winning margins."
 (
-    us_elec
+    elections24_sf
     .filter(pl.col("st") != "DC")
-    .ggplot(aes(x="long", y="lat", group="group", fill="d_points"))
-    .geom_polygon(color="#F2F2F2", size=0.03)
+    .ggplot(aes(x="x", y="y", group="group_id", fill="d_points"))
+    .geom_polygon(color="white", size=0.05)
     .coord_equal()
     .scale_fill_gradient2(low="red", mid="#756BB1", high="blue")
-    .labs(title="Winning margins", fill="Percent")
-    + theme_map()
+    .labs(fill="Percent")
 )
 ```
 
@@ -247,8 +743,7 @@ county_full = county_full.with_columns(
         labels=["0-10", "10-50", "50-100", "100-500", "500-1,000", "1,000-5,000", ">5,000"],
     )
     .labs(fill="Population per\nsquare mile")
-    + guides(fill=guide_legend(nrow=1))
-    + theme_map()
+    .add_guides(fill=p9.guide_legend(nrow=1))
 )
 ```
 
@@ -262,8 +757,7 @@ county_full = county_full.with_columns(
     .coord_equal()
     .scale_fill_brewer(palette="Greens")
     .labs(fill="US Population,\nPercent Black")
-    + guides(fill=guide_legend(nrow=1))
-    + theme_map()
+    .add_guides(fill=p9.guide_legend(nrow=1))
 )
 ```
 
@@ -285,7 +779,6 @@ orange_rev = list(reversed(orange_pal))
     .coord_equal()
     .scale_fill_manual(values=orange_pal)
     .labs(title="Gun-Related Suicides, 1999-2015", fill="Rate per 100,000 pop.")
-    + theme_map()
 )
 ```
 
@@ -299,7 +792,6 @@ orange_rev = list(reversed(orange_pal))
     .coord_equal()
     .scale_fill_manual(values=orange_rev)
     .labs(title="Reverse-coded Population Density", fill="People per square mile")
-    + theme_map()
 )
 ```
 
@@ -342,7 +834,7 @@ state_grid = pl.DataFrame(
     }
 )
 
-election_bins = state_grid.join(election, on="st", how="left")
+election_bins = state_grid.join(election24, on="st", how="left")
 ```
 
 ```{python}
@@ -353,10 +845,9 @@ election_bins = state_grid.join(election, on="st", how="left")
     .ggplot(aes(x="x", y="-y", fill="pct_trump"))
     .geom_tile(color="white", size=1)
     .geom_text(aes(label="st"), size=8, color="white")
-    .scale_fill_gradient(low="#FEE5D9", high="#A50F15")
+    .scale_fill_gradient(low="#FEE5D9", high="#A50F15", labels=lambda lst: [f"{v:.0%}" for v in lst])
     .coord_equal()
     .labs(fill="Percent Trump")
-    + theme_map()
 )
 ```
 
@@ -372,23 +863,22 @@ election_bins = state_grid.join(election, on="st", how="left")
     .scale_fill_manual(values={"Democrat": "#2E74C0", "Republican": "#CB454A"})
     .coord_equal()
     .labs(fill="Winner")
-    + theme_map()
 )
 ```
 
 ## Small-Multiple Maps
 
 The `opiates` data have state-level death rates observed over time.
-We merge them into the same polygon frame and facet by year.
+We merge them into the same state polygon frame and facet by year.
 
 ```{python}
 opiates.head()
 ```
 
 ```{python}
-opiates_map = county_map.join(
+opiates_map = us_states.join(
     opiates,
-    on="state_fips",
+    on="region",
     how="left",
 )
 ```
@@ -400,7 +890,7 @@ opiates_map = county_map.join(
     opiates_map
     .filter(pl.col("year").is_between(2000, 2014))
     .ggplot(aes(x="long", y="lat", group="group", fill="adjusted"))
-    .geom_polygon(color="#F2F2F2", size=0.01)
+    .geom_polygon(color="white", size=0.05)
     .coord_equal()
     .scale_fill_cmap(cmap_name="plasma")
     .facet_wrap("year", ncol=3)
@@ -408,7 +898,6 @@ opiates_map = county_map.join(
         fill="Death rate per\n100,000 population",
         title="Opiate Related Deaths by State, 2000-2014",
     )
-    + theme_map()
 )
 ```
 
@@ -417,6 +906,10 @@ opiates_map = county_map.join(
 Even if data are collected in spatial units, a map may not be the clearest display.
 The same opiate data can be shown as time series, grouped by Census division.
 This makes the state trajectories and regional variation easier to compare.
+
+```{python}
+p9.theme_set(p9.theme_gray())
+```
 
 ```{python}
 #| label: fig-ch-07-opiates-lines
@@ -475,8 +968,8 @@ opiates_labels = opiates_div.filter(pl.col("year") == pl.col("year").max().over(
         y="Rate per 100,000 population",
         title="State-Level Opiate Death Rates by Census Division, 1999-2019",
     )
-    + theme_minimal()
-    + theme(strip_background=element_blank())
+    .theme_minimal()
+    .add_theme(strip_background=p9.element_blank())
 )
 ```
 
