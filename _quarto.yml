@@ -13,6 +13,7 @@ book:
     - 04-group-facet-transform.qmd
     - 05-more-on-geoms.qmd
     - 06-modeling.qmd
+    - 07-maps.qmd
 
 format:
   html:

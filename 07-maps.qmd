@@ -1,0 +1,487 @@
+---
+title: "Draw Maps"
+execute:
+  warning: false
+  message: false
+---
+
+This chapter follows [Chapter 7 of @Healy2026](https://socvis.co/maps.html), translating the main map examples to Python, Polars, and `plotnine_polars`.
+The Python setup here is intentionally lightweight: we use the preprojected polygon tables from `socviz` and draw them with ordinary plotnine polygon layers.
+That keeps the data work in Polars and avoids adding a full GIS stack for this introductory chapter.
+
+```{python}
+import polars as pl
+
+from plotnine_polars import (
+    aes,
+    element_blank,
+    element_rect,
+    element_text,
+    guide_legend,
+    guides,
+    labs,
+    scale_color_manual,
+    scale_fill_brewer,
+    scale_fill_cmap,
+    scale_fill_gradient,
+    scale_fill_gradient2,
+    scale_fill_manual,
+    scale_x_continuous,
+    theme,
+    theme_minimal,
+    theme_void,
+)
+```
+
+```{python}
+election = pl.read_parquet("data/election.parquet").with_columns(
+    fips_str=pl.col("fips").cast(pl.Int64).cast(pl.Utf8).str.zfill(2),
+    region=pl.col("state").str.to_lowercase(),
+)
+
+county_map = pl.read_parquet("data/county_map.parquet").with_columns(
+    state_fips=pl.col("id").str.slice(0, 2),
+)
+county_data = pl.read_parquet("data/county_data.parquet")
+
+opiates = (
+    pl.read_parquet("data/opiates.parquet")
+    .with_columns(
+        year=pl.col("year").cast(pl.Int64),
+        state_fips=pl.col("fips"),
+    )
+    .join(
+        election.select("fips_str", "state"),
+        left_on="state_fips",
+        right_on="fips_str",
+        how="left",
+    )
+)
+```
+
+```{python}
+party_colors = ["#2E74C0", "#CB454A"]
+
+
+def theme_map():
+    return (
+        theme_void()
+        + theme(
+            dpi=100,
+            legend_position="bottom",
+            plot_title=element_text(ha="left", size=12),
+            strip_background=element_rect(fill="white", color="white"),
+        )
+    )
+```
+
+## Map U.S. State-Level Data
+
+The first thing to remember about spatial data is that you do not have to represent it spatially.
+Here is the 2016 U.S. presidential election data as a faceted dot plot.
+This view makes the margins by state more directly comparable than a two-color choropleth would.
+
+```{python}
+election.select(
+    "state", "total_vote", "r_points", "pct_trump", "party", "census"
+).sample(5, seed=7)
+```
+
+```{python}
+#| label: fig-ch-07-election-dotplot
+#| fig-cap: "2016 election results by state and census region."
+(
+    election
+    .filter(pl.col("st") != "DC")
+    .ggplot(aes(x="r_points", y="reorder(state, r_points)", color="party"))
+    .geom_vline(xintercept=0, color="#4D4D4D")
+    .geom_point(size=2)
+    .scale_color_manual(values=party_colors)
+    .scale_x_continuous(
+        breaks=[-30, -20, -10, 0, 10, 20, 30, 40],
+        labels=[
+            "30\n(Clinton)", "20", "10", "0",
+            "10", "20", "30", "40\n(Trump)"
+        ],
+    )
+    .facet_wrap("census", ncol=1, scales="free_y")
+    .add_guides(color="none")
+    .labs(x="Point Margin", y="")
+    .add_theme(axis_text_y=element_text(size=7))
+)
+```
+
+In R, the chapter begins by loading state outlines from the `maps` package.
+The Python version uses the preprojected `county_map` object from `socviz`.
+Because the table has one polygon per county, state-level values are joined to the county polygons through the first two digits of the county FIPS code.
+The result is still a state-level choropleth, but it is drawn with a county-level map frame.
+
+```{python}
+county_map.head()
+```
+
+```{python}
+us_elec = county_map.join(
+    election,
+    left_on="state_fips",
+    right_on="fips_str",
+    how="left",
+)
+```
+
+```{python}
+#| label: fig-ch-07-blank-map
+#| fig-cap: "The preprojected U.S. county map frame."
+(
+    county_map
+    .ggplot(aes(x="long", y="lat", group="group"))
+    .geom_polygon(fill="white", color="#D9D9D9", size=0.05)
+    .coord_equal()
+    + theme_map()
+)
+```
+
+Once the data are joined, we can fill the polygons by the winning party.
+The important practical point is the same as in ggplot: make sure the keys used for the join really match.
+Here those keys are the state FIPS codes in `election` and the first two digits of the county FIPS codes in `county_map`.
+
+```{python}
+#| label: fig-ch-07-election-map
+#| fig-cap: "2016 election results by state, drawn with county polygons."
+(
+    us_elec
+    .ggplot(aes(x="long", y="lat", group="group", fill="party"))
+    .geom_polygon(color="#F2F2F2", size=0.03)
+    .coord_equal()
+    .scale_fill_manual(values=party_colors)
+    .labs(title="Election Results 2016", fill=None)
+    + theme_map()
+)
+```
+
+With the map data frame in place, we can map continuous variables too.
+The default continuous fill is not ideal for election data, so we specify the gradient directly.
+
+```{python}
+#| label: fig-ch-07-trump-vote
+#| fig-cap: "Trump vote share by state."
+(
+    us_elec
+    .ggplot(aes(x="long", y="lat", group="group", fill="pct_trump"))
+    .geom_polygon(color="#F2F2F2", size=0.03)
+    .coord_equal()
+    .scale_fill_gradient(low="white", high="#CB454A")
+    .labs(title="Trump vote", fill="Percent")
+    + theme_map()
+)
+```
+
+For margins, a diverging scale is more appropriate.
+The `d_points` variable is positive when Clinton's margin is larger and negative when Trump's is larger.
+
+```{python}
+#| label: fig-ch-07-purple-america
+#| fig-cap: "A Purple America version of the 2016 winning margins."
+(
+    us_elec
+    .filter(pl.col("st") != "DC")
+    .ggplot(aes(x="long", y="lat", group="group", fill="d_points"))
+    .geom_polygon(color="#F2F2F2", size=0.03)
+    .coord_equal()
+    .scale_fill_gradient2(low="red", mid="#756BB1", high="blue")
+    .labs(title="Winning margins", fill="Percent")
+    + theme_map()
+)
+```
+
+## America's Ur-Choropleths
+
+The county map and county data objects join on the county FIPS code.
+This gives us the same large polygon table used in the book, with county-level variables attached.
+
+```{python}
+county_data.select("id", "name", "state", "pop_dens", "pct_black").sample(5, seed=7)
+```
+
+```{python}
+county_full = county_map.join(county_data, on="id", how="left")
+```
+
+```{python}
+pop_dens_levels = [
+    "[    0,   10)",
+    "[   10,   50)",
+    "[   50,  100)",
+    "[  100,  500)",
+    "[  500, 1000)",
+    "[ 1000, 5000)",
+    "[ 5000,71672]",
+]
+
+pct_black_levels = [
+    "[ 0.0, 2.0)",
+    "[ 2.0, 5.0)",
+    "[ 5.0,10.0)",
+    "[10.0,15.0)",
+    "[15.0,25.0)",
+    "[25.0,50.0)",
+    "[50.0,85.3]",
+]
+
+county_full = county_full.with_columns(
+    pop_dens_ord=pl.col("pop_dens").cast(pl.Enum(pop_dens_levels)),
+    pct_black_ord=pl.col("pct_black").cast(pl.Enum(pct_black_levels)),
+)
+```
+
+```{python}
+#| label: fig-ch-07-pop-density
+#| fig-cap: "U.S. population density by county."
+(
+    county_full
+    .ggplot(aes(x="long", y="lat", group="group", fill="pop_dens_ord"))
+    .geom_polygon(color="#F2F2F2", size=0.02)
+    .coord_equal()
+    .scale_fill_brewer(
+        palette="Blues",
+        labels=["0-10", "10-50", "50-100", "100-500", "500-1,000", "1,000-5,000", ">5,000"],
+    )
+    .labs(fill="Population per\nsquare mile")
+    + guides(fill=guide_legend(nrow=1))
+    + theme_map()
+)
+```
+
+```{python}
+#| label: fig-ch-07-pct-black
+#| fig-cap: "Percent Black population by county."
+(
+    county_full
+    .ggplot(aes(x="long", y="lat", group="group", fill="pct_black_ord"))
+    .geom_polygon(color="#F2F2F2", size=0.02)
+    .coord_equal()
+    .scale_fill_brewer(palette="Greens")
+    .labs(fill="US Population,\nPercent Black")
+    + guides(fill=guide_legend(nrow=1))
+    + theme_map()
+)
+```
+
+Population density and percent Black are the two background choropleths that explain, or at least complicate, many maps of the United States.
+The next pair of maps repeats the book's comparison between binned gun-related suicide rates and reverse-coded population density.
+
+```{python}
+orange_pal = ["#FEEDDE", "#FDD0A2", "#FDAE6B", "#FD8D3C", "#E6550D", "#A63603"]
+orange_rev = list(reversed(orange_pal))
+```
+
+```{python}
+#| label: fig-ch-07-gun-suicides
+#| fig-cap: "Gun-related suicides by county."
+(
+    county_full
+    .ggplot(aes(x="long", y="lat", fill="su_gun6", group="group"))
+    .geom_polygon(color="#F2F2F2", size=0.02)
+    .coord_equal()
+    .scale_fill_manual(values=orange_pal)
+    .labs(title="Gun-Related Suicides, 1999-2015", fill="Rate per 100,000 pop.")
+    + theme_map()
+)
+```
+
+```{python}
+#| label: fig-ch-07-pop-density-reverse
+#| fig-cap: "Reverse-coded population density by county."
+(
+    county_full
+    .ggplot(aes(x="long", y="lat", fill="pop_dens6", group="group"))
+    .geom_polygon(color="#F2F2F2", size=0.02)
+    .coord_equal()
+    .scale_fill_manual(values=orange_rev)
+    .labs(title="Reverse-coded Population Density", fill="People per square mile")
+    + theme_map()
+)
+```
+
+## Statebins
+
+The R chapter uses the `statebins` package.
+Here we build a small statebin grid directly as a Polars data frame and draw it with `geom_tile()`.
+This is not a replacement for a dedicated statebins library, but it is enough to show the idea with the same grammar of graphics.
+
+```{python}
+state_grid = pl.DataFrame(
+    {
+        "st": [
+            "AK", "ME",
+            "VT", "NH", "WA", "ID", "MT", "ND", "MN", "IL", "WI", "MI", "NY", "MA",
+            "OR", "NV", "WY", "SD", "IA", "IN", "OH", "PA", "NJ", "CT", "RI",
+            "CA", "UT", "CO", "NE", "MO", "KY", "WV", "VA", "MD", "DE",
+            "AZ", "NM", "KS", "AR", "TN", "NC", "SC", "DC",
+            "OK", "LA", "MS", "AL", "GA",
+            "HI", "TX", "FL",
+        ],
+        "x": [
+            0, 11,
+            10, 11, 0, 1, 2, 3, 4, 5, 6, 7, 9, 10,
+            0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11,
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0, 1, 2, 3, 4, 5, 6, 8,
+            2, 3, 4, 5, 6,
+            0, 3, 8,
+        ],
+        "y": [
+            0, 0,
+            1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+            4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+            5, 5, 5, 5, 5, 5, 5, 5,
+            6, 6, 6, 6, 6,
+            7, 7, 7,
+        ],
+    }
+)
+
+election_bins = state_grid.join(election, on="st", how="left")
+```
+
+```{python}
+#| label: fig-ch-07-statebins-trump
+#| fig-cap: "A statebin-style view of Trump's vote share."
+(
+    election_bins
+    .ggplot(aes(x="x", y="-y", fill="pct_trump"))
+    .geom_tile(color="white", size=1)
+    .geom_text(aes(label="st"), size=8, color="white")
+    .scale_fill_gradient(low="#FEE5D9", high="#A50F15")
+    .coord_equal()
+    .labs(fill="Percent Trump")
+    + theme_map()
+)
+```
+
+```{python}
+#| label: fig-ch-07-statebins-party
+#| fig-cap: "A statebin-style view of the state winner."
+(
+    election_bins
+    .with_columns(color_party=pl.when(pl.col("party") == "Republican").then(pl.lit("Republican")).otherwise(pl.lit("Democrat")))
+    .ggplot(aes(x="x", y="-y", fill="color_party"))
+    .geom_tile(color="white", size=1)
+    .geom_text(aes(label="st"), size=8, color="white")
+    .scale_fill_manual(values={"Democrat": "#2E74C0", "Republican": "#CB454A"})
+    .coord_equal()
+    .labs(fill="Winner")
+    + theme_map()
+)
+```
+
+## Small-Multiple Maps
+
+The `opiates` data have state-level death rates observed over time.
+We merge them into the same polygon frame and facet by year.
+
+```{python}
+opiates.head()
+```
+
+```{python}
+opiates_map = county_map.join(
+    opiates,
+    on="state_fips",
+    how="left",
+)
+```
+
+```{python}
+#| label: fig-ch-07-opiates-map
+#| fig-cap: "Opiate-related deaths by state, 2000-2014."
+(
+    opiates_map
+    .filter(pl.col("year").is_between(2000, 2014))
+    .ggplot(aes(x="long", y="lat", group="group", fill="adjusted"))
+    .geom_polygon(color="#F2F2F2", size=0.01)
+    .coord_equal()
+    .scale_fill_cmap(cmap_name="plasma")
+    .facet_wrap("year", ncol=3)
+    .labs(
+        fill="Death rate per\n100,000 population",
+        title="Opiate Related Deaths by State, 2000-2014",
+    )
+    + theme_map()
+)
+```
+
+## Is Your Data Really Spatial?
+
+Even if data are collected in spatial units, a map may not be the clearest display.
+The same opiate data can be shown as time series, grouped by Census division.
+This makes the state trajectories and regional variation easier to compare.
+
+```{python}
+#| label: fig-ch-07-opiates-lines
+#| fig-cap: "All state-level opiate death-rate trends at once."
+(
+    opiates
+    .filter(pl.col("st") != "DC")
+    .ggplot(aes(x="year", y="adjusted", group="st"))
+    .geom_line(color="#B3B3B3")
+    .labs(x="Year", y="Rate per 100,000 population")
+)
+```
+
+```{python}
+division_means = (
+    opiates
+    .filter(pl.col("division_name").is_not_null())
+    .group_by("division_name")
+    .agg(pl.col("adjusted").mean().alias("division_mean"))
+)
+
+division_order = (
+    division_means
+    .sort("division_mean", descending=True)
+    .get_column("division_name")
+    .to_list()
+)
+
+opiates_div = (
+    opiates
+    .filter(pl.col("division_name").is_not_null())
+    .join(division_means, on="division_name", how="left")
+    .with_columns(division_ordered=pl.col("division_name").cast(pl.Enum(division_order)))
+)
+
+opiates_labels = opiates_div.filter(pl.col("year") == pl.col("year").max().over("st"))
+```
+
+```{python}
+#| label: fig-ch-07-opiates-faceted-lines
+#| fig-cap: "The opiate data as a faceted time series."
+(
+    opiates_div
+    .ggplot(aes(x="year", y="adjusted"))
+    .geom_line(aes(group="st"), color="#B3B3B3")
+    .geom_smooth(aes(group="division_name"), se=False)
+    .geom_text(
+        data=opiates_labels,
+        mapping=aes(x="year", y="adjusted", label="st"),
+        size=6,
+        nudge_x=0.45,
+    )
+    .facet_wrap("division_ordered", nrow=3)
+    .labs(
+        x="",
+        y="Rate per 100,000 population",
+        title="State-Level Opiate Death Rates by Census Division, 1999-2019",
+    )
+    + theme_minimal()
+    + theme(strip_background=element_blank())
+)
+```
+
+## Where to Go Next
+
+These examples use polygon tables as ordinary data frames, which is enough to reproduce the main lessons of the chapter.
+For more serious map work in Python, the next step would be a spatial data stack such as GeoPandas, Shapely, and PyProj.
+The conceptual warning remains the same: maps are compelling, but they are not always the clearest or most honest way to show spatially grouped social data.
