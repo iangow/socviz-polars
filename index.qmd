@@ -1,3 +1,40 @@
 # Preface {.unnumbered}
 
-This is a Python/Polars companion to Kieran Healy's [*Data Visualization: A Practical Introduction*](https://socviz.co). It reproduces the book's examples using [Polars](https://pola.rs) for data manipulation and [plotnine](https://plotnine.org) for plotting.
+This is a Python Polars companion to Kieran Healy's [*Data Visualization: A Practical Introduction*](https://socviz.co). 
+It reproduces almost all of the book's examples using [Polars](https://pola.rs) for data manipulation and [plotnine](https://plotnine.org) for plotting.
+While I target the second edition of @Healy2026, this companion should also work as a companion to the first edition, as many of the changes between editions relate to changes in the R code that do not affect the translation here.
+
+## A Brief Overview of Data Science using R and Python
+
+Rython and R have emerged as the dominant programming languages for data science, serving as the primary environments for statistical computing, machine learning, and data analysis (e.g., @wickham2023r; @mckinney2022python).
+
+
+### Data frames
+
+Data frames are table-like (or spreadsheet-like) data structures in which each column represents a variable and each row represents an observation.
+The columns of a data frame may have different data types from each other.
+
+With the benefit of some hindsight, it is clear that a core requirement for data science work is a **data frame library**.
+A typical data frame library provides note the data frame data structure itself, but also functionality for working with data frames.
+It can be helpful to think in terms of the *verbs* that represent the kinds of data manipulation we want to perform on our data frames.
+Here are the most common things we want to do with data frames:^[The [`dplyr` documentation](https://dplyr.tidyverse.org) discusses a version of this list.]
+
+ - *filter* rows based on their values
+ - *arrange* or reorder rows
+ - *select* columns
+ - *mutate* or create new variables from existing ones
+ - *summarize* many values into a smaller set of summary statistics
+
+While standard Python does not include a data frame library, there are several third-party data frame libraries used for data analysis in Python. 
+By far the most established data frame library is pandas, which has been the de facto standard data frame library in Python for more than a decade.
+Its broad adoption means that much existing Python code, documentation, and discussion of data analysis assumes some familiarity with pandas.
+
+In recent years, other data frame libraries have emerged to address perceived limitations of pandas or to support special use cases.
+For example, PySpark provides a data frame interface designed for distributed computing across clusters, making it useful for very large data sets.
+Ibis offers a higher-level interface for working with data stored in databases.
+Recently Polars has attracted attention for its speed, efficiency, and expressive syntax.
+
+In this book, I focus on Polars because its syntax makes data-manipulation code relatively easy to read while also scaling well to larger data sets.
+In addition, as I discuss below, Polars provides facility for adding namespaces that allows me to use a more fluent methods-based approach to plotting.
+
+

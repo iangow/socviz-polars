@@ -21,6 +21,10 @@ format:
   html:
     theme: cosmo
     toc: true
+    mainfont: "EB Garamond"
+    sansfont: "Source Sans 3"
+    monofont: "JetBrains Mono"
+    css: custom.css
 
 bibliography: references.bib
 
