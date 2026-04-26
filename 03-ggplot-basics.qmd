@@ -97,25 +97,38 @@ p.geom_point()
 ```
 
 ```{python}
-from plotnine.data import mpg
+p = gapminder.ggplot(aes(x="gdpPercap", y="lifeExp"))
 
-p = (
-    gapminder
-    .ggplot()
-    .aes(x="gdpPercap", y="lifeExp")
-    .geom_point()
-    .geom_smooth(method="loess")
-)
+p.geom_point().geom_smooth(method="loess")
 ```
 
 ```{python}
-p = (
-    gapminder
-    .ggplot()
-    .aes(x="gdpPercap", y="lifeExp")
-)
+p = gapminder.ggplot(aes(x="gdpPercap", y="lifeExp"))
 
 p.geom_point().geom_smooth(method="lm")
+```
+
+```{python}
+p = gapminder.ggplot(aes(x="gdpPercap", y="lifeExp"))
+
+(
+    p
+    .geom_point()
+    .geom_smooth(method="loess", color="blue")
+    .scale_x_log10()
+)
+```
+
+Now skip creating `p`.
+
+```{python}
+(
+    gapminder
+    .ggplot(aes(x="gdpPercap", y="lifeExp"))
+    .geom_point()
+    .geom_smooth(method="loess", color="blue")
+    .scale_x_log10()
+)
 ```
 
 ```{python}
@@ -132,10 +145,10 @@ p.geom_point().geom_smooth(method="lm")
 ```{python}
 from mizani.formatters import currency_format
 
+p = gapminder.ggplot(aes(x="gdpPercap", y="lifeExp"))
+
 (
-    gapminder
-    .ggplot()
-    .aes(x="gdpPercap", y="lifeExp")
+    p
     .geom_point()
     .geom_smooth(method="loess")
     .scale_x_log10(labels=currency_format(precision=0, big_mark=','))
@@ -263,6 +276,8 @@ p_out.save("lifexp_vs_gdp_gradient.pdf",
 
 
 ```{python}
+from plotnine.data import mpg
+
 mpg = pl.from_pandas(mpg)
 ```
 
