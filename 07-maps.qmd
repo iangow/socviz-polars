@@ -114,7 +114,7 @@ def build_counties(
     cache_dir="data/_cache/census",
     api_key=None,
     shift=True,
-    crop=True,
+    crop=False,
     simplify_tolerance=1000,
     legacy_county_data_path="data/county_data.parquet",
 ):
@@ -165,6 +165,7 @@ def build_counties(
             "census_region": [v[1] for v in state_lookup.values()],
         }
     )
+    state_fips_sql = ", ".join(f"'{state}'" for state in state_lookup)
 
     con = duckdb.connect()
     try:
@@ -183,7 +184,7 @@ def build_counties(
             ST_Transform(geom, 'EPSG:4269', 'EPSG:3338', always_xy := true) AS geom_ak,
             ST_Transform(geom, 'EPSG:4269', 'ESRI:102007', always_xy := true) AS geom_hi
         FROM ST_Read('{boundaries.as_posix()}')
-        WHERE STATEFP != '72'
+        WHERE STATEFP IN ({state_fips_sql})
     """)
 
     con.sql("""
@@ -206,10 +207,10 @@ def build_counties(
         ),
         centroids AS (
             SELECT
-                ST_X(ST_Centroid(ST_Union_Agg(geom_ak))) AS ak_x,
-                ST_Y(ST_Centroid(ST_Union_Agg(geom_ak))) AS ak_y,
-                ST_X(ST_Centroid(ST_Union_Agg(geom_hi))) AS hi_x,
-                ST_Y(ST_Centroid(ST_Union_Agg(geom_hi))) AS hi_y
+                ST_X(ST_Centroid(ST_Union_Agg(geom_ak) FILTER (WHERE state = '02'))) AS ak_x,
+                ST_Y(ST_Centroid(ST_Union_Agg(geom_ak) FILTER (WHERE state = '02'))) AS ak_y,
+                ST_X(ST_Centroid(ST_Union_Agg(geom_hi) FILTER (WHERE state = '15'))) AS hi_x,
+                ST_Y(ST_Centroid(ST_Union_Agg(geom_hi) FILTER (WHERE state = '15'))) AS hi_y
             FROM counties_raw
         )
         SELECT
