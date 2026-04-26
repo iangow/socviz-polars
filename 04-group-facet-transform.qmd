@@ -13,6 +13,7 @@ import polars as pl
 from mizani.formatters import currency_format, percent_format
 from plotnine.data import midwest as midwest_pd
 from plotnine_polars import aes, after_stat
+from socviz_pl import load_data
 ```
 
 ```{python}
@@ -20,10 +21,10 @@ gapminder = pl.read_csv(
     "https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv",
     separator="\t"
 )
-gss_sm = pl.read_parquet("data/gss_sm.parquet")
+gss_sm = load_data("gss_sm")
 midwest = pl.from_pandas(midwest_pd)
-titanic = pl.read_parquet("data/titanic.parquet")
-oecd_sum = pl.read_parquet("data/oecd_sum.parquet")
+titanic = load_data("titanic")
+oecd_sum = load_data("oecd_sum")
 ```
 
 ## Grouped Data and the Group Aesthetic

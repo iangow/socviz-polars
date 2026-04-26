@@ -16,6 +16,7 @@ import statsmodels.formula.api as smf
 
 from mizani.formatters import currency_format
 from plotnine_polars import aes, position_dodge
+from socviz_pl import load_data
 ```
 
 ```{python}
@@ -25,7 +26,7 @@ gapminder = pl.read_csv(
 )
 gapminder_pd = gapminder.to_pandas()
 
-gss_sm = pl.read_parquet("data/gss_sm.parquet")
+gss_sm = load_data("gss_sm")
 gss_sm_pd = gss_sm.to_pandas()
 ```
 
