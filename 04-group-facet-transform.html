@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>5&nbsp; Show the Right Numbers – Data Visualization: A Python/Polars Companion</title>
+<title>4&nbsp; Show the Right Numbers – Data Visualization: A Python/Polars Companion</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -95,10 +95,14 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-5ccb035bea26c1e21f80f44cf7c27909.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-c0f9e757bd1bbe5faf3da83a888945c0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-91459808351f4a5e66f61f3cc0ad5ca1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-c0f9e757bd1bbe5faf3da83a888945c0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -128,9 +132,181 @@ div.csl-indent {
 }</script>
 
 
+<link rel="stylesheet" href="custom.css">
 </head>
 
-<body class="nav-sidebar floating quarto-light">
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -139,7 +315,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-group-facet-transform.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Show the Right Numbers</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-group-facet-transform.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Show the Right Numbers</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -155,6 +331,9 @@ div.csl-indent {
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Data Visualization: A Python/Polars Companion</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -167,45 +346,74 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Preface</span></span></a>
+ <span class="menu-text">Preface</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-look-at-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Look at Data</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Look at Data</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-intro.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Get Started</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Get Started</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-ggplot-basics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Make a Plot</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Make a Plot</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-group-facet-transform.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Show the Right Numbers</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Show the Right Numbers</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-more-on-geoms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Graph Tables, Add Labels, Make Notes</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Graph Tables, Add Labels, Make Notes</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-modeling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Work with Models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Work with Models</span></span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-maps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Draw Maps</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-map-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Preparing Map Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
@@ -216,22 +424,23 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#grouped-data-and-the-group-aesthetic" id="toc-grouped-data-and-the-group-aesthetic" class="nav-link active" data-scroll-target="#grouped-data-and-the-group-aesthetic"><span class="header-section-number">5.1</span> Grouped Data and the Group Aesthetic</a></li>
-  <li><a href="#facet-to-make-small-multiples" id="toc-facet-to-make-small-multiples" class="nav-link" data-scroll-target="#facet-to-make-small-multiples"><span class="header-section-number">5.2</span> Facet to Make Small Multiples</a></li>
-  <li><a href="#geoms-can-transform-data" id="toc-geoms-can-transform-data" class="nav-link" data-scroll-target="#geoms-can-transform-data"><span class="header-section-number">5.3</span> Geoms Can Transform Data</a></li>
-  <li><a href="#frequency-plots-the-slightly-awkward-way" id="toc-frequency-plots-the-slightly-awkward-way" class="nav-link" data-scroll-target="#frequency-plots-the-slightly-awkward-way"><span class="header-section-number">5.4</span> Frequency Plots the Slightly Awkward Way</a></li>
-  <li><a href="#histograms-and-density-plots" id="toc-histograms-and-density-plots" class="nav-link" data-scroll-target="#histograms-and-density-plots"><span class="header-section-number">5.5</span> Histograms and Density Plots</a></li>
-  <li><a href="#avoid-transformations-when-necessary" id="toc-avoid-transformations-when-necessary" class="nav-link" data-scroll-target="#avoid-transformations-when-necessary"><span class="header-section-number">5.6</span> Avoid Transformations When Necessary</a></li>
-  <li><a href="#where-to-go-next" id="toc-where-to-go-next" class="nav-link" data-scroll-target="#where-to-go-next"><span class="header-section-number">5.7</span> Where to Go Next</a></li>
+  <li><a href="#grouped-data-and-the-group-aesthetic" id="toc-grouped-data-and-the-group-aesthetic" class="nav-link active" data-scroll-target="#grouped-data-and-the-group-aesthetic"><span class="header-section-number">4.1</span> Grouped Data and the Group Aesthetic</a></li>
+  <li><a href="#facet-to-make-small-multiples" id="toc-facet-to-make-small-multiples" class="nav-link" data-scroll-target="#facet-to-make-small-multiples"><span class="header-section-number">4.2</span> Facet to Make Small Multiples</a></li>
+  <li><a href="#geoms-can-transform-data" id="toc-geoms-can-transform-data" class="nav-link" data-scroll-target="#geoms-can-transform-data"><span class="header-section-number">4.3</span> Geoms Can Transform Data</a></li>
+  <li><a href="#frequency-plots-the-slightly-awkward-way" id="toc-frequency-plots-the-slightly-awkward-way" class="nav-link" data-scroll-target="#frequency-plots-the-slightly-awkward-way"><span class="header-section-number">4.4</span> Frequency Plots the Slightly Awkward Way</a></li>
+  <li><a href="#histograms-and-density-plots" id="toc-histograms-and-density-plots" class="nav-link" data-scroll-target="#histograms-and-density-plots"><span class="header-section-number">4.5</span> Histograms and Density Plots</a></li>
+  <li><a href="#avoid-transformations-when-necessary" id="toc-avoid-transformations-when-necessary" class="nav-link" data-scroll-target="#avoid-transformations-when-necessary"><span class="header-section-number">4.6</span> Avoid Transformations When Necessary</a></li>
+  <li><a href="#where-to-go-next" id="toc-where-to-go-next" class="nav-link" data-scroll-target="#where-to-go-next"><span class="header-section-number">4.7</span> Where to Go Next</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Show the Right Numbers</span></h1>
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Show the Right Numbers</span></h1>
 </div>
 
 
@@ -249,24 +458,26 @@ div.csl-indent {
 
 
 <p>This chapter follows <a href="https://socviz.co/04-group-facet-transform.html">Chapter 4 of <span class="citation" data-cites="Healy2026">Healy (<span>2026</span>)</span></a>, translating the main plots to <code>plotnine_polars</code>. The main ideas carry over directly: grouping tells a geom how observations belong together, faceting splits one plot into a set of comparable panels, and several geoms compute summaries before drawing anything.</p>
-<div id="28581418" class="cell" data-execution_count="1">
+<div id="69135b5c" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mizani.formatters <span class="im">import</span> currency_format, percent_format</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine.data <span class="im">import</span> midwest <span class="im">as</span> midwest_pd</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes, after_stat</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes, after_stat</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> socviz_pl <span class="im">import</span> load_data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="eceb3c54" class="cell" data-execution_count="2">
+<div id="ad5cd4d7" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>gapminder <span class="op">=</span> pl.read_csv(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv"</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    separator<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>gss_sm <span class="op">=</span> pl.read_parquet(<span class="st">"data/gss_sm.parquet"</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>midwest <span class="op">=</span> pl.from_pandas(midwest_pd)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>titanic <span class="op">=</span> pl.read_parquet(<span class="st">"data/titanic.parquet"</span>)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>oecd_sum <span class="op">=</span> pl.read_parquet(<span class="st">"data/oecd_sum.parquet"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/jennybc/"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gapminder/main/inst/extdata/gapminder.tsv"</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    separator<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>gss_sm <span class="op">=</span> load_data(<span class="st">"gss_sm"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>midwest <span class="op">=</span> pl.from_pandas(midwest_pd)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>titanic <span class="op">=</span> load_data(<span class="st">"titanic"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>oecd_sum <span class="op">=</span> load_data(<span class="st">"oecd_sum"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<section id="grouped-data-and-the-group-aesthetic" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="grouped-data-and-the-group-aesthetic"><span class="header-section-number">5.1</span> Grouped Data and the Group Aesthetic</h2>
+<section id="grouped-data-and-the-group-aesthetic" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="grouped-data-and-the-group-aesthetic"><span class="header-section-number">4.1</span> Grouped Data and the Group Aesthetic</h2>
 <p>As in R, the line geom needs to know which observations should be connected. With the fluent API, the <code>group</code> mapping goes inside <code>.geom_line()</code> because it applies to the line layer.</p>
 <div id="cell-fig-ch-04-gapminder-lines-wrong" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -281,7 +492,7 @@ div.csl-indent {
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-gapminder-lines-wrong-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-gapminder-lines-wrong-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.1: Connecting GDP per capita observations without a country grouping.
+Figure&nbsp;4.1: Connecting GDP per capita observations without a country grouping.
 </figcaption>
 </figure>
 </div>
@@ -300,15 +511,15 @@ Figure&nbsp;5.1: Connecting GDP per capita observations without a country groupi
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-gapminder-lines-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-gapminder-lines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.2: GDP per capita over time, grouped by country.
+Figure&nbsp;4.2: GDP per capita over time, grouped by country.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="facet-to-make-small-multiples" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="facet-to-make-small-multiples"><span class="header-section-number">5.2</span> Facet to Make Small Multiples</h2>
+<section id="facet-to-make-small-multiples" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="facet-to-make-small-multiples"><span class="header-section-number">4.2</span> Facet to Make Small Multiples</h2>
 <p>In R, the first argument to <code>facet_wrap()</code> is written as a one-sided formula, <code>~ continent</code>. In <code>plotnine_polars</code>, we pass the column name as a string.</p>
 <div id="cell-fig-ch-04-facet-continent" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -324,7 +535,7 @@ Figure&nbsp;5.2: GDP per capita over time, grouped by country.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-facet-continent-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-facet-continent-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.3: Faceting by continent.
+Figure&nbsp;4.3: Faceting by continent.
 </figcaption>
 </figure>
 </div>
@@ -352,7 +563,7 @@ Figure&nbsp;5.3: Faceting by continent.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-facet-continent-polished-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-facet-continent-polished-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.4: Faceting by continent with smoother and log-scaled GDP per capita.
+Figure&nbsp;4.4: Faceting by continent with smoother and log-scaled GDP per capita.
 </figcaption>
 </figure>
 </div>
@@ -374,15 +585,15 @@ Figure&nbsp;5.4: Faceting by continent with smoother and log-scaled GDP per capi
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-facet-grid-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-facet-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.5: Faceting on two categorical variables.
+Figure&nbsp;4.5: Faceting on two categorical variables.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="geoms-can-transform-data" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="geoms-can-transform-data"><span class="header-section-number">5.3</span> Geoms Can Transform Data</h2>
+<section id="geoms-can-transform-data" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="geoms-can-transform-data"><span class="header-section-number">4.3</span> Geoms Can Transform Data</h2>
 <p><code>geom_bar()</code> counts observations before drawing bars. This example is the direct translation of the R code, with <code>bigregion</code> mapped to <code>x</code>.</p>
 <div id="cell-fig-ch-04-bar-counts" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -397,7 +608,7 @@ Figure&nbsp;5.5: Faceting on two categorical variables.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-bar-counts-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-bar-counts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.6: A bar chart of GSS respondents by census region.
+Figure&nbsp;4.6: A bar chart of GSS respondents by census region.
 </figcaption>
 </figure>
 </div>
@@ -418,7 +629,7 @@ Figure&nbsp;5.6: A bar chart of GSS respondents by census region.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-bar-proportions-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-bar-proportions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.7: A bar chart with proportions over all census regions.
+Figure&nbsp;4.7: A bar chart with proportions over all census regions.
 </figcaption>
 </figure>
 </div>
@@ -439,15 +650,15 @@ Figure&nbsp;5.7: A bar chart with proportions over all census regions.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-religion-fill-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-religion-fill-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.8: GSS religious preference mapped to bar fill.
+Figure&nbsp;4.8: GSS religious preference mapped to bar fill.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="frequency-plots-the-slightly-awkward-way" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="frequency-plots-the-slightly-awkward-way"><span class="header-section-number">5.4</span> Frequency Plots the Slightly Awkward Way</h2>
+<section id="frequency-plots-the-slightly-awkward-way" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="frequency-plots-the-slightly-awkward-way"><span class="header-section-number">4.4</span> Frequency Plots the Slightly Awkward Way</h2>
 <p>The stacked bar chart is direct. The <code>position="fill"</code> adjustment changes the scale from counts to within-bar proportions.</p>
 <div id="cell-fig-ch-04-stacked-region-religion" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -462,7 +673,7 @@ Figure&nbsp;5.8: GSS religious preference mapped to bar fill.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-stacked-region-religion-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-stacked-region-religion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.9: A stacked bar chart of religious preference by census region.
+Figure&nbsp;4.9: A stacked bar chart of religious preference by census region.
 </figcaption>
 </figure>
 </div>
@@ -482,7 +693,7 @@ Figure&nbsp;5.9: A stacked bar chart of religious preference by census region.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-filled-region-religion-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-filled-region-religion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.10: Using the fill position adjustment to compare proportions across regions.
+Figure&nbsp;4.10: Using the fill position adjustment to compare proportions across regions.
 </figcaption>
 </figure>
 </div>
@@ -506,7 +717,7 @@ Figure&nbsp;5.10: Using the fill position adjustment to compare proportions acro
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-dodged-proportions-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-dodged-proportions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.11: A dodged bar chart where proportions are grouped by religion.
+Figure&nbsp;4.11: A dodged bar chart where proportions are grouped by religion.
 </figcaption>
 </figure>
 </div>
@@ -531,15 +742,15 @@ Figure&nbsp;5.11: A dodged bar chart where proportions are grouped by religion.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-faceted-proportions-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-faceted-proportions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.12: Faceting religious preference proportions within region.
+Figure&nbsp;4.12: Faceting religious preference proportions within region.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="histograms-and-density-plots" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="histograms-and-density-plots"><span class="header-section-number">5.5</span> Histograms and Density Plots</h2>
+<section id="histograms-and-density-plots" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="histograms-and-density-plots"><span class="header-section-number">4.5</span> Histograms and Density Plots</h2>
 <p>The <code>midwest</code> data is available from <code>plotnine.data</code> as a pandas data frame, so we convert it to Polars with <code>pl.from_pandas()</code>.</p>
 <div id="cell-fig-ch-04-hist-area-default" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -554,7 +765,7 @@ Figure&nbsp;5.12: Faceting religious preference proportions within region.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-hist-area-default-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-hist-area-default-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.13: A histogram of county area using plotnine’s default bin choice.
+Figure&nbsp;4.13: A histogram of county area using plotnine’s default bin choice.
 </figcaption>
 </figure>
 </div>
@@ -573,7 +784,7 @@ Figure&nbsp;5.13: A histogram of county area using plotnine’s default bin choi
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-hist-area-bins-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-hist-area-bins-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.14: The same county-area histogram using ten bins.
+Figure&nbsp;4.14: The same county-area histogram using ten bins.
 </figcaption>
 </figure>
 </div>
@@ -596,7 +807,7 @@ Figure&nbsp;5.14: The same county-area histogram using ten bins.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-hist-oh-wi-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-hist-oh-wi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.15: Comparing percent college educated in Ohio and Wisconsin counties.
+Figure&nbsp;4.15: Comparing percent college educated in Ohio and Wisconsin counties.
 </figcaption>
 </figure>
 </div>
@@ -615,7 +826,7 @@ Figure&nbsp;5.15: Comparing percent college educated in Ohio and Wisconsin count
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-density-area-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-density-area-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.16: Kernel density estimate of county area.
+Figure&nbsp;4.16: Kernel density estimate of county area.
 </figcaption>
 </figure>
 </div>
@@ -634,7 +845,7 @@ Figure&nbsp;5.16: Kernel density estimate of county area.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-density-state-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-density-state-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.17: Comparing area distributions by state.
+Figure&nbsp;4.17: Comparing area distributions by state.
 </figcaption>
 </figure>
 </div>
@@ -655,15 +866,15 @@ Figure&nbsp;5.17: Comparing area distributions by state.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-density-scaled-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-density-scaled-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.18: Scaled density estimates for Ohio and Wisconsin counties.
+Figure&nbsp;4.18: Scaled density estimates for Ohio and Wisconsin counties.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="avoid-transformations-when-necessary" class="level2" data-number="5.6">
-<h2 data-number="5.6" class="anchored" data-anchor-id="avoid-transformations-when-necessary"><span class="header-section-number">5.6</span> Avoid Transformations When Necessary</h2>
+<section id="avoid-transformations-when-necessary" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="avoid-transformations-when-necessary"><span class="header-section-number">4.6</span> Avoid Transformations When Necessary</h2>
 <p>When the data already contains the values to draw, use <code>.geom_col()</code>. It is the convenient form of <code>geom_bar(stat = "identity")</code>.</p>
 <div id="cell-fig-ch-04-titanic" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -679,7 +890,7 @@ Figure&nbsp;5.18: Scaled density estimates for Ohio and Wisconsin counties.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-titanic-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-titanic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.19: Survival on the Titanic, by sex.
+Figure&nbsp;4.19: Survival on the Titanic, by sex.
 </figcaption>
 </figure>
 </div>
@@ -706,19 +917,19 @@ Figure&nbsp;5.19: Survival on the Titanic, by sex.
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-oecd-gap-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-04-oecd-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.20: Using geom_col() to plot negative and positive values in a bar chart.
+Figure&nbsp;4.20: Using geom_col() to plot negative and positive values in a bar chart.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="where-to-go-next" class="level2" data-number="5.7">
-<h2 data-number="5.7" class="anchored" data-anchor-id="where-to-go-next"><span class="header-section-number">5.7</span> Where to Go Next</h2>
-<p>The exercises in <span class="citation" data-cites="Healy2026">Healy (<a href="#ref-Healy2026" role="doc-biblioref">2026</a>)</span> mostly carry over. The main translation points are to use strings instead of formulas for facets, <code>after_stat()</code> for computed statistics, and Polars expressions such as <code>.filter(pl.col("state").is_in(oh_wi))</code> for data preparation.</p>
+<section id="where-to-go-next" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="where-to-go-next"><span class="header-section-number">4.7</span> Where to Go Next</h2>
+<p>The exercises in <span class="citation" data-cites="Healy2026">Healy (<a href="references.html#ref-Healy2026" role="doc-biblioref">2026</a>)</span> mostly carry over. The main translation points are to use strings instead of formulas for facets, <code>after_stat()</code> for computed statistics, and Polars expressions such as <code>.filter(pl.col("state").is_in(oh_wi))</code> for data preparation.</p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
 <div id="ref-Healy2026" class="csl-entry" role="listitem">
 Healy, Kieran. 2026. <em>Data Visualization: A Practical Introduction</em>. 2nd ed. Princeton University Press. <a href="https://socviz.co/">https://socviz.co/</a>.
 </div>
@@ -728,6 +939,19 @@ Healy, Kieran. 2026. <em>Data Visualization: A Practical Introduction</em>. 2nd 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {
@@ -1129,12 +1353,12 @@ Healy, Kieran. 2026. <em>Data Visualization: A Practical Introduction</em>. 2nd 
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./03-ggplot-basics.html" class="pagination-link" aria-label="Make a Plot">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Make a Plot</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Make a Plot</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="./05-more-on-geoms.html" class="pagination-link" aria-label="Graph Tables, Add Labels, Make Notes">
-        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Graph Tables, Add Labels, Make Notes</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Graph Tables, Add Labels, Make Notes</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

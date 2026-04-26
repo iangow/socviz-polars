@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>3&nbsp; Get Started – Data Visualization: A Python/Polars Companion</title>
+<title>2&nbsp; Get Started – Data Visualization: A Python/Polars Companion</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -95,10 +95,14 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-5ccb035bea26c1e21f80f44cf7c27909.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-c0f9e757bd1bbe5faf3da83a888945c0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-91459808351f4a5e66f61f3cc0ad5ca1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-c0f9e757bd1bbe5faf3da83a888945c0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -131,9 +135,181 @@ div.csl-indent {
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
+<link rel="stylesheet" href="custom.css">
 </head>
 
-<body class="nav-sidebar floating quarto-light">
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -142,7 +318,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./02-intro.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Get Started</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./02-intro.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Get Started</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -158,6 +334,9 @@ div.csl-indent {
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Data Visualization: A Python/Polars Companion</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -170,45 +349,74 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Preface</span></span></a>
+ <span class="menu-text">Preface</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-look-at-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Look at Data</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Look at Data</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-intro.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Get Started</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Get Started</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-ggplot-basics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Make a Plot</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Make a Plot</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-group-facet-transform.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Show the Right Numbers</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Show the Right Numbers</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-more-on-geoms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Graph Tables, Add Labels, Make Notes</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Graph Tables, Add Labels, Make Notes</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-modeling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Work with Models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Work with Models</span></span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-maps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Draw Maps</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-map-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Preparing Map Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
@@ -219,26 +427,27 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#work-in-plain-text" id="toc-work-in-plain-text" class="nav-link active" data-scroll-target="#work-in-plain-text"><span class="header-section-number">3.1</span> Work in Plain Text</a></li>
-  <li><a href="#use-python-with-an-ide" id="toc-use-python-with-an-ide" class="nav-link" data-scroll-target="#use-python-with-an-ide"><span class="header-section-number">3.2</span> Use Python with an IDE</a></li>
-  <li><a href="#things-to-know-about-python" id="toc-things-to-know-about-python" class="nav-link" data-scroll-target="#things-to-know-about-python"><span class="header-section-number">3.3</span> Things to know about Python</a>
+  <li><a href="#work-in-plain-text" id="toc-work-in-plain-text" class="nav-link active" data-scroll-target="#work-in-plain-text"><span class="header-section-number">2.1</span> Work in Plain Text</a></li>
+  <li><a href="#use-python-with-an-ide" id="toc-use-python-with-an-ide" class="nav-link" data-scroll-target="#use-python-with-an-ide"><span class="header-section-number">2.2</span> Use Python with an IDE</a></li>
+  <li><a href="#things-to-know-about-python" id="toc-things-to-know-about-python" class="nav-link" data-scroll-target="#things-to-know-about-python"><span class="header-section-number">2.3</span> Things to know about Python</a>
   <ul class="collapse">
-  <li><a href="#everything-has-a-name" id="toc-everything-has-a-name" class="nav-link" data-scroll-target="#everything-has-a-name"><span class="header-section-number">3.3.1</span> Everything has a name</a></li>
-  <li><a href="#everything-is-an-object" id="toc-everything-is-an-object" class="nav-link" data-scroll-target="#everything-is-an-object"><span class="header-section-number">3.3.2</span> Everything is an object</a></li>
-  <li><a href="#you-do-things-using-functions" id="toc-you-do-things-using-functions" class="nav-link" data-scroll-target="#you-do-things-using-functions"><span class="header-section-number">3.3.3</span> You do things using functions</a></li>
-  <li><a href="#functions-come-in-packages" id="toc-functions-come-in-packages" class="nav-link" data-scroll-target="#functions-come-in-packages"><span class="header-section-number">3.3.4</span> Functions come in packages</a></li>
-  <li><a href="#ask-vectors-their-type-ask-complex-objects-their-class" id="toc-ask-vectors-their-type-ask-complex-objects-their-class" class="nav-link" data-scroll-target="#ask-vectors-their-type-ask-complex-objects-their-class"><span class="header-section-number">3.3.5</span> “Ask vectors their type; ask complex objects their class”</a></li>
+  <li><a href="#everything-has-a-name" id="toc-everything-has-a-name" class="nav-link" data-scroll-target="#everything-has-a-name"><span class="header-section-number">2.3.1</span> Everything has a name</a></li>
+  <li><a href="#everything-is-an-object" id="toc-everything-is-an-object" class="nav-link" data-scroll-target="#everything-is-an-object"><span class="header-section-number">2.3.2</span> Everything is an object</a></li>
+  <li><a href="#you-do-things-using-functions" id="toc-you-do-things-using-functions" class="nav-link" data-scroll-target="#you-do-things-using-functions"><span class="header-section-number">2.3.3</span> You do things using functions</a></li>
+  <li><a href="#functions-come-in-packages" id="toc-functions-come-in-packages" class="nav-link" data-scroll-target="#functions-come-in-packages"><span class="header-section-number">2.3.4</span> Functions come in packages</a></li>
+  <li><a href="#ask-vectors-their-type-ask-complex-objects-their-class" id="toc-ask-vectors-their-type-ask-complex-objects-their-class" class="nav-link" data-scroll-target="#ask-vectors-their-type-ask-complex-objects-their-class"><span class="header-section-number">2.3.5</span> “Ask vectors their type; ask complex objects their class”</a></li>
   </ul></li>
-  <li><a href="#make-your-first-figure" id="toc-make-your-first-figure" class="nav-link" data-scroll-target="#make-your-first-figure"><span class="header-section-number">3.4</span> Make Your First Figure</a></li>
+  <li><a href="#make-your-first-figure" id="toc-make-your-first-figure" class="nav-link" data-scroll-target="#make-your-first-figure"><span class="header-section-number">2.4</span> Make Your First Figure</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Get Started</span></h1>
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Get Started</span></h1>
 </div>
 
 
@@ -255,62 +464,63 @@ div.csl-indent {
 </header>
 
 
-<p>I don’t disagree with anything that <span class="citation" data-cites="Healy2026">Healy (<a href="#ref-Healy2026" role="doc-biblioref">2026</a>)</span> says in <a href="https://socviz.co/02-intro.html">Chapter 2</a>.</p>
-<p>In the current version of this guide, I assume that you are already familiar with Python. If you are unfamiliar with Python and just want to learn a bit about data visualization, I would recommend just using R and <span class="citation" data-cites="Healy2026">Healy (<a href="#ref-Healy2026" role="doc-biblioref">2026</a>)</span>. Even if your ultimate destination is Python, whatever you learn from R will largely carry over to Python. Getting started with data analysis is simply easier with R and, if you are not destined to learn Python, it’s probably a better path for many users.</p>
+<p>I don’t disagree with anything that <span class="citation" data-cites="Healy2026">Healy (<a href="references.html#ref-Healy2026" role="doc-biblioref">2026</a>)</span> says in <a href="https://socviz.co/02-intro.html">Chapter 2</a>.</p>
+<p>In the current version of this guide, I assume that you are already familiar with Python. If you are unfamiliar with Python and just want to learn a bit about data visualization, I would recommend just using R and <span class="citation" data-cites="Healy2026">Healy (<a href="references.html#ref-Healy2026" role="doc-biblioref">2026</a>)</span>. Even if your ultimate destination is Python, whatever you learn from R will largely carry over to Python. Getting started with data analysis is simply easier with R and, if you are not destined to learn Python, it’s probably a better path for many users.</p>
 <p>For example, the Python ecosystem is built around things like virtual environments and, even with tools like <code>uv</code>, these are not easy for newcomers to manage, especially when using Jupyter notebooks. In contrast, I would get that most R users have a single system-level installation of the packages they use and virtual environments are reserved for special use cases.</p>
 <p>In writing this guide, I have made a couple of additional choices that may make it not for you.</p>
 <ul>
 <li><strong>I use Python Polars</strong>: I have elected to use Python Polars as my data frame library rather than the more conventional choice of pandas. This choice partly reflects my choice of Polars in other settings (e.g., Polars is clearly the better choice for the larger data sets used in the book <a href="https://iangow.github.io/era_pl_book/"><em>Empirical Research in Accounting</em></a>). Another reason to use Polars is the second choice.</li>
-<li><strong>I use a “fluent” implementation of <code>plotnine</code></strong>: While <span class="citation" data-cites="Healy2026">Healy (<a href="#ref-Healy2026" role="doc-biblioref">2026</a>)</span> uses <code>ggplot2</code> package in R, the closest equivalent in Python is <code>plotnine</code>. However the <code>plotnine</code> package mimics <code>ggplot2</code> so closely that it feels a bit like writing R code in Python. For a more “Pythonic” feel, I create a small package <code>plotnine_polars</code>, that provides a version of <code>plotnine</code> that creates a custom Polars data frame namespace that provides a “fluent” API for <code>plotnine</code>. It seems that “fluent” is a term of art in Python used to descibe APIs that implement functions as chainable methods.</li>
+<li><strong>I use a “fluent” implementation of <code>plotnine</code></strong>: While <span class="citation" data-cites="Healy2026">Healy (<a href="references.html#ref-Healy2026" role="doc-biblioref">2026</a>)</span> uses <code>ggplot2</code> package in R, the closest equivalent in Python is <code>plotnine</code>. However the <code>plotnine</code> package mimics <code>ggplot2</code> so closely that it feels a bit like writing R code in Python. For a more “Pythonic” feel, I create a small package <code>plotnine_polars</code>, that provides a version of <code>plotnine</code> that creates a custom Polars data frame namespace that provides a “fluent” API for <code>plotnine</code>. It seems that “fluent” is a term of art in Python used to descibe APIs that implement functions as chainable methods.</li>
 </ul>
-<section id="work-in-plain-text" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="work-in-plain-text"><span class="header-section-number">3.1</span> Work in Plain Text</h2>
-<p>Everything <span class="citation" data-cites="Healy2026">Healy (<a href="#ref-Healy2026" role="doc-biblioref">2026</a>)</span> says here carries over to Python. I would recommend Quarto for Python too. While many Python users are more accustomed to using Jupyter notebooks (as they are now called), I believe that Quarto documents do a better job of separating source code from output.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> This is particularly important when using source control systems such as Git.</p>
+<section id="work-in-plain-text" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="work-in-plain-text"><span class="header-section-number">2.1</span> Work in Plain Text</h2>
+<p>Everything <span class="citation" data-cites="Healy2026">Healy (<a href="references.html#ref-Healy2026" role="doc-biblioref">2026</a>)</span> says here carries over to Python. I would recommend Quarto for Python too. While many Python users are more accustomed to using Jupyter notebooks (as they are now called), I believe that Quarto documents do a better job of separating source code from output.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> This is particularly important when using source control systems such as Git.</p>
 <p>The same “three backticks” approach discussed by Healy for R applies with Python too. Just use <code>{python}</code> in place of <code>{r}</code>:</p>
 <pre><code>```{python}
 
 ```</code></pre>
 </section>
-<section id="use-python-with-an-ide" class="level2" data-number="3.2">
-<h2 data-number="3.2" class="anchored" data-anchor-id="use-python-with-an-ide"><span class="header-section-number">3.2</span> Use Python with an IDE</h2>
+<section id="use-python-with-an-ide" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="use-python-with-an-ide"><span class="header-section-number">2.2</span> Use Python with an IDE</h2>
 <p>I writing this I am using Positron. This is probably a good choice for this project because it comes with Quarto.</p>
 <p>At some point, I will put better instructions here.</p>
 </section>
-<section id="things-to-know-about-python" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="things-to-know-about-python"><span class="header-section-number">3.3</span> Things to know about Python</h2>
-<p>While I assume that the following will be familiar, I think it is helpful to mirror a few observations from <span class="citation" data-cites="Healy2026">Healy (<a href="#ref-Healy2026" role="doc-biblioref">2026</a>)</span>.</p>
-<section id="everything-has-a-name" class="level3" data-number="3.3.1">
-<h3 data-number="3.3.1" class="anchored" data-anchor-id="everything-has-a-name"><span class="header-section-number">3.3.1</span> Everything has a name</h3>
+<section id="things-to-know-about-python" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="things-to-know-about-python"><span class="header-section-number">2.3</span> Things to know about Python</h2>
+<p>While I assume that the following will be familiar, I think it is helpful to mirror a few observations from <span class="citation" data-cites="Healy2026">Healy (<a href="references.html#ref-Healy2026" role="doc-biblioref">2026</a>)</span>.</p>
+<section id="everything-has-a-name" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="everything-has-a-name"><span class="header-section-number">2.3.1</span> Everything has a name</h3>
 <p>True for Python too.</p>
 </section>
-<section id="everything-is-an-object" class="level3" data-number="3.3.2">
-<h3 data-number="3.3.2" class="anchored" data-anchor-id="everything-is-an-object"><span class="header-section-number">3.3.2</span> Everything is an object</h3>
+<section id="everything-is-an-object" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="everything-is-an-object"><span class="header-section-number">2.3.2</span> Everything is an object</h3>
 <p>Also true in Python. In many ways, Python is more object-oriented than R is, with many packages implementing functionality as methods that would be functions in R.</p>
 </section>
-<section id="you-do-things-using-functions" class="level3" data-number="3.3.3">
-<h3 data-number="3.3.3" class="anchored" data-anchor-id="you-do-things-using-functions"><span class="header-section-number">3.3.3</span> You do things using functions</h3>
+<section id="you-do-things-using-functions" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="you-do-things-using-functions"><span class="header-section-number">2.3.3</span> You do things using functions</h3>
 <p>If one recognizes that methods are simply functions attached to objects, this is also true of Python. If you’re coming from Stata or SAS, you may be used to thinking of functions (or “macros”) as a relatively advanced topic, both the <a href="https://iangow.github.io/far_book/r-intro.html#introduction-to-r">R version</a> and the <a href="https://iangow.github.io/era_pl_book/py-intro.html#an-introduction-to-python">Python version</a> of <em>Empirical Research in Accounting</em> start with functions.</p>
 </section>
-<section id="functions-come-in-packages" class="level3" data-number="3.3.4">
-<h3 data-number="3.3.4" class="anchored" data-anchor-id="functions-come-in-packages"><span class="header-section-number">3.3.4</span> Functions come in packages</h3>
+<section id="functions-come-in-packages" class="level3" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="functions-come-in-packages"><span class="header-section-number">2.3.4</span> Functions come in packages</h3>
 <p>This is even more true in Python than it is in R. While R offers tools for working with arrays and data frames out of the box, Python relies much more on third-party packages for standard data science work. For example, arrays typically come from NumPy and data frames from packages such as pandas or Polars.</p>
 <p>In this chapter, I use the following two packages.</p>
-<div id="bf629c48" class="cell" data-execution_count="1">
+<div id="6d1181e2" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotnine_polars</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>These lines do not make any functions part of the namespace directly; one still needs to access them using (say) <code>pl.read_csv()</code>. In contrast, the command <code>library(ggplot2)</code> in R is closer to saying <code>from polars import *</code>; if we took that approach, <code>read_csv()</code> would become available directly.</p>
 </section>
-<section id="ask-vectors-their-type-ask-complex-objects-their-class" class="level3" data-number="3.3.5">
-<h3 data-number="3.3.5" class="anchored" data-anchor-id="ask-vectors-their-type-ask-complex-objects-their-class"><span class="header-section-number">3.3.5</span> “Ask vectors their type; ask complex objects their class”</h3>
+<section id="ask-vectors-their-type-ask-complex-objects-their-class" class="level3" data-number="2.3.5">
+<h3 data-number="2.3.5" class="anchored" data-anchor-id="ask-vectors-their-type-ask-complex-objects-their-class"><span class="header-section-number">2.3.5</span> “Ask vectors their type; ask complex objects their class”</h3>
 <p>It is difficult to do a literal translation of this to Python. To make things concrete let’s create an object.</p>
-<div id="80272af9" class="cell" data-execution_count="2">
+<div id="5b77899c" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>gapminder <span class="op">=</span> pl.read_csv(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv"</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    separator<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>gapminder</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/jennybc/"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gapminder/main/inst/extdata/gapminder.tsv"</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    separator<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>gapminder</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -433,23 +643,23 @@ div.csl-indent {
 </div>
 </div>
 <p>Here we can see that <code>organs</code> is a Polars <code>DataFrame</code>.</p>
-<div id="6a4287e7" class="cell" data-execution_count="3">
+<div id="2ce1048a" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(gapminder)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>polars.dataframe.frame.DataFrame</code></pre>
 </div>
 </div>
-<p>The analogue of the vector in R is probably either a NumPy array (<code>np.ndarray</code>) or a <code>Series</code>, whether provided by pandas or Polars. We won’t work with arrays or <code>Series</code> objects much. However, the idea of “type” referred to in <span class="citation" data-cites="Healy2026">Healy (<a href="#ref-Healy2026" role="doc-biblioref">2026</a>)</span> is mirrored in the <code>.dtype</code> attribute.</p>
-<div id="14b7ad3b" class="cell" data-execution_count="4">
+<p>The analogue of the vector in R is probably either a NumPy array (<code>np.ndarray</code>) or a <code>Series</code>, whether provided by pandas or Polars. We won’t work with arrays or <code>Series</code> objects much. However, the idea of “type” referred to in <span class="citation" data-cites="Healy2026">Healy (<a href="references.html#ref-Healy2026" role="doc-biblioref">2026</a>)</span> is mirrored in the <code>.dtype</code> attribute.</p>
+<div id="ba485b8e" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>gapminder[<span class="st">"year"</span>].dtype</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>Int64</code></pre>
 </div>
 </div>
 <p>We can inspect the <code>dtype</code> for all columns of a <code>DataFrame</code> using the <code>.schema</code> attribute:</p>
-<div id="b19584ee" class="cell" data-execution_count="5">
+<div id="4bf1bda0" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>gapminder.schema</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
+<div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>Schema([('country', String),
         ('continent', String),
         ('year', Int64),
@@ -460,23 +670,22 @@ div.csl-indent {
 </div>
 </section>
 </section>
-<section id="make-your-first-figure" class="level2" data-number="3.4">
-<h2 data-number="3.4" class="anchored" data-anchor-id="make-your-first-figure"><span class="header-section-number">3.4</span> Make Your First Figure</h2>
+<section id="make-your-first-figure" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="make-your-first-figure"><span class="header-section-number">2.4</span> Make Your First Figure</h2>
 <div id="cell-fig-first-plot" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    gapminder</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .ggplot()</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .aes(x<span class="op">=</span><span class="st">"gdpPercap"</span>, y<span class="op">=</span><span class="st">"lifeExp"</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    .geom_point()</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"gdpPercap"</span>, y<span class="op">=</span><span class="st">"lifeExp"</span>))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .geom_point()</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
 <div id="fig-first-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-first-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="02-intro_files/figure-html/fig-first-plot-output-1.png" width="672" height="480" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-first-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.1: Life expectancy plotted against GDP per capita for a large number of country-years.
+Figure&nbsp;2.1: Life expectancy plotted against GDP per capita for a large number of country-years.
 </figcaption>
 </figure>
 </div>
@@ -484,7 +693,7 @@ Figure&nbsp;3.1: Life expectancy plotted against GDP per capita for a large numb
 </div>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
 <div id="ref-Healy2026" class="csl-entry" role="listitem">
 Healy, Kieran. 2026. <em>Data Visualization: A Practical Introduction</em>. 2nd ed. Princeton University Press. <a href="https://socviz.co/">https://socviz.co/</a>.
 </div>
@@ -500,6 +709,19 @@ Healy, Kieran. 2026. <em>Data Visualization: A Practical Introduction</em>. 2nd 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {
@@ -901,12 +1123,12 @@ Healy, Kieran. 2026. <em>Data Visualization: A Practical Introduction</em>. 2nd 
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./01-look-at-data.html" class="pagination-link" aria-label="Look at Data">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Look at Data</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Look at Data</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="./03-ggplot-basics.html" class="pagination-link" aria-label="Make a Plot">
-        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Make a Plot</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Make a Plot</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
