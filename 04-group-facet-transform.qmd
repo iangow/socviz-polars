@@ -18,7 +18,8 @@ from socviz_pl import load_data
 
 ```{python}
 gapminder = pl.read_csv(
-    "https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv",
+    "https://raw.githubusercontent.com/jennybc/"
+    "gapminder/main/inst/extdata/gapminder.tsv",
     separator="\t"
 )
 gss_sm = load_data("gss_sm")

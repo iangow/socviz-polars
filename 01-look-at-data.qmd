@@ -2,7 +2,7 @@
 title: "Look at Data"
 ---
 
-[This chapter](https://socviz.co/01-look-at-data.html) is largely conceptual, with only a few glancing references to R and ggplot.
+[Chapter 1](https://socviz.co/01-look-at-data.html) of @Healy2026 is largely conceptual, with only a few glancing references to R and ggplot.
 So I don't have much to add here.
 
 An important caveat that applies to @Healy2026 is worth emphasizing:

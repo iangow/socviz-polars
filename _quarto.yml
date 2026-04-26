@@ -4,7 +4,7 @@ project:
 
 book:
   title: "Data Visualization: A Python/Polars Companion"
-  author: "Ian Gow"
+  author: "Ian D. Gow"
   chapters:
     - index.qmd
     - 01-look-at-data.qmd
@@ -16,12 +16,16 @@ book:
     - 07-maps.qmd
   appendices:
     - appendix-map-data.qmd
+    - references.qmd
 
 format:
   html:
-    theme: cosmo
+    theme:
+      light: cosmo
+      dark: darkly
+    respect-user-color-scheme: true
     toc: true
-    mainfont: "EB Garamond"
+    mainfont: "TeX Gyre Pagella"
     sansfont: "Source Sans 3"
     monofont: "JetBrains Mono"
     css: custom.css

@@ -61,8 +61,7 @@ As an alternative, we can use the `.aes()` method created by `plotnine_polars` a
 ```{python}
 p = (
     gapminder
-    .ggplot()
-    .aes(x="gdpPercap", y="lifeExp")
+    .ggplot(aes(x="gdpPercap", y="lifeExp"))
 )
 ```
 
@@ -90,8 +89,7 @@ p.geom_point()
 ```{python}
 (
     gapminder
-    .ggplot()
-    .aes(x="gdpPercap",y="lifeExp")
+    .ggplot(aes(x="gdpPercap",y="lifeExp"))
     .geom_smooth(method="loess")
 )
 ```
@@ -134,8 +132,7 @@ Now skip creating `p`.
 ```{python}
 (
     gapminder
-    .ggplot()
-    .aes(x="gdpPercap", y="lifeExp")
+    .ggplot(aes(x="gdpPercap", y="lifeExp"))
     .geom_point()
     .geom_smooth(method="loess", colour="blue")
     .scale_x_log10()
@@ -158,10 +155,7 @@ p = gapminder.ggplot(aes(x="gdpPercap", y="lifeExp"))
 ```{python}
 (
     gapminder
-    .ggplot()
-    .aes(x="gdpPercap",
-         y="lifeExp",
-         color='"purple"')
+    .ggplot(aes(x="gdpPercap", y="lifeExp", color='"purple"'))
     .geom_point()
     .geom_smooth(method="loess")
     .scale_x_log10()
@@ -171,8 +165,7 @@ p = gapminder.ggplot(aes(x="gdpPercap", y="lifeExp"))
 ```{python}
 (
     gapminder
-    .ggplot()
-    .aes(x="gdpPercap", y="lifeExp")
+    .ggplot(aes(x="gdpPercap", y="lifeExp"))
     .geom_point(color="purple")
     .geom_smooth(method="loess")
     .scale_x_log10()
@@ -182,8 +175,7 @@ p = gapminder.ggplot(aes(x="gdpPercap", y="lifeExp"))
 ```{python}
 (
     gapminder
-    .ggplot()
-    .aes(x="gdpPercap", y="lifeExp")
+    .ggplot(aes(x="gdpPercap", y="lifeExp"))
     .geom_point(alpha=0.3)
     .geom_smooth(color="firebrick", se=False,
                  size=8,  # not linewidth
@@ -195,8 +187,7 @@ p = gapminder.ggplot(aes(x="gdpPercap", y="lifeExp"))
 ```{python}
 (
     gapminder
-    .ggplot()
-    .aes(x="gdpPercap", y="lifeExp")
+    .ggplot(aes(x="gdpPercap", y="lifeExp"))
     .geom_point(alpha=0.3)
     .geom_smooth(method="loess", se=False)
     .scale_x_log10(labels=currency_format(precision=0, big_mark=','))
@@ -221,9 +212,8 @@ p = gapminder.ggplot(aes(x="gdpPercap", y="lifeExp"))
 ```{python}
 (
     gapminder
-    .ggplot()
-    .aes(x="gdpPercap", y="lifeExp", color="continent",
-         fill="continent")
+    .ggplot(aes(x="gdpPercap", y="lifeExp", 
+                color="continent", fill="continent"))
     .geom_point()
     .geom_smooth(method="loess")
     .scale_x_log10()
@@ -250,8 +240,7 @@ import numpy as np
 (
     gapminder
     .with_columns(log_pop=pl.col("pop").log())
-    .ggplot()
-    .aes(x="gdpPercap", y="lifeExp", color="log_pop")
+    .ggplot(aes(x="gdpPercap", y="lifeExp", color="log_pop"))
     .geom_point()
     .scale_x_log10()
 )
@@ -260,8 +249,7 @@ import numpy as np
 ```{python}
 p_out = (
     gapminder
-    .ggplot()
-    .aes(x="gdpPercap", y="lifeExp")
+    .ggplot(aes(x="gdpPercap", y="lifeExp"))
     .geom_point()
     .geom_smooth(method="loess")
     .scale_x_log10()
@@ -284,8 +272,7 @@ mpg = pl.from_pandas(mpg)
 ```{python}
 (
     mpg
-    .ggplot()
-    .aes(x="displ", y="hwy")
+    .ggplot(aes(x="displ", y="hwy"))
     .geom_point()
     .geom_smooth(method="loess")
     .labs(x="displacement", y="horsepower")

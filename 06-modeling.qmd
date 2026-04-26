@@ -21,13 +21,13 @@ from socviz_pl import load_data
 
 ```{python}
 gapminder = pl.read_csv(
-    "https://raw.githubusercontent.com/jennybc/gapminder/main/inst/extdata/gapminder.tsv",
+    "https://raw.githubusercontent.com/jennybc/"
+    "gapminder/main/inst/extdata/gapminder.tsv",
     separator="\t"
 )
 gapminder_pd = gapminder.to_pandas()
 
 gss_sm = load_data("gss_sm")
-gss_sm_pd = gss_sm.to_pandas()
 ```
 
 ## Show Several Fits at Once
@@ -49,8 +49,10 @@ p = (
 (
     p
     .geom_point(alpha=0.1)
-    .geom_smooth(color="tomato", fill="tomato", method="rlm", se=False)
-    .geom_smooth(color="steelblue", fill="steelblue", method="lm")
+    .geom_smooth(color="tomato", fill="tomato", 
+                 method="rlm", se=False)
+    .geom_smooth(color="steelblue", fill="steelblue", 
+                 method="lm")
 )
 ```
 
@@ -102,7 +104,8 @@ model_colors = ["#E41A1C", "#377EB8", "#4DAF4A"]
         method="lm"
     )
     .geom_smooth(
-        aes(color='"Cubic Spline"', fill='"Cubic Spline"'),
+        aes(color='"Cubic Spline"',
+            fill='"Cubic Spline"'),
         method="lm",
         formula="y ~ bs(x, df=3)"
     )
@@ -110,8 +113,10 @@ model_colors = ["#E41A1C", "#377EB8", "#4DAF4A"]
         aes(color='"LOESS"', fill='"LOESS"'),
         method="loess"
     )
-    .scale_color_manual(name="Models", values=model_colors)
-    .scale_fill_manual(name="Models", values=model_colors)
+    .scale_color_manual(name="Models", 
+                        values=model_colors)
+    .scale_fill_manual(name="Models", 
+                       values=model_colors)
     .add_theme(legend_position="top")
 )
 ```
@@ -137,7 +142,7 @@ The following small helpers provide the pieces of `broom::tidy()`, `augment()`, 
 
 ```{python}
 def tidy_result(result, conf_int=False):
-    out = pd.DataFrame({
+    out = pl.DataFrame({
         "term": result.params.index,
         "estimate": result.params.to_numpy(),
         "std_error": result.bse.to_numpy(),
@@ -145,21 +150,27 @@ def tidy_result(result, conf_int=False):
         "p_value": result.pvalues.to_numpy(),
     })
     if conf_int:
-        conf = result.conf_int()
-        out["conf_low"] = conf.iloc[:, 0].to_numpy()
-        out["conf_high"] = conf.iloc[:, 1].to_numpy()
-    return pl.from_pandas(out)
+        conf = result.conf_int().to_numpy()
+        out = out.with_columns(
+            conf_low=conf[:, 0],
+            conf_high=conf[:, 1],
+        )
+    return out
 
 
 def augment_ols(result, data):
     pred = result.get_prediction(data).summary_frame()
-    out = data.copy()
-    out["fitted"] = result.fittedvalues
-    out["se_fit"] = pred["mean_se"].to_numpy()
-    out["resid"] = result.resid
-    out["hat"] = result.get_influence().hat_matrix_diag
-    out["cooksd"] = result.get_influence().cooks_distance[0]
-    return pl.from_pandas(out)
+    out = (
+        pl.from_pandas(data.copy())
+        .with_columns(
+            fitted=result.fittedvalues.to_numpy(),
+            se_fit=pred["mean_se"].to_numpy(),
+            resid=result.resid.to_numpy(),
+            hat=result.get_influence().hat_matrix_diag,
+            cooksd=result.get_influence().cooks_distance[0]
+        )
+    )
+    return out
 
 
 def glance_ols(result):
@@ -179,7 +190,10 @@ def glance_ols(result):
 ```
 
 ```{python}
-tidy_result(out).with_columns(pl.selectors.numeric().round(2))
+(
+    tidy_result(out)
+    .with_columns(pl.selectors.numeric().round(2))
+)
 ```
 
 ## Generate Predictions to Graph
@@ -195,9 +209,10 @@ gdp_grid = pl.DataFrame({
         100
     )
 })
-pop_grid = pl.DataFrame({"pop": [gapminder["pop"].median()]})
+pop_grid = pl.DataFrame({"pop": gapminder["pop"].median()})
 continent_grid = pl.DataFrame({
-    "continent": ["Africa", "Americas", "Asia", "Europe", "Oceania"]
+    "continent": ["Africa", "Americas", 
+                  "Asia", "Europe", "Oceania"]
 })
 
 pred_df = (
@@ -209,19 +224,24 @@ pred_df.shape
 ```
 
 ```{python}
-pred_out = out.get_prediction(pred_df.to_pandas()).summary_frame()
+pred_out = pl.from_pandas(
+    out
+    .get_prediction(pred_df.to_pandas())
+    .summary_frame()
+)
 
 pred_df = pl.concat(
     [
         pred_df,
-        pl.from_pandas(
-            pred_out[["mean", "obs_ci_lower", "obs_ci_upper"]]
-            .rename(columns={
+        pred_out
+        .select("mean", "obs_ci_lower", "obs_ci_upper")
+        .rename({
                 "mean": "fit",
                 "obs_ci_lower": "lwr",
                 "obs_ci_upper": "upr",
-            })
+            }
         )
+    
     ],
     how="horizontal"
 )
@@ -231,11 +251,9 @@ pred_df.head()
 ```{python}
 #| label: fig-ch-06-ols-predictions
 #| fig-cap: "OLS predictions for Europe and Africa."
-pred_eu_af = pred_df.filter(pl.col("continent").is_in(["Europe", "Africa"]))
-gap_eu_af = gapminder.filter(pl.col("continent").is_in(["Europe", "Africa"]))
-
 (
-    pred_eu_af
+    pred_df
+    .filter(pl.col("continent").is_in(["Europe", "Africa"]))
     .ggplot(aes(
         x="gdpPercap",
         y="fit",
@@ -246,7 +264,8 @@ gap_eu_af = gapminder.filter(pl.col("continent").is_in(["Europe", "Africa"]))
         group="continent"
     ))
     .geom_point(
-        data=gap_eu_af,
+        data=gapminder
+             .filter(pl.col("continent").is_in(["Europe", "Africa"])),
         mapping=aes(x="gdpPercap", y="lifeExp", color="continent"),
         alpha=0.5,
         inherit_aes=False
@@ -269,19 +288,11 @@ out_conf = (
     .with_columns(
         nicelabs=(
             pl.col("term")
-            .str.replace("C\\(continent\\)\\[T\\.", "")
-            .str.replace("\\]", "")
+            .str.replace(r"C\(continent\)\[T\.", "")
+            .str.replace(r"\]", "")
         )
     )
 )
-
-term_order = (
-    out_conf
-    .sort("estimate")
-    .get_column("nicelabs")
-    .to_list()
-)
-out_conf = out_conf.with_columns(pl.col("nicelabs").cast(pl.Enum(term_order)))
 
 out_conf
 ```
@@ -291,7 +302,7 @@ out_conf
 #| fig-cap: "A basic plot of OLS estimates."
 (
     out_conf
-    .ggplot(aes(x="nicelabs", y="estimate"))
+    .ggplot(aes(x="reorder(nicelabs, estimate)", y="estimate"))
     .geom_point()
     .coord_flip()
 )
@@ -303,11 +314,12 @@ out_conf
 (
     out_conf
     .ggplot(aes(
-        x="nicelabs",
-        y="estimate",
-        ymin="conf_low",
-        ymax="conf_high"
-    ))
+            x="nicelabs",
+            y="estimate",
+            ymin="conf_low",
+            ymax="conf_high"
+        )
+    )
     .geom_pointrange()
     .coord_flip()
     .labs(x=None, y="OLS Estimate")
@@ -319,7 +331,12 @@ The helper here omits broom's leading dots in column names, because plain Python
 
 ```{python}
 out_aug = augment_ols(out, gapminder_pd)
-out_aug.select("country", "continent", "year", "lifeExp", "fitted", "resid", "hat", "cooksd").head()
+(
+    out_aug
+    .select("country", "continent", "year", "lifeExp", 
+            "fitted", "resid", "hat", "cooksd")
+    .head()
+)
 ```
 
 ```{python}
@@ -342,26 +359,23 @@ The survival-analysis aside from the R chapter is omitted here because it is not
 ## Grouped Analysis
 
 The R chapter uses nested list columns and `purrr::map()` to fit one model per continent-year group.
-In Python, an explicit loop is clearer for this first pass.
+Here `group_by().map_groups()` keeps the grouping work in Polars, while the helper converts each group to pandas only at the statsmodels boundary.
 
 ```{python}
 def fit_life_exp_group(df):
-    fit_df = df.assign(log_gdp=np.log(df["gdpPercap"]))
-    result = smf.ols("lifeExp ~ log_gdp", data=fit_df).fit()
-    return tidy_result(result).to_pandas()
-
-
-group_results = []
-for (continent, year), df in gapminder_pd.groupby(["continent", "year"], sort=True):
-    if continent == "Oceania":
-        continue
-    tidied = fit_life_exp_group(df)
-    tidied["continent"] = continent
-    tidied["year"] = year
-    group_results.append(tidied)
+    fit_df = df.with_columns(log_gdp=pl.col("gdpPercap").log())
+    result = smf.ols("lifeExp ~ log_gdp", data=fit_df.to_pandas()).fit()
+    return tidy_result(result).with_columns(
+        continent=pl.lit(df["continent"][0]),
+        year=pl.lit(df["year"][0]),
+    )
 
 out_tidy = (
-    pl.from_pandas(pd.concat(group_results, ignore_index=True))
+    gapminder
+    .filter(pl.col("continent") != "Oceania")
+    .sort("continent", "year")
+    .group_by("continent", "year", maintain_order=True)
+    .map_groups(fit_life_exp_group)
     .filter(pl.col("term") == "log_gdp")
     .with_columns(
         ymin=pl.col("estimate") - 2 * pl.col("std_error"),
@@ -399,17 +413,17 @@ The model below mirrors the R example by predicting the binary `obama` variable 
 
 ```{python}
 bo_df = (
-    gss_sm_pd
-    .assign(polviews_m=gss_sm_pd["polviews"])
-    [["obama", "polviews_m", "sex", "race"]]
-    .dropna()
+    gss_sm
+    .with_columns(polviews_m=pl.col("polviews"))
+    .select("obama", "polviews_m", "sex", "race")
+    .drop_nulls()
 )
 
 out_bo = smf.logit(
     'obama ~ C(polviews_m, Treatment(reference="Moderate")) + '
     'C(sex, Treatment(reference="Male")) * '
     'C(race, Treatment(reference="White"))',
-    data=bo_df
+    data=bo_df.to_pandas()
 ).fit(disp=False)
 ```
 
@@ -418,35 +432,36 @@ print(out_bo.summary())
 ```
 
 ```{python}
-bo_m = out_bo.get_margeff(at="overall", dummy=True)
+bo_m = pl.from_pandas(
+    out_bo
+    .get_margeff(at="overall", dummy=True)
+    .summary_frame()
+    .reset_index(names="factor")
+)
+
 bo_gg = (
-    pl.from_pandas(
-        bo_m.summary_frame()
-        .reset_index(names="factor")
-        .rename(columns={
+    bo_m
+    .rename({
             "dy/dx": "AME",
             "Std. Err.": "SE",
             "Pr(>|z|)": "p",
             "Conf. Int. Low": "lower",
             "Cont. Int. Hi.": "upper",
-        })
+        }
     )
     .with_columns(
         factor=(
             pl.col("factor")
-            .str.replace('C\\(polviews_m, Treatment\\(reference="Moderate"\\)\\)\\[T\\.', "")
-            .str.replace('C\\(sex, Treatment\\(reference="Male"\\)\\)\\[T\\.', "")
-            .str.replace('C\\(race, Treatment\\(reference="White"\\)\\)\\[T\\.', "Race: ")
-            .str.replace_all("\\]", "")
+            .str.replace(r'C\(polviews_m, Treatment\(reference="Moderate"\)\)\[T\.', "")
+            .str.replace(r'C\(sex, Treatment\(reference="Male"\)\)\[T\.', "")
+            .str.replace(r'C\(race, Treatment\(reference="White"\)\)\[T\.', "Race: ")
+            .str.replace_all(r"\]", "")
             .str.replace_all(":Race: ", " x Race: ")
         )
     )
+    .select("factor", "AME", "lower", "upper")
+    .sort("AME")
 )
-
-ame_order = bo_gg.sort("AME").get_column("factor").to_list()
-bo_gg = bo_gg.with_columns(pl.col("factor").cast(pl.Enum(ame_order)))
-
-bo_gg.select("factor", "AME", "lower", "upper")
 ```
 
 Statsmodels reports marginal effects for the model matrix columns, including the interaction columns.
@@ -457,7 +472,8 @@ This is not identical to the `margins` output in the R chapter, but it serves th
 #| fig-cap: "Average marginal effects from a logistic regression."
 (
     bo_gg
-    .ggplot(aes(x="factor", y="AME", ymin="lower", ymax="upper"))
+    .ggplot(aes(x="reorder(factor, AME)", y="AME", 
+                ymin="lower", ymax="upper"))
     .geom_hline(yintercept=0, color="#CCCCCC")
     .geom_pointrange()
     .coord_flip()

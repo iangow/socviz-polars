@@ -6,24 +6,29 @@ While I target the second edition of @Healy2026, this companion should also work
 
 ## A Brief Overview of Data Science using R and Python
 
-Rython and R have emerged as the dominant programming languages for data science, serving as the primary environments for statistical computing, machine learning, and data analysis (e.g., @wickham2023r; @mckinney2022python).
-
+Python and R have emerged as the dominant programming languages for data science, serving as the primary environments for statistical computing, machine learning, and data analysis [e.g., @wickham2023r; @mckinney2022python].
 
 ### Data frames
 
 Data frames are table-like (or spreadsheet-like) data structures in which each column represents a variable and each row represents an observation.
 The columns of a data frame may have different data types from each other.
 
-With the benefit of some hindsight, it is clear that a core requirement for data science work is a **data frame library**.
+With the benefit of some hindsight, it is clear that a core requirement for data science work is a **data frame library**.^[The goal of the pandas package was to provide just such a library for Python, which had previously lacked one. Since the release of pandas, Python has gone on to become the most popular language for data science.]
 A typical data frame library provides note the data frame data structure itself, but also functionality for working with data frames.
 It can be helpful to think in terms of the *verbs* that represent the kinds of data manipulation we want to perform on our data frames.
-Here are the most common things we want to do with data frames:^[The [`dplyr` documentation](https://dplyr.tidyverse.org) discusses a version of this list.]
+Some of the most common things we want to do with data frames are the following:^[The [`dplyr` documentation](https://dplyr.tidyverse.org) discusses a version of this list.]
 
  - *filter* rows based on their values
  - *arrange* or reorder rows
  - *select* columns
  - *mutate* or create new variables from existing ones
  - *summarize* many values into a smaller set of summary statistics
+
+In addition, we likely want to combine multiple data frames and rearrange data frames from wide to long forms or vice versa.
+
+While R comes with a built-in data frame library that handles all these tasks, a number of alternative data frame libraries have emerged over the years.
+The `data.table` library [@datatable] "provides a high-performance version of base R's `data.frame` with syntax and feature enhancements for ease of use, convenience and programming speed."
+The `dplyr` library [@dplyr] implements "a grammar of data manipulation" and forms part of the Tidyverse, which is "an opinionated collection of R packages designed for data science."
 
 While standard Python does not include a data frame library, there are several third-party data frame libraries used for data analysis in Python. 
 By far the most established data frame library is pandas, which has been the de facto standard data frame library in Python for more than a decade.
@@ -37,4 +42,21 @@ Recently Polars has attracted attention for its speed, efficiency, and expressiv
 In this book, I focus on Polars because its syntax makes data-manipulation code relatively easy to read while also scaling well to larger data sets.
 In addition, as I discuss below, Polars provides facility for adding namespaces that allows me to use a more fluent methods-based approach to plotting.
 
+### Data visualization libraries
+
+#### R
+
+Base graphics in R were written by Ross Ihaka drawing on experience implementing the graphics driver of S, a predecessor of R, and @chambers1983graphical. 
+Base graphics functions are generally fast, but have limited scope and functionality.
+
+The development of "grid" graphics, a much richer system of graphical primitives, started in 2000
+The lattice package, developed by Deepayan Sarkar [@sarkar2008lattice}], uses grid graphics to implement the trellis graphics system of @cleveland1993visualizing and is a considerable improvement over base graphics.
+You can easily produce conditioned plots and some plotting details are taken care of automatically.
+However, lattice graphics lack a formal model, which extending them more difficult.
+
+The ggplot2, started in 2005, is an attempt to take the good things about base and lattice graphics and improve on them with a strong underlying model which supports the production of any kind of statistical graphic, based on the principles outlined above.
+The solid underlying model of ggplot2 makes it easy to describe a wide range of graphics with a compact syntax, and independent components make extension easy.
+Like lattice, ggplot2 uses grid to draw the graphics, which means you can exercise much low-level control over the appearance of the plot.
+
+#### Python
 
