@@ -2242,21 +2242,33 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "quarto", specifier = ">=0.1.0" },
     { name = "scikit-misc" },
-    { name = "socviz-py", specifier = ">=0.0.2" },
+    { name = "socviz-py", editable = "../socviz_py" },
     { name = "statsmodels", specifier = ">=0.14.6" },
 ]
 
 [[package]]
 name = "socviz-py"
 version = "0.0.2"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "../socviz_py" }
 dependencies = [
     { name = "polars", extra = ["pyarrow"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/48/40/3885317e0ada931d135645f2ea5726e942892e7656b9e9a77a65d1623e72/socviz_py-0.0.2.tar.gz", hash = "sha256:09b279203f2a2d12865110036cc32fbe51c49046b1868a313d8e6ee1de6667a8", size = 1260134, upload-time = "2026-04-27T12:57:34.068Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/6d/1c/4c93d878d5679373761c3bc7600ff7f55a8a5ec552ec7e7eea6d478627f7/socviz_py-0.0.2-py3-none-any.whl", hash = "sha256:7eca942493e90843cb55fa087fd104d178319e9ed1c9c2422b6584be3cc113fd", size = 1264437, upload-time = "2026-04-27T12:57:32.079Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "build", marker = "extra == 'dev'" },
+    { name = "duckdb", marker = "extra == 'dev'" },
+    { name = "pandas", marker = "extra == 'dev'" },
+    { name = "pandas", marker = "extra == 'pandas'" },
+    { name = "plotnine", marker = "extra == 'dev'" },
+    { name = "plotnine", marker = "extra == 'plots'" },
+    { name = "polars", extras = ["pyarrow"] },
+    { name = "pyarrow", marker = "extra == 'pandas'" },
+    { name = "pytest", marker = "extra == 'dev'" },
+    { name = "requests", marker = "extra == 'dev'" },
+    { name = "twine", marker = "extra == 'dev'" },
 ]
+provides-extras = ["plots", "pandas", "dev"]
 
 [[package]]
 name = "soupsieve"
