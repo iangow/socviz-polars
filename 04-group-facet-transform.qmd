@@ -10,10 +10,13 @@ The main ideas carry over directly: grouping tells a geom how observations belon
 
 ```{python}
 import polars as pl
+import plotnine_polars as p9
 from mizani.formatters import currency_format, percent_format
 from plotnine.data import midwest as midwest_pd
-from plotnine_polars import aes, after_stat
-from socviz_pl import load_data
+from plotnine_polars import aes
+from socviz_pl import load_data, theme_socviz
+
+p9.theme_set(theme_socviz())
 ```
 
 ```{python}
@@ -28,6 +31,8 @@ titanic = load_data("titanic")
 oecd_sum = load_data("oecd_sum")
 ```
 
+## Colorless Green Data Sleeps Furiously
+
 ## Grouped Data and the Group Aesthetic
 
 As in R, the line geom needs to know which observations should be connected.
@@ -35,7 +40,7 @@ With the fluent API, the `group` mapping goes inside `.geom_line()` because it a
 
 ```{python}
 #| label: fig-ch-04-gapminder-lines-wrong
-#| fig-cap: "Connecting GDP per capita observations without a country grouping."
+#| fig-cap: Trying and failing to plot the data over time by country.
 (
     gapminder
     .ggplot(aes(x="year", y="gdpPercap"))
@@ -45,7 +50,7 @@ With the fluent API, the `group` mapping goes inside `.geom_line()` because it a
 
 ```{python}
 #| label: fig-ch-04-gapminder-lines
-#| fig-cap: "GDP per capita over time, grouped by country."
+#| fig-cap: Plotting the data over time by country, again.
 (
     gapminder
     .ggplot(aes(x="year", y="gdpPercap"))
@@ -128,7 +133,7 @@ As in the R example, `group=1` asks for proportions over the whole dataset rathe
 (
     gss_sm
     .ggplot(aes(x="bigregion"))
-    .geom_bar(aes(y=after_stat("prop"), group=1))
+    .geom_bar(aes(y=p9.after_stat("prop"), group=1))
     .scale_y_continuous(labels=percent_format())
 )
 ```
@@ -183,7 +188,7 @@ Grouping by `religion` makes the proportions add up across regions for each reli
     gss_sm
     .ggplot(aes(x="bigregion", fill="religion"))
     .geom_bar(
-        aes(y=after_stat("prop"), group="religion"),
+        aes(y=p9.after_stat("prop"), group="religion"),
         position="dodge"
     )
     .scale_y_continuous(labels=percent_format())
@@ -199,7 +204,7 @@ Faceting by region lets each panel calculate the proportions within the region.
     gss_sm
     .ggplot(aes(x="religion"))
     .geom_bar(
-        aes(y=after_stat("prop"), group="bigregion"),
+        aes(y=p9.after_stat("prop"), group="bigregion"),
         position="dodge"
     )
     .facet_wrap("bigregion", ncol=1)
@@ -267,7 +272,7 @@ oh_wi = ["OH", "WI"]
 ```
 
 The density statistic also exposes computed values.
-Here `after_stat("scaled")` is the plotnine form of the ggplot idiom `..scaled..`.
+Here `p9.after_stat("scaled")` is the plotnine form of the ggplot idiom `..scaled..`.
 
 ```{python}
 #| label: fig-ch-04-density-scaled
@@ -276,7 +281,7 @@ Here `after_stat("scaled")` is the plotnine form of the ggplot idiom `..scaled..
     midwest
     .filter(pl.col("state").is_in(oh_wi))
     .ggplot(aes(x="area", fill="state", color="state"))
-    .geom_density(aes(y=after_stat("scaled")), alpha=0.3)
+    .geom_density(aes(y=p9.after_stat("scaled")), alpha=0.3)
 )
 ```
 

@@ -15,18 +15,9 @@ import polars as pl
 
 from plotnine_polars import aes
 import plotnine_polars as p9
-from socviz_pl import load_data
+from socviz_pl import load_data, theme_socviz, theme_socviz_map
 
-def theme_map():
-    return (
-        p9.theme_void()
-        + p9.theme(
-            dpi=100,
-            legend_position="bottom",
-            plot_title=p9.element_text(ha="left", size=12),
-            strip_background=p9.element_rect(fill="white", color="white"),
-        )
-    )
+p9.theme_set(theme_socviz())
 ```
 
 ```{python}
@@ -276,7 +267,7 @@ elections24_sf = (
 
 ```{python}
 #| include: false
-p9.theme_set(theme_map())
+p9.theme_set(theme_socviz_map())
 ```
 
 Once the data are joined, we can fill the polygons by the winning party.
@@ -547,7 +538,7 @@ The same opiate data can be shown as time series, grouped by Census division.
 This makes the state trajectories and regional variation easier to compare.
 
 ```{python}
-p9.theme_set(p9.theme_gray())
+p9.theme_set(theme_socviz())
 ```
 
 ```{python}

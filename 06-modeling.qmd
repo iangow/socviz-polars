@@ -15,8 +15,11 @@ import polars as pl
 import statsmodels.formula.api as smf
 
 from mizani.formatters import currency_format
+import plotnine_polars as p9
 from plotnine_polars import aes, position_dodge
-from socviz_pl import load_data
+from socviz_pl import load_data, theme_socviz
+
+p9.theme_set(theme_socviz())
 ```
 
 ```{python}
