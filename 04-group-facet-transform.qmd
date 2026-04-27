@@ -70,7 +70,8 @@ In `plotnine_polars`, we pass the column name as a string.
     gapminder
     .ggplot(aes(x="year", y="gdpPercap"))
     .geom_line(aes(group="country"))
-    .facet_wrap("continent")
+    .facet_wrap("~ continent", ncol=1)
+    .add_theme(figure_size=(3, 8))
 )
 ```
 
@@ -79,12 +80,14 @@ The hex color `#B3B3B3` is the equivalent shade.
 
 ```{python}
 #| label: fig-ch-04-facet-continent-polished
-#| fig-cap: "Faceting by continent with smoother and log-scaled GDP per capita."
+#| fig-cap: "Faceting by continent, again."
+#| column: screen-inset
 (
     gapminder
     .ggplot(aes(x="year", y="gdpPercap"))
     .geom_line(aes(group="country"), color="#B3B3B3")
-    .geom_smooth(size=1.1, method="loess", se=False)
+    .geom_smooth(size=1.1, method="loess", se=False, color="#0072B2")
+    .scale_x_continuous(breaks = [1960, 1980, 2000])
     .scale_y_log10(labels=currency_format(precision=0, big_mark=","))
     .facet_wrap("continent", ncol=5)
     .labs(
@@ -92,20 +95,19 @@ The hex color `#B3B3B3` is the equivalent shade.
         y="GDP per capita",
         title="GDP per capita on Five Continents"
     )
+    .add_theme(figure_size=(9, 3))
 )
 ```
 
-For `facet_grid()`, the R formula `sex ~ race` becomes explicit `rows` and `cols` arguments.
-
 ```{python}
 #| label: fig-ch-04-facet-grid
-#| fig-cap: "Faceting on two categorical variables."
+#| fig-cap: "Faceting on two categorical variables. Each panel plots the relationship between age and number of children, with the facets breaking out the data by sex (in the rows) and race (in the columns)."
 (
     gss_sm
     .ggplot(aes(x="age", y="childs"))
     .geom_point(alpha=0.2)
-    .geom_smooth()
-    .facet_grid(rows="sex", cols="race")
+    .geom_smooth(method="loess", se=False, color="#0072B2")
+    .facet_grid("sex ~ race")
 )
 ```
 
@@ -125,16 +127,29 @@ This example is the direct translation of the R code, with `bigregion` mapped to
 ```
 
 Modern plotnine uses `after_stat("prop")` where older ggplot examples often use `..prop..`.
-As in the R example, `group=1` asks for proportions over the whole dataset rather than within each x value.
 
 ```{python}
 #| label: fig-ch-04-bar-proportions
-#| fig-cap: "A bar chart with proportions over all census regions."
+#| fig-cap: "A first go at a bar chart with proportions."
 (
     gss_sm
-    .ggplot(aes(x="bigregion"))
-    .geom_bar(aes(y=p9.after_stat("prop"), group=1))
-    .scale_y_continuous(labels=percent_format())
+    .ggplot(aes(x="bigregion",
+                y=p9.after_stat("prop")))
+    .geom_bar()
+)
+```
+
+As in the R example, `group=1` asks for proportions over the whole dataset rather than within each x value.
+
+```{python}
+#| label: fig-ch-04-bar-prop-correct
+#| fig-cap: " A bar chart with correct proportions."
+(
+    gss_sm
+    .ggplot(aes(x="bigregion",
+                y=p9.after_stat("prop"),
+                group=1))
+    .geom_bar()
 )
 ```
 
@@ -142,14 +157,27 @@ Mapping `fill` changes the interior of the bars.
 The fluent API uses `.add_guides(fill="none")` to suppress a redundant legend.
 
 ```{python}
+gss_sm.group_by("religion").agg(n=pl.len()).sort("n", descending=True)
+```
+
+```{python}
 #| label: fig-ch-04-religion-fill
-#| fig-cap: "GSS religious preference mapped to bar fill."
+#| fig-cap: "GSS religious preference mapped to bar color (a) and fill (b)."
+#| fig-subcap: ["", ""]
+#| layout-nrow: 2
+
+(
+    gss_sm
+    .ggplot(aes(x="religion", color="religion"))
+    .geom_bar()
+).show()
+
 (
     gss_sm
     .ggplot(aes(x="religion", fill="religion"))
     .geom_bar()
     .add_guides(fill="none")
-)
+).show()
 ```
 
 ## Frequency Plots the Slightly Awkward Way
@@ -181,9 +209,24 @@ The `position="fill"` adjustment changes the scale from counts to within-bar pro
 The next plot mirrors the book's "not quite what we wanted" example.
 Grouping by `religion` makes the proportions add up across regions for each religion rather than within each region.
 
+
+```{python}
+#| label: fig-ch-04-proportions
+#| fig-cap: "A first go at a dodged bar chart with proportional bars."
+(
+    gss_sm
+    .ggplot(aes(x="bigregion", fill="religion"))
+    .geom_bar(
+        aes(y=p9.after_stat("prop")),
+        position="dodge"
+    )
+    .scale_y_continuous(labels=percent_format())
+)
+```
+
 ```{python}
 #| label: fig-ch-04-dodged-proportions
-#| fig-cap: "A dodged bar chart where proportions are grouped by religion."
+#| fig-cap: "A second attempt as a dodged bar chart with proportional bars."
 (
     gss_sm
     .ggplot(aes(x="bigregion", fill="religion"))
@@ -199,7 +242,7 @@ Faceting by region lets each panel calculate the proportions within the region.
 
 ```{python}
 #| label: fig-ch-04-faceted-proportions
-#| fig-cap: "Faceting religious preference proportions within region."
+#| fig-cap: "Faceting proportions within region."
 (
     gss_sm
     .ggplot(aes(x="religion"))
@@ -207,7 +250,7 @@ Faceting by region lets each panel calculate the proportions within the region.
         aes(y=p9.after_stat("prop"), group="bigregion"),
         position="dodge"
     )
-    .facet_wrap("bigregion", ncol=1)
+    .facet_wrap("bigregion", ncol=2)
     .scale_y_continuous(labels=percent_format())
 )
 ```
