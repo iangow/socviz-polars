@@ -17,6 +17,3 @@ dependencies = [
     "socviz-py>=0.0.2",
     "statsmodels>=0.14.6",
 ]
-
-[tool.uv.sources]
-socviz-py = { path = "../socviz_py", editable = true }
