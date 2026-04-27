@@ -504,23 +504,27 @@ div.csl-indent {
 <h3 data-number="2.3.4" class="anchored" data-anchor-id="functions-come-in-packages"><span class="header-section-number">2.3.4</span> Functions come in packages</h3>
 <p>This is even more true in Python than it is in R. While R offers tools for working with arrays and data frames out of the box, Python relies much more on third-party packages for standard data science work. For example, arrays typically come from NumPy and data frames from packages such as pandas or Polars.</p>
 <p>In this chapter, I use the following two packages.</p>
-<div id="6d1181e2" class="cell" data-execution_count="1">
+<div id="0f196096" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotnine_polars <span class="im">as</span> p9</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> socviz_pl <span class="im">import</span> theme_socviz</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>p9.theme_set(theme_socviz())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>These lines do not make any functions part of the namespace directly; one still needs to access them using (say) <code>pl.read_csv()</code>. In contrast, the command <code>library(ggplot2)</code> in R is closer to saying <code>from polars import *</code>; if we took that approach, <code>read_csv()</code> would become available directly.</p>
 </section>
 <section id="ask-vectors-their-type-ask-complex-objects-their-class" class="level3" data-number="2.3.5">
 <h3 data-number="2.3.5" class="anchored" data-anchor-id="ask-vectors-their-type-ask-complex-objects-their-class"><span class="header-section-number">2.3.5</span> “Ask vectors their type; ask complex objects their class”</h3>
 <p>It is difficult to do a literal translation of this to Python. To make things concrete let’s create an object.</p>
-<div id="5b77899c" class="cell" data-execution_count="2">
+<div id="3bb9889b" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>gapminder <span class="op">=</span> pl.read_csv(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/jennybc/"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gapminder/main/inst/extdata/gapminder.tsv"</span>,</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    separator<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>gapminder</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="2">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -643,23 +647,23 @@ div.csl-indent {
 </div>
 </div>
 <p>Here we can see that <code>organs</code> is a Polars <code>DataFrame</code>.</p>
-<div id="2ce1048a" class="cell" data-execution_count="3">
+<div id="6dd3abd3" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(gapminder)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="9">
+<div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>polars.dataframe.frame.DataFrame</code></pre>
 </div>
 </div>
 <p>The analogue of the vector in R is probably either a NumPy array (<code>np.ndarray</code>) or a <code>Series</code>, whether provided by pandas or Polars. We won’t work with arrays or <code>Series</code> objects much. However, the idea of “type” referred to in <span class="citation" data-cites="Healy2026">Healy (<a href="references.html#ref-Healy2026" role="doc-biblioref">2026</a>)</span> is mirrored in the <code>.dtype</code> attribute.</p>
-<div id="ba485b8e" class="cell" data-execution_count="4">
+<div id="5944d851" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>gapminder[<span class="st">"year"</span>].dtype</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
+<div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>Int64</code></pre>
 </div>
 </div>
 <p>We can inspect the <code>dtype</code> for all columns of a <code>DataFrame</code> using the <code>.schema</code> attribute:</p>
-<div id="4bf1bda0" class="cell" data-execution_count="5">
+<div id="18207ea8" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>gapminder.schema</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
+<div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>Schema([('country', String),
         ('continent', String),
         ('year', Int64),
@@ -678,11 +682,11 @@ div.csl-indent {
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"gdpPercap"</span>, y<span class="op">=</span><span class="st">"lifeExp"</span>))</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .geom_point()</span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="12">
+<div class="cell-output cell-output-display" data-execution_count="6">
 <div id="fig-first-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-first-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="02-intro_files/figure-html/fig-first-plot-output-1.png" width="672" height="480" class="figure-img">
+<img src="02-intro_files/figure-html/fig-first-plot-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-first-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2.1: Life expectancy plotted against GDP per capita for a large number of country-years.

@@ -461,25 +461,16 @@ div.csl-indent {
 
 
 <p>This chapter follows <a href="https://socvis.co/maps.html">Chapter 7 of <span class="citation" data-cites="Healy2026">Healy (<span>2026</span>)</span></a>, translating the main map examples to Python, Polars, and <code>plotnine_polars</code>. The Python setup here is intentionally lightweight: we use the preprojected polygon tables from <code>socviz</code> and draw them with ordinary plotnine polygon layers. That keeps the data work in Polars and avoids adding a full GIS stack for this introductory chapter. The code used to prepare the map-related Parquet files lives in the <code>data-raw/</code> directory of the <code>socviz_py</code> package.</p>
-<div id="7a33df16" class="cell" data-execution_count="1">
+<div id="dcd8ad50" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotnine_polars <span class="im">as</span> p9</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> socviz_pl <span class="im">import</span> load_data</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> socviz_pl <span class="im">import</span> load_data, theme_socviz, theme_socviz_map</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> theme_map():</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        p9.theme_void()</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> p9.theme(</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>            dpi<span class="op">=</span><span class="dv">100</span>,</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>            legend_position<span class="op">=</span><span class="st">"bottom"</span>,</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            plot_title<span class="op">=</span>p9.element_text(ha<span class="op">=</span><span class="st">"left"</span>, size<span class="op">=</span><span class="dv">12</span>),</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>            strip_background<span class="op">=</span>p9.element_rect(fill<span class="op">=</span><span class="st">"white"</span>, color<span class="op">=</span><span class="st">"white"</span>),</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>p9.theme_set(theme_socviz())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="4c73b55c" class="cell" data-execution_count="2">
+<div id="514b3344" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>election24 <span class="op">=</span> load_data(<span class="st">"election24"</span>).with_columns(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    fips_str<span class="op">=</span>pl.col(<span class="st">"fips"</span>).cast(pl.Utf8).<span class="bu">str</span>.zfill(<span class="dv">2</span>),</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    region<span class="op">=</span>pl.col(<span class="st">"state"</span>).<span class="bu">str</span>.to_lowercase(),</span>
@@ -509,11 +500,11 @@ div.csl-indent {
 <section id="draw-a-map-of-us-states" class="level2" data-number="7.1">
 <h2 data-number="7.1" class="anchored" data-anchor-id="draw-a-map-of-us-states"><span class="header-section-number">7.1</span> Draw a Map of US States</h2>
 <p>The first thing to remember about spatial data is that you do not have to represent it spatially. Here are the 2024 US presidential election data as a faceted dot plot. This view makes the margins by state more directly comparable than a two-color choropleth would.</p>
-<div id="8dfd5a35" class="cell" data-execution_count="3">
+<div id="9aa52506" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>election24.select(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"state"</span>, <span class="st">"total_vote"</span>, <span class="st">"r_points"</span>, <span class="st">"pct_trump"</span>, <span class="st">"party"</span>, <span class="st">"census"</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>).sample(<span class="dv">5</span>, seed<span class="op">=</span><span class="dv">7</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="42">
+<div class="cell-output cell-output-display" data-execution_count="3">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -587,7 +578,7 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<div id="0440a195" class="cell" data-execution_count="4">
+<div id="c01fa77a" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>party_colors <span class="op">=</span> [<span class="st">"#2E74C0"</span>, <span class="st">"#CB454A"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="cell-fig-ch-07-election-dotplot" class="cell" data-fig-height="11" data-execution_count="5">
@@ -611,11 +602,11 @@ div.csl-indent {
 <span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    .add_theme(axis_text_y<span class="op">=</span>p9.element_text(size<span class="op">=</span><span class="dv">7</span>))</span>
 <span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    .add_theme(figure_size<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">11</span>))</span>
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="44">
+<div class="cell-output cell-output-display" data-execution_count="5">
 <div id="fig-ch-07-election-dotplot" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-election-dotplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-election-dotplot-output-1.png" width="576" height="1056" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-election-dotplot-output-1.png" width="600" height="1100" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-election-dotplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.1: 2024 election results by state and census region.
@@ -625,9 +616,9 @@ Figure&nbsp;7.1: 2024 election results by state and census region.
 </div>
 </div>
 <p>In R, the chapter begins by loading state outlines from the <code>maps</code> package. The Python version uses the same state outline data exported from R’s <code>ggplot2::map_data("state")</code>. The result is an ordinary polygon table with one row per outline vertex and a lower-case <code>region</code> column for joining to state-level data.</p>
-<div id="f8580a33" class="cell" data-execution_count="6">
+<div id="f051472c" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>us_states</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="45">
+<div class="cell-output cell-output-display" data-execution_count="6">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -756,11 +747,11 @@ Figure&nbsp;7.1: 2024 election results by state and census region.
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    .geom_point(size <span class="op">=</span> <span class="fl">0.1</span>)</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    .add_theme(figure_size<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="46">
-<div id="fig-7-3" class="quarto-float quarto-figure quarto-figure-center anchored" height="384" width="576">
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div id="fig-7-3" class="quarto-float quarto-figure quarto-figure-center anchored" width="600" height="400">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-7-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-7-3-output-1.png" id="fig-7-3" width="576" height="384" class="figure-img">
+<img src="07-maps_files/figure-html/fig-7-3-output-1.png" id="fig-7-3" width="600" height="400" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-7-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.2
@@ -776,11 +767,11 @@ Figure&nbsp;7.2
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    .geom_polygon(fill<span class="op">=</span><span class="st">"white"</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    .add_theme(figure_size<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="47">
-<div id="fig-7-4" class="quarto-float quarto-figure quarto-figure-center anchored" height="384" width="576">
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div id="fig-7-4" class="quarto-float quarto-figure quarto-figure-center anchored" width="600" height="400">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-7-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-7-4-output-1.png" id="fig-7-4" width="576" height="384" class="figure-img">
+<img src="07-maps_files/figure-html/fig-7-4-output-1.png" id="fig-7-4" width="600" height="400" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-7-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.3
@@ -789,7 +780,7 @@ Figure&nbsp;7.3
 </div>
 </div>
 </div>
-<div id="93fd9c41" class="cell" data-execution_count="9">
+<div id="db7c3c17" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyproj <span class="im">import</span> Transformer</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>albers <span class="op">=</span> Transformer.from_crs(</span>
@@ -814,11 +805,11 @@ Figure&nbsp;7.3
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    .add_guides(fill<span class="op">=</span><span class="st">"none"</span>)</span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    .add_theme(figure_size<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="49">
-<div id="fig-7-5" class="quarto-float quarto-figure quarto-figure-center anchored" height="384" width="576">
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div id="fig-7-5" class="quarto-float quarto-figure quarto-figure-center anchored" width="600" height="400">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-7-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-7-5-output-1.png" id="fig-7-5" width="576" height="384" class="figure-img">
+<img src="07-maps_files/figure-html/fig-7-5-output-1.png" id="fig-7-5" width="600" height="400" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-7-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.4
@@ -830,13 +821,13 @@ Figure&nbsp;7.4
 </section>
 <section id="use-simple-features-to-draw-maps" class="level2" data-number="7.2">
 <h2 data-number="7.2" class="anchored" data-anchor-id="use-simple-features-to-draw-maps"><span class="header-section-number">7.2</span> Use Simple Features to Draw Maps</h2>
-<div id="e85b1619" class="cell" data-execution_count="11">
+<div id="0fe9d880" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    election24</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .select(<span class="st">"state"</span>, <span class="st">"st"</span>, <span class="st">"fips"</span>, <span class="st">"total_vote"</span>, </span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"winner"</span>, <span class="st">"pct_margin"</span>)</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="50">
+<div class="cell-output cell-output-display" data-execution_count="11">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -959,19 +950,19 @@ Figure&nbsp;7.4
 </div>
 </div>
 <p>Rather than using <code>states_sf</code> from the <code>socviz</code> R package, I grab similar data from the <code>geodatasets</code> package.</p>
-<div id="4d2083fc" class="cell" data-execution_count="12">
+<div id="a75ef1fb" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geodatasets</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> geodatasets.get_path(<span class="st">"geoda.ncovr"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>I then load the <code>spatial</code> extension of DuckDB.</p>
-<div id="b82aeef1" class="cell" data-execution_count="13">
+<div id="17ae6409" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>con <span class="op">=</span> duckdb.<span class="ex">connect</span>()</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>con.sql(<span class="st">"INSTALL spatial"</span>)</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>con.sql(<span class="st">"LOAD spatial"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>I use DuckDB to process the data into the required form. Here <code>states</code> is roughly equivalent to <code>states_sf</code> from <code>socviz</code>.</p>
-<div id="5d7f4175" class="cell" data-execution_count="14">
+<div id="a5c1ebae" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>states <span class="op">=</span> con.sql(<span class="ss">f"""</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ss">    SELECT</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="ss">        STATE_NAME AS state,</span></span>
@@ -986,7 +977,7 @@ Figure&nbsp;7.4
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="ss">    ORDER BY state</span></span>
 <span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="ffb901b0" class="cell" data-execution_count="15">
+<div id="439f7a2b" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>con.sql(<span class="st">"""</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="st">        state,</span></span>
@@ -995,7 +986,7 @@ Figure&nbsp;7.4
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="st">    ORDER BY state</span></span>
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="st">    LIMIT 10</span></span>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="54">
+<div class="cell-output cell-output-display" data-execution_count="15">
 <pre><code>┌──────────────────────┬───────────────────────────────────┐
 │        state         │               geom                │
 │       varchar        │              varchar              │
@@ -1014,7 +1005,7 @@ Figure&nbsp;7.4
   10 rows                                        2 columns</code></pre>
 </div>
 </div>
-<div id="f99c66ed" class="cell" data-execution_count="16">
+<div id="9dd178ea" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>state_vertices <span class="op">=</span> con.sql(<span class="st">"""</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="st">WITH </span></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="st">raw_parts AS (</span></span>
@@ -1062,7 +1053,7 @@ Figure&nbsp;7.4
 <span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>).pl()</span>
 <span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>state_vertices</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="55">
+<div class="cell-output cell-output-display" data-execution_count="16">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -1171,7 +1162,7 @@ Figure&nbsp;7.4
 </div>
 </div>
 </div>
-<div id="a65ec414" class="cell" data-execution_count="17">
+<div id="175e042a" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>elections24_sf <span class="op">=</span> (</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    election24</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    .join(state_vertices, on<span class="op">=</span><span class="st">"state"</span>, how<span class="op">=</span><span class="st">"inner"</span>)</span>
@@ -1187,11 +1178,11 @@ Figure&nbsp;7.4
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    .scale_fill_manual(values<span class="op">=</span>party_colors)</span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    .labs(fill<span class="op">=</span><span class="va">None</span>)</span>
 <span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="58">
+<div class="cell-output cell-output-display" data-execution_count="19">
 <div id="fig-ch-07-election-map" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-election-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-election-map-output-1.png" width="700" height="500" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-election-map-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-election-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.5: 2024 election results by state.
@@ -1210,11 +1201,11 @@ Figure&nbsp;7.5: 2024 election results by state.
 <span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    .scale_fill_gradient(low<span class="op">=</span><span class="st">"white"</span>, high<span class="op">=</span><span class="st">"#CB454A"</span>, labels<span class="op">=</span><span class="kw">lambda</span> lst: [<span class="ss">f"</span><span class="sc">{</span>v<span class="sc">:.0%}</span><span class="ss">"</span> <span class="cf">for</span> v <span class="kw">in</span> lst])</span>
 <span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    .labs(fill<span class="op">=</span><span class="st">"Percent"</span>)</span>
 <span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="59">
+<div class="cell-output cell-output-display" data-execution_count="20">
 <div id="fig-ch-07-trump-vote" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-trump-vote-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-trump-vote-output-1.png" width="700" height="500" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-trump-vote-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-trump-vote-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.6: Trump vote share by state.
@@ -1234,11 +1225,11 @@ Figure&nbsp;7.6: Trump vote share by state.
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    .scale_fill_gradient2(low<span class="op">=</span><span class="st">"red"</span>, mid<span class="op">=</span><span class="st">"#756BB1"</span>, high<span class="op">=</span><span class="st">"blue"</span>)</span>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    .labs(fill<span class="op">=</span><span class="st">"Percent"</span>)</span>
 <span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="60">
+<div class="cell-output cell-output-display" data-execution_count="21">
 <div id="fig-ch-07-purple-america" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-purple-america-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-purple-america-output-1.png" width="700" height="500" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-purple-america-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-purple-america-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.7: A Purple America version of the 2024 winning margins.
@@ -1251,9 +1242,9 @@ Figure&nbsp;7.7: A Purple America version of the 2024 winning margins.
 <section id="americas-ur-choropleths" class="level2" data-number="7.3">
 <h2 data-number="7.3" class="anchored" data-anchor-id="americas-ur-choropleths"><span class="header-section-number">7.3</span> America’s Ur-Choropleths</h2>
 <p>The county map and county data objects join on the county FIPS code. This gives us the same large polygon table used in the book, with county-level variables attached.</p>
-<div id="276dfc3c" class="cell" data-execution_count="22">
+<div id="619bc9d0" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>county_data.select(<span class="st">"id"</span>, <span class="st">"name"</span>, <span class="st">"state"</span>, <span class="st">"pop_dens"</span>, <span class="st">"pct_black"</span>).sample(<span class="dv">5</span>, seed<span class="op">=</span><span class="dv">7</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="61">
+<div class="cell-output cell-output-display" data-execution_count="22">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -1320,10 +1311,10 @@ Figure&nbsp;7.7: A Purple America version of the 2024 winning margins.
 </div>
 </div>
 </div>
-<div id="41296422" class="cell" data-execution_count="23">
+<div id="4157357e" class="cell" data-execution_count="23">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>county_full <span class="op">=</span> county_map.join(county_data, on<span class="op">=</span><span class="st">"id"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="8f5b1bac" class="cell" data-execution_count="24">
+<div id="48f2518c" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>pop_dens_levels <span class="op">=</span> [</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"[    0,   10)"</span>,</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"[   10,   50)"</span>,</span>
@@ -1362,11 +1353,11 @@ Figure&nbsp;7.7: A Purple America version of the 2024 winning margins.
 <span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    .labs(fill<span class="op">=</span><span class="st">"Population per</span><span class="ch">\n</span><span class="st">square mile"</span>)</span>
 <span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    .add_guides(fill<span class="op">=</span>p9.guide_legend(nrow<span class="op">=</span><span class="dv">1</span>))</span>
 <span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="64">
+<div class="cell-output cell-output-display" data-execution_count="25">
 <div id="fig-ch-07-pop-density" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-pop-density-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-pop-density-output-1.png" width="700" height="500" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-pop-density-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-pop-density-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.8: U.S. population density by county.
@@ -1385,11 +1376,11 @@ Figure&nbsp;7.8: U.S. population density by county.
 <span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    .labs(fill<span class="op">=</span><span class="st">"US Population,</span><span class="ch">\n</span><span class="st">Percent Black"</span>)</span>
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    .add_guides(fill<span class="op">=</span>p9.guide_legend(nrow<span class="op">=</span><span class="dv">1</span>))</span>
 <span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="65">
+<div class="cell-output cell-output-display" data-execution_count="26">
 <div id="fig-ch-07-pct-black" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-pct-black-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-pct-black-output-1.png" width="700" height="500" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-pct-black-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-pct-black-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.9: Percent Black population by county.
@@ -1399,7 +1390,7 @@ Figure&nbsp;7.9: Percent Black population by county.
 </div>
 </div>
 <p>Population density and percent Black are the two background choropleths that explain, or at least complicate, many maps of the United States. The next pair of maps repeats the book’s comparison between binned gun-related suicide rates and reverse-coded population density.</p>
-<div id="748dc295" class="cell" data-execution_count="27">
+<div id="6cbcf475" class="cell" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>orange_pal <span class="op">=</span> [<span class="st">"#FEEDDE"</span>, <span class="st">"#FDD0A2"</span>, <span class="st">"#FDAE6B"</span>, <span class="st">"#FD8D3C"</span>, <span class="st">"#E6550D"</span>, <span class="st">"#A63603"</span>]</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>orange_rev <span class="op">=</span> <span class="bu">list</span>(<span class="bu">reversed</span>(orange_pal))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -1412,11 +1403,11 @@ Figure&nbsp;7.9: Percent Black population by county.
 <span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    .scale_fill_manual(values<span class="op">=</span>orange_pal)</span>
 <span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    .labs(title<span class="op">=</span><span class="st">"Gun-Related Suicides, 1999-2015"</span>, fill<span class="op">=</span><span class="st">"Rate per 100,000 pop."</span>)</span>
 <span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="67">
+<div class="cell-output cell-output-display" data-execution_count="28">
 <div id="fig-ch-07-gun-suicides" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-gun-suicides-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-gun-suicides-output-1.png" width="700" height="500" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-gun-suicides-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-gun-suicides-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.10: Gun-related suicides by county.
@@ -1434,11 +1425,11 @@ Figure&nbsp;7.10: Gun-related suicides by county.
 <span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    .scale_fill_manual(values<span class="op">=</span>orange_rev)</span>
 <span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    .labs(title<span class="op">=</span><span class="st">"Reverse-coded Population Density"</span>, fill<span class="op">=</span><span class="st">"People per square mile"</span>)</span>
 <span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="68">
+<div class="cell-output cell-output-display" data-execution_count="29">
 <div id="fig-ch-07-pop-density-reverse" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-pop-density-reverse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-pop-density-reverse-output-1.png" width="700" height="500" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-pop-density-reverse-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-pop-density-reverse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.11: Reverse-coded population density by county.
@@ -1451,7 +1442,7 @@ Figure&nbsp;7.11: Reverse-coded population density by county.
 <section id="statebins" class="level2" data-number="7.4">
 <h2 data-number="7.4" class="anchored" data-anchor-id="statebins"><span class="header-section-number">7.4</span> Statebins</h2>
 <p>The R chapter uses the <code>statebins</code> package. Here we build a small statebin grid directly as a Polars data frame and draw it with <code>geom_tile()</code>. This is not a replacement for a dedicated statebins library, but it is enough to show the idea with the same grammar of graphics.</p>
-<div id="9d226688" class="cell" data-execution_count="30">
+<div id="3bbaee1b" class="cell" data-execution_count="30">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>state_grid <span class="op">=</span> pl.DataFrame(</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    {</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"st"</span>: [</span>
@@ -1496,11 +1487,11 @@ Figure&nbsp;7.11: Reverse-coded population density by county.
 <span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    .coord_equal()</span>
 <span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    .labs(fill<span class="op">=</span><span class="st">"Percent Trump"</span>)</span>
 <span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="70">
+<div class="cell-output cell-output-display" data-execution_count="31">
 <div id="fig-ch-07-statebins-trump" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-statebins-trump-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-statebins-trump-output-1.png" width="700" height="500" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-statebins-trump-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-statebins-trump-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.12: A statebin-style view of Trump’s vote share.
@@ -1520,11 +1511,11 @@ Figure&nbsp;7.12: A statebin-style view of Trump’s vote share.
 <span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    .coord_equal()</span>
 <span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    .labs(fill<span class="op">=</span><span class="st">"Winner"</span>)</span>
 <span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="71">
+<div class="cell-output cell-output-display" data-execution_count="32">
 <div id="fig-ch-07-statebins-party" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-statebins-party-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-statebins-party-output-1.png" width="700" height="500" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-statebins-party-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-statebins-party-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.13: A statebin-style view of the state winner.
@@ -1537,9 +1528,9 @@ Figure&nbsp;7.13: A statebin-style view of the state winner.
 <section id="small-multiple-maps" class="level2" data-number="7.5">
 <h2 data-number="7.5" class="anchored" data-anchor-id="small-multiple-maps"><span class="header-section-number">7.5</span> Small-Multiple Maps</h2>
 <p>The <code>opiates</code> data have state-level death rates observed over time. We merge them into the same state polygon frame and facet by year.</p>
-<div id="be1d9e86" class="cell" data-execution_count="33">
+<div id="600d001a" class="cell" data-execution_count="33">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>opiates.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="72">
+<div class="cell-output cell-output-display" data-execution_count="33">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -1641,7 +1632,7 @@ Figure&nbsp;7.13: A statebin-style view of the state winner.
 </div>
 </div>
 </div>
-<div id="f7bb4119" class="cell" data-execution_count="34">
+<div id="2cdac316" class="cell" data-execution_count="34">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>opiates_map <span class="op">=</span> us_states.join(</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    opiates,</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    on<span class="op">=</span><span class="st">"region"</span>,</span>
@@ -1662,11 +1653,11 @@ Figure&nbsp;7.13: A statebin-style view of the state winner.
 <span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"Opiate Related Deaths by State, 2000-2014"</span>,</span>
 <span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="74">
+<div class="cell-output cell-output-display" data-execution_count="35">
 <div id="fig-ch-07-opiates-map" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-opiates-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-opiates-map-output-1.png" width="700" height="500" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-opiates-map-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-opiates-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.14: Opiate-related deaths by state, 2000-2014.
@@ -1679,10 +1670,10 @@ Figure&nbsp;7.14: Opiate-related deaths by state, 2000-2014.
 <section id="is-your-data-really-spatial" class="level2" data-number="7.6">
 <h2 data-number="7.6" class="anchored" data-anchor-id="is-your-data-really-spatial"><span class="header-section-number">7.6</span> Is Your Data Really Spatial?</h2>
 <p>Even if data are collected in spatial units, a map may not be the clearest display. The same opiate data can be shown as time series, grouped by Census division. This makes the state trajectories and regional variation easier to compare.</p>
-<div id="eab69980" class="cell" data-execution_count="36">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>p9.theme_set(p9.theme_gray())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="75">
-<pre><code>&lt;plotnine.themes.theme_void.theme_void at 0x126c2adf0&gt;</code></pre>
+<div id="d7b7a96e" class="cell" data-execution_count="36">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>p9.theme_set(theme_socviz())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="36">
+<pre><code>&lt;plotnine.themes.theme_minimal.theme_minimal at 0x12237c7d0&gt;</code></pre>
 </div>
 </div>
 <div id="cell-fig-ch-07-opiates-lines" class="cell" data-execution_count="37">
@@ -1693,11 +1684,11 @@ Figure&nbsp;7.14: Opiate-related deaths by state, 2000-2014.
 <span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    .geom_line(color<span class="op">=</span><span class="st">"#B3B3B3"</span>)</span>
 <span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    .labs(x<span class="op">=</span><span class="st">"Year"</span>, y<span class="op">=</span><span class="st">"Rate per 100,000 population"</span>)</span>
 <span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="76">
+<div class="cell-output cell-output-display" data-execution_count="37">
 <div id="fig-ch-07-opiates-lines" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-opiates-lines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="07-maps_files/figure-html/fig-ch-07-opiates-lines-output-1.png" width="672" height="480" class="figure-img">
+<img src="07-maps_files/figure-html/fig-ch-07-opiates-lines-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-07-opiates-lines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;7.15: All state-level opiate death-rate trends at once.
@@ -1706,7 +1697,7 @@ Figure&nbsp;7.15: All state-level opiate death-rate trends at once.
 </div>
 </div>
 </div>
-<div id="381f76be" class="cell" data-execution_count="38">
+<div id="4679e34b" class="cell" data-execution_count="38">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>division_means <span class="op">=</span> (</span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    opiates</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"division_name"</span>).is_not_null())</span>
@@ -1751,7 +1742,7 @@ Figure&nbsp;7.15: All state-level opiate death-rate trends at once.
 <span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>    .theme_minimal()</span>
 <span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>    .add_theme(strip_background<span class="op">=</span>p9.element_blank())</span>
 <span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="78">
+<div class="cell-output cell-output-display" data-execution_count="39">
 <div id="fig-ch-07-opiates-faceted-lines" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-07-opiates-faceted-lines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
