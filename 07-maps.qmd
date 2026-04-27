@@ -30,6 +30,7 @@ county_map = load_data("county_map").with_columns(
     state_fips=pl.col("id").str.slice(0, 2),
 )
 us_states = load_data("us_states")
+states_sf = load_data("states_sf")
 county_data = load_data("county_data")
 
 opiates = (
@@ -179,18 +180,13 @@ con.sql("LOAD spatial")
 ```
 
 I use DuckDB to process the data into the required form.
-Here `states` is roughly equivalent to `states_sf` from `socviz`.
+The `states_sf` data set packaged with `socviz_py` is built from this object.
 
 ```{python}
 states = con.sql(f"""
     SELECT
         STATE_NAME AS state,
-        ST_Transform(
-            ST_Union_Agg(geom),
-            'EPSG:4326',
-            '+proj=aea +lat_1=39 +lat_2=45 +lon_0=-96 +datum=WGS84 +units=m +no_defs',
-            always_xy := true
-        ) AS geom
+        ST_Union_Agg(geom) AS geom
     FROM ST_Read('{path}')
     GROUP BY state
     ORDER BY state
@@ -209,59 +205,20 @@ con.sql("""
 ```
 
 ```{python}
-state_vertices = con.sql("""
-WITH 
-raw_parts AS (
-  SELECT
-    state,
-    dump.geom AS geom,
-    dump.path AS path
-  FROM states,
-  UNNEST(ST_Dump(geom)) AS t(dump)
-),
-parts AS (
-  SELECT
-    state,
-    geom,
-    row_number() OVER (
-      PARTITION BY state
-      ORDER BY CAST(path AS VARCHAR)
-    ) AS part_id
-  FROM raw_parts
-),
-rings AS (
-  SELECT
-    state,
-    state || '_' || part_id::VARCHAR AS group_id,
-    ST_ExteriorRing(geom) AS ring
-  FROM parts
-),
-points AS (
-  SELECT
-    state,
-    group_id,
-    i AS ord,
-    ST_PointN(ring, i::INTEGER) AS pt
-  FROM rings,
-  generate_series(1, ST_NumPoints(ring)::INTEGER) AS t(i)
-)
-SELECT
-  state,
-  group_id,
-  ord,
-  ST_X(pt) AS x,
-  ST_Y(pt) AS y
-FROM points
-ORDER BY state, group_id, ord
-""").pl()
+x, y = albers.transform(states_sf["long"], states_sf["lat"])
 
-state_vertices
+states_sf = states_sf.with_columns(
+    pl.Series("x", x),
+    pl.Series("y", y),
+)
+
+states_sf
 ```
 
 ```{python}
 elections24_sf = (
     election24
-    .join(state_vertices, on="state", how="inner")
+    .join(states_sf, on="state", how="inner")
 )
 ```
 

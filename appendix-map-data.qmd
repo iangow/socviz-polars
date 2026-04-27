@@ -27,6 +27,81 @@ us_states <- ggplot2::map_data("state")
 arrow::write_parquet(us_states, "data/us_states.parquet")
 ```
 
+The `states_sf` data set starts from the `geoda.ncovr` geometry in the
+`geodatasets` package.
+It stores one row per state exterior-ring vertex, keeping longitude and latitude
+unprojected so the map chapter can apply the Albers projection just before
+plotting.
+
+```{python}
+#| eval: false
+import duckdb
+import geodatasets
+
+path = geodatasets.get_path("geoda.ncovr")
+
+con = duckdb.connect()
+con.sql("INSTALL spatial")
+con.sql("LOAD spatial")
+
+states = con.sql(f"""
+    SELECT
+        STATE_NAME AS state,
+        ST_Union_Agg(geom) AS geom
+    FROM ST_Read('{path}')
+    GROUP BY state
+    ORDER BY state
+""")
+
+states_sf = con.sql("""
+WITH
+raw_parts AS (
+  SELECT
+    state,
+    dump.geom AS geom,
+    dump.path AS path
+  FROM states,
+  UNNEST(ST_Dump(geom)) AS t(dump)
+),
+parts AS (
+  SELECT
+    state,
+    geom,
+    row_number() OVER (
+      PARTITION BY state
+      ORDER BY CAST(path AS VARCHAR)
+    ) AS part_id
+  FROM raw_parts
+),
+rings AS (
+  SELECT
+    state,
+    state || '_' || part_id::VARCHAR AS group_id,
+    ST_ExteriorRing(geom) AS ring
+  FROM parts
+),
+points AS (
+  SELECT
+    state,
+    group_id,
+    i AS ord,
+    ST_PointN(ring, i::INTEGER) AS pt
+  FROM rings,
+  generate_series(1, ST_NumPoints(ring)::INTEGER) AS t(i)
+)
+SELECT
+  state,
+  group_id,
+  ord,
+  ST_X(pt) AS long,
+  ST_Y(pt) AS lat
+FROM points
+ORDER BY state, group_id, ord
+""").pl()
+
+states_sf.write_parquet("data/states_sf.parquet")
+```
+
 The county files are built from Census cartographic county boundaries and ACS 5-year county data.
 DuckDB's spatial extension handles the geometry work; Polars handles the tabular ACS data and derived variables.
 
