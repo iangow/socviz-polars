@@ -62,13 +62,30 @@ election24.select(
 ```
 
 ```{python}
+census_order = (
+    election24
+    .filter(pl.col("st") != "DC")
+    .group_by("census")
+    .agg(pl.col("r_points").median())
+    .sort("r_points")
+    .get_column("census")
+    .to_list()
+)
+
+election24 = election24.with_columns(
+    pl.col("census").cast(pl.Enum(census_order))
+)
+```
+
+```{python}
 party_colors = ["#2E74C0", "#CB454A"]
 ```
 
 ```{python}
-#| label: fig-ch-07-election-dotplot
-#| fig-cap: "2024 election results by state and census region."
-#| fig-height: 11
+#| label: fig-ch-07-electiondotplot
+#| column: margin
+#| out-width: "90%"
+#| fig-cap: 2024 Election Results. Would a two-color choropleth map be more informative than this, or less?
 (
     election24
     .filter(pl.col("st") != "DC")
@@ -83,11 +100,15 @@ party_colors = ["#2E74C0", "#CB454A"]
             "10", "20", "30", "40\n(Trump)"
         ],
     )
-    .facet_wrap("census", ncol=1, scales="free_y")
+    
+    .facet_grid("census", scales="free_y", space="free_y")
     .add_guides(color="none")
     .labs(x="Point Margin", y="")
-    .add_theme(axis_text_y=p9.element_text(size=7))
-    .add_theme(figure_size=(6, 11))
+    .add_theme(
+        text=p9.element_text(family="DIN Condensed",
+                             size=7)
+    )
+    .add_theme(figure_size=(2.5, 10))
 )
 ```
 
@@ -101,12 +122,18 @@ us_states
 
 ```{python}
 #| label: fig-7-3
+#| column: margin
+#| out-width: "90%"
 #| fig-caption: A map of the continental US made out of points.
 ( 
     us_states
     .ggplot(aes(x="long", y="lat", group="group"))
     .geom_point(size = 0.1)
-    .add_theme(figure_size=(6, 4))
+    .add_theme(
+        text=p9.element_text(family="DIN Condensed",
+                             size=7),
+        figure_size=(2.5, 1.5)
+    )
 )
 ```
 
@@ -114,11 +141,17 @@ us_states
 ```{python}
 #| label: fig-7-4
 #| fig-caption: A map of US state borders.
+#| column: margin
+#| out-width: "90%"
 ( 
     us_states
     .ggplot(aes(x="long", y="lat", group="group"))
     .geom_polygon(fill="white", color="black")
-    .add_theme(figure_size=(6, 4))
+    .add_theme(
+        text=p9.element_text(family="DIN Condensed",
+                             size=7),
+        figure_size=(2.5, 1.5)
+    )
 )
 ```
 
