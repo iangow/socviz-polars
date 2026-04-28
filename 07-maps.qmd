@@ -24,10 +24,6 @@ election24 = sv.load_data("election24").with_columns(
     fips_str=pl.col("fips").cast(pl.Utf8).str.zfill(2),
     region=pl.col("state").str.to_lowercase(),
 )
-
-us_states = sv.load_data("us_states")
-states_sf = sv.load_data("states_sf")
-county_data = sv.load_data("county_data")
 ```
 
 ## Draw a Map of US States
@@ -99,6 +95,8 @@ The Python version uses the same state outline data exported from R's `ggplot2::
 The result is an ordinary polygon table with one row per outline vertex and a lower-case `region` column for joining to state-level data.
 
 ```{python}
+us_states = sv.load_data("us_states")
+
 us_states
 ```
 
@@ -246,17 +244,11 @@ con.sql("""
 
 ```{python}
 states_sf = (
-    states_sf
+    sv.load_data("states_sf")
     .with_columns(
         albers_transform(pl.col("long"), pl.col("lat"))
     )
     .unnest("coords")
-)
-```
-
-```{python}
-county_map = sv.load_data("county_map").with_columns(
-    state_fips=pl.col("id").str.slice(0, 2),
 )
 ```
 
@@ -376,6 +368,13 @@ The `d_points` variable is positive when Harris's margin is larger and negative 
 ```
 
 ## America's Ur-Choropleths
+
+```{python}
+county_data = sv.load_data("county_data")
+county_map = sv.load_data("county_map").with_columns(
+    state_fips=pl.col("id").str.slice(0, 2),
+)
+```
 
 The county map and county data objects join on the county FIPS code.
 This gives us the same large polygon table used in the book, with county-level variables attached.
