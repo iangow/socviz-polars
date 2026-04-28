@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.9.35">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -95,9 +95,9 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-22b4aaf4c2978829df3684e8f2c068db.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-c0f9e757bd1bbe5faf3da83a888945c0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
@@ -462,7 +462,7 @@ div.csl-indent {
 
 
 <p>This chapter follows <a href="https://socviz.co/04-group-facet-transform.html">Chapter 4 of <span class="citation" data-cites="Healy2026">Healy (<span>2026</span>)</span></a>, translating the main plots to <code>plotnine_polars</code>. The main ideas carry over directly: grouping tells a geom how observations belong together, faceting splits one plot into a set of comparable panels, and several geoms compute summaries before drawing anything.</p>
-<div id="771a5bf4" class="cell" data-execution_count="1">
+<div id="33bc6f4b" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotnine_polars <span class="im">as</span> p9</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mizani.formatters <span class="im">import</span> currency_format, percent_format</span>
@@ -471,20 +471,17 @@ div.csl-indent {
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> socviz_pl <span class="im">import</span> load_data, theme_socviz</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>p9.theme_set(theme_socviz())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="121">
-<pre><code>&lt;plotnine.themes.theme_minimal.theme_minimal at 0x124a4d810&gt;</code></pre>
 </div>
-</div>
-<div id="2805db01" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>gapminder <span class="op">=</span> pl.read_csv(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/jennybc/"</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gapminder/main/inst/extdata/gapminder.tsv"</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    separator<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>gss_sm <span class="op">=</span> load_data(<span class="st">"gss_sm"</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>midwest <span class="op">=</span> pl.from_pandas(midwest_pd)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>titanic <span class="op">=</span> load_data(<span class="st">"titanic"</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>oecd_sum <span class="op">=</span> load_data(<span class="st">"oecd_sum"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="7bf54a24" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>gapminder <span class="op">=</span> pl.read_csv(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/jennybc/"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gapminder/main/inst/extdata/gapminder.tsv"</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    separator<span class="op">=</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>gss_sm <span class="op">=</span> load_data(<span class="st">"gss_sm"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>midwest <span class="op">=</span> pl.from_pandas(midwest_pd)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>titanic <span class="op">=</span> load_data(<span class="st">"titanic"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>oecd_sum <span class="op">=</span> load_data(<span class="st">"oecd_sum"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="colorless-green-data-sleeps-furiously" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="colorless-green-data-sleeps-furiously"><span class="header-section-number">4.1</span> Colorless Green Data Sleeps Furiously</h2>
@@ -493,12 +490,12 @@ div.csl-indent {
 <h2 data-number="4.2" class="anchored" data-anchor-id="grouped-data-and-the-group-aesthetic"><span class="header-section-number">4.2</span> Grouped Data and the Group Aesthetic</h2>
 <p>As in R, the line geom needs to know which observations should be connected. With the fluent API, the <code>group</code> mapping goes inside <code>.geom_line()</code> because it applies to the line layer.</p>
 <div id="cell-fig-ch-04-gapminder-lines-wrong" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    gapminder</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"gdpPercap"</span>))</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    .geom_line()</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="123">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    gapminder</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"gdpPercap"</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    .geom_line()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
 <div id="fig-ch-04-gapminder-lines-wrong" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-gapminder-lines-wrong-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -512,12 +509,12 @@ Figure&nbsp;4.1: Trying and failing to plot the data over time by country.
 </div>
 </div>
 <div id="cell-fig-ch-04-gapminder-lines" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    gapminder</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"gdpPercap"</span>))</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    .geom_line(aes(group<span class="op">=</span><span class="st">"country"</span>))</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="124">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    gapminder</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"gdpPercap"</span>))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    .geom_line(aes(group<span class="op">=</span><span class="st">"country"</span>))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
 <div id="fig-ch-04-gapminder-lines" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-gapminder-lines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -535,14 +532,14 @@ Figure&nbsp;4.2: Plotting the data over time by country, again.
 <h2 data-number="4.3" class="anchored" data-anchor-id="facet-to-make-small-multiples"><span class="header-section-number">4.3</span> Facet to Make Small Multiples</h2>
 <p>In R, the first argument to <code>facet_wrap()</code> is written as a one-sided formula, <code>~ continent</code>. In <code>plotnine_polars</code>, we pass the column name as a string.</p>
 <div id="cell-fig-ch-04-facet-continent" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    gapminder</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"gdpPercap"</span>))</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    .geom_line(aes(group<span class="op">=</span><span class="st">"country"</span>))</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    .facet_wrap(<span class="st">"~ continent"</span>, ncol<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    .add_theme(figure_size<span class="op">=</span>(<span class="dv">3</span>, <span class="dv">8</span>))</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="125">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    gapminder</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"gdpPercap"</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    .geom_line(aes(group<span class="op">=</span><span class="st">"country"</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    .facet_wrap(<span class="st">"~ continent"</span>, ncol<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    .add_theme(figure_size<span class="op">=</span>(<span class="dv">3</span>, <span class="dv">8</span>))</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
 <div id="fig-ch-04-facet-continent" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-facet-continent-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -557,22 +554,22 @@ Figure&nbsp;4.3: Faceting by continent.
 </div>
 <p>The color name <code>gray70</code> used in R is not understood by matplotlib, which is underneath plotnine. The hex color <code>#B3B3B3</code> is the equivalent shade.</p>
 <div id="cell-fig-ch-04-facet-continent-polished" class="cell page-columns page-full" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    gapminder</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"gdpPercap"</span>))</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    .geom_line(aes(group<span class="op">=</span><span class="st">"country"</span>), color<span class="op">=</span><span class="st">"#B3B3B3"</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    .geom_smooth(size<span class="op">=</span><span class="fl">1.1</span>, method<span class="op">=</span><span class="st">"loess"</span>, se<span class="op">=</span><span class="va">False</span>, color<span class="op">=</span><span class="st">"#0072B2"</span>)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    .scale_x_continuous(breaks <span class="op">=</span> [<span class="dv">1960</span>, <span class="dv">1980</span>, <span class="dv">2000</span>])</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    .scale_y_log10(labels<span class="op">=</span>currency_format(precision<span class="op">=</span><span class="dv">0</span>, big_mark<span class="op">=</span><span class="st">","</span>))</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    .facet_wrap(<span class="st">"continent"</span>, ncol<span class="op">=</span><span class="dv">5</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    .labs(</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">"Year"</span>,</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"GDP per capita"</span>,</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"GDP per capita on Five Continents"</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    .add_theme(figure_size<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">3</span>))</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="126">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    gapminder</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"gdpPercap"</span>))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    .geom_line(aes(group<span class="op">=</span><span class="st">"country"</span>), color<span class="op">=</span><span class="st">"#B3B3B3"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    .geom_smooth(size<span class="op">=</span><span class="fl">1.1</span>, method<span class="op">=</span><span class="st">"loess"</span>, se<span class="op">=</span><span class="va">False</span>, color<span class="op">=</span><span class="st">"#0072B2"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    .scale_x_continuous(breaks <span class="op">=</span> [<span class="dv">1960</span>, <span class="dv">1980</span>, <span class="dv">2000</span>])</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    .scale_y_log10(labels<span class="op">=</span>currency_format(precision<span class="op">=</span><span class="dv">0</span>, big_mark<span class="op">=</span><span class="st">","</span>))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    .facet_wrap(<span class="st">"continent"</span>, ncol<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    .labs(</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">"Year"</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"GDP per capita"</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"GDP per capita on Five Continents"</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    .add_theme(figure_size<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">3</span>))</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="6">
 <div id="fig-ch-04-facet-continent-polished" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-ch-04-facet-continent-polished-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
@@ -586,14 +583,14 @@ Figure&nbsp;4.4: Faceting by continent, again.
 </div>
 </div>
 <div id="cell-fig-ch-04-facet-grid" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"age"</span>, y<span class="op">=</span><span class="st">"childs"</span>))</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    .geom_point(alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    .geom_smooth(method<span class="op">=</span><span class="st">"loess"</span>, se<span class="op">=</span><span class="va">False</span>, color<span class="op">=</span><span class="st">"#0072B2"</span>)</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    .facet_grid(<span class="st">"sex ~ race"</span>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="127">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"age"</span>, y<span class="op">=</span><span class="st">"childs"</span>))</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    .geom_point(alpha<span class="op">=</span><span class="fl">0.2</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    .geom_smooth(method<span class="op">=</span><span class="st">"loess"</span>, se<span class="op">=</span><span class="va">False</span>, color<span class="op">=</span><span class="st">"#0072B2"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    .facet_grid(<span class="st">"sex ~ race"</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
 <div id="fig-ch-04-facet-grid" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-facet-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -611,12 +608,12 @@ Figure&nbsp;4.5: Faceting on two categorical variables. Each panel plots the rel
 <h2 data-number="4.4" class="anchored" data-anchor-id="geoms-can-transform-data"><span class="header-section-number">4.4</span> Geoms Can Transform Data</h2>
 <p><code>geom_bar()</code> counts observations before drawing bars. This example is the direct translation of the R code, with <code>bigregion</code> mapped to <code>x</code>.</p>
 <div id="cell-fig-ch-04-bar-counts" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>))</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="128">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
 <div id="fig-ch-04-bar-counts" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-bar-counts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -631,13 +628,13 @@ Figure&nbsp;4.6: A bar chart of GSS respondents by census region.
 </div>
 <p>Modern plotnine uses <code>after_stat("prop")</code> where older ggplot examples often use <code>..prop..</code>.</p>
 <div id="cell-fig-ch-04-bar-proportions" class="cell" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                y<span class="op">=</span>p9.after_stat(<span class="st">"prop"</span>)))</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="129">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                y<span class="op">=</span>p9.after_stat(<span class="st">"prop"</span>)))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
 <div id="fig-ch-04-bar-proportions" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-bar-proportions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -652,14 +649,14 @@ Figure&nbsp;4.7: A first go at a bar chart with proportions.
 </div>
 <p>As in the R example, <code>group=1</code> asks for proportions over the whole dataset rather than within each x value.</p>
 <div id="cell-fig-ch-04-bar-prop-correct" class="cell" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                y<span class="op">=</span>p9.after_stat(<span class="st">"prop"</span>),</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                group<span class="op">=</span><span class="dv">1</span>))</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="130">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                y<span class="op">=</span>p9.after_stat(<span class="st">"prop"</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                group<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
 <div id="fig-ch-04-bar-prop-correct" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-bar-prop-correct-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -673,9 +670,9 @@ Figure&nbsp;4.8: A bar chart with correct proportions.
 </div>
 </div>
 <p>Mapping <code>fill</code> changes the interior of the bars. The fluent API uses <code>.add_guides(fill="none")</code> to suppress a redundant legend.</p>
-<div id="7ffa9d3f" class="cell" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gss_sm.group_by(<span class="st">"religion"</span>).agg(n<span class="op">=</span>pl.<span class="bu">len</span>()).sort(<span class="st">"n"</span>, descending<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="131">
+<div id="02003106" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>gss_sm.group_by(<span class="st">"religion"</span>).agg(n<span class="op">=</span>pl.<span class="bu">len</span>()).sort(<span class="st">"n"</span>, descending<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -726,24 +723,24 @@ Figure&nbsp;4.8: A bar chart with correct proportions.
 </div>
 </div>
 <div class="cell" data-layout-nrow="2" data-execution_count="12">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"religion"</span>, color<span class="op">=</span><span class="st">"religion"</span>))</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>).show()</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"religion"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    .add_guides(fill<span class="op">=</span><span class="st">"none"</span>)</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>).show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"religion"</span>, color<span class="op">=</span><span class="st">"religion"</span>))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>).show()</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"religion"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    .add_guides(fill<span class="op">=</span><span class="st">"none"</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>).show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="fig-ch-04-religion-fill" class="quarto-layout-panel">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-religion-fill-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
 <div class="cell-output cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ch-04-religion-fill" style="flex-basis: 100.0%;justify-content: flex-start;">
-<div id="fig-ch-04-religion-fill-1" class="quarto-float quarto-figure quarto-figure-center anchored" width="600" height="350">
+<div id="fig-ch-04-religion-fill-1" class="quarto-float quarto-figure quarto-figure-center anchored" height="350" width="600">
 <figure class="quarto-float quarto-subfloat-fig figure">
 <div aria-describedby="fig-ch-04-religion-fill-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-religion-fill-output-1.png" id="fig-ch-04-religion-fill-1" data-ref-parent="fig-ch-04-religion-fill" width="600" height="350" class="figure-img">
@@ -757,7 +754,7 @@ Figure&nbsp;4.8: A bar chart with correct proportions.
 </div>
 <div class="quarto-layout-row">
 <div class="cell-output cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ch-04-religion-fill" style="flex-basis: 100.0%;justify-content: flex-start;">
-<div id="fig-ch-04-religion-fill-2" class="quarto-float quarto-figure quarto-figure-center anchored" width="600" height="350">
+<div id="fig-ch-04-religion-fill-2" class="quarto-float quarto-figure quarto-figure-center anchored" height="350" width="600">
 <figure class="quarto-float quarto-subfloat-fig figure">
 <div aria-describedby="fig-ch-04-religion-fill-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="04-group-facet-transform_files/figure-html/fig-ch-04-religion-fill-output-2.png" id="fig-ch-04-religion-fill-2" data-ref-parent="fig-ch-04-religion-fill" width="600" height="350" class="figure-img">
@@ -781,12 +778,12 @@ Figure&nbsp;4.9: GSS religious preference mapped to bar color (a) and fill (b).
 <h2 data-number="4.5" class="anchored" data-anchor-id="frequency-plots-the-slightly-awkward-way"><span class="header-section-number">4.5</span> Frequency Plots the Slightly Awkward Way</h2>
 <p>The stacked bar chart is direct. The <code>position="fill"</code> adjustment changes the scale from counts to within-bar proportions.</p>
 <div id="cell-fig-ch-04-stacked-region-religion" class="cell" data-execution_count="13">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="133">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar()</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
 <div id="fig-ch-04-stacked-region-religion" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-stacked-region-religion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -800,13 +797,13 @@ Figure&nbsp;4.10: A stacked bar chart of religious preference by census region.
 </div>
 </div>
 <div id="cell-fig-ch-04-filled-region-religion" class="cell" data-execution_count="14">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar(position<span class="op">=</span><span class="st">"fill"</span>)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    .scale_y_continuous(labels<span class="op">=</span>percent_format())</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="134">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar(position<span class="op">=</span><span class="st">"fill"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    .scale_y_continuous(labels<span class="op">=</span>percent_format())</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
 <div id="fig-ch-04-filled-region-religion" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-filled-region-religion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -821,16 +818,16 @@ Figure&nbsp;4.11: Using the fill position adjustment to compare proportions acro
 </div>
 <p>The next plot mirrors the book’s “not quite what we wanted” example. Grouping by <code>religion</code> makes the proportions add up across regions for each religion rather than within each region.</p>
 <div id="cell-fig-ch-04-proportions" class="cell" data-execution_count="15">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar(</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        aes(y<span class="op">=</span>p9.after_stat(<span class="st">"prop"</span>)),</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        position<span class="op">=</span><span class="st">"dodge"</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    .scale_y_continuous(labels<span class="op">=</span>percent_format())</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="135">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar(</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        aes(y<span class="op">=</span>p9.after_stat(<span class="st">"prop"</span>)),</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        position<span class="op">=</span><span class="st">"dodge"</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    .scale_y_continuous(labels<span class="op">=</span>percent_format())</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
 <div id="fig-ch-04-proportions" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-proportions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -844,16 +841,16 @@ Figure&nbsp;4.12: A first go at a dodged bar chart with proportional bars.
 </div>
 </div>
 <div id="cell-fig-ch-04-dodged-proportions" class="cell" data-execution_count="16">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar(</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        aes(y<span class="op">=</span>p9.after_stat(<span class="st">"prop"</span>), group<span class="op">=</span><span class="st">"religion"</span>),</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        position<span class="op">=</span><span class="st">"dodge"</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    .scale_y_continuous(labels<span class="op">=</span>percent_format())</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="136">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar(</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        aes(y<span class="op">=</span>p9.after_stat(<span class="st">"prop"</span>), group<span class="op">=</span><span class="st">"religion"</span>),</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        position<span class="op">=</span><span class="st">"dodge"</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    .scale_y_continuous(labels<span class="op">=</span>percent_format())</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
 <div id="fig-ch-04-dodged-proportions" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-dodged-proportions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -868,17 +865,17 @@ Figure&nbsp;4.13: A second attempt as a dodged bar chart with proportional bars.
 </div>
 <p>Faceting by region lets each panel calculate the proportions within the region.</p>
 <div id="cell-fig-ch-04-faceted-proportions" class="cell" data-execution_count="17">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"religion"</span>))</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar(</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        aes(y<span class="op">=</span>p9.after_stat(<span class="st">"prop"</span>), group<span class="op">=</span><span class="st">"bigregion"</span>),</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        position<span class="op">=</span><span class="st">"dodge"</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    .facet_wrap(<span class="st">"bigregion"</span>, ncol<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    .scale_y_continuous(labels<span class="op">=</span>percent_format())</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="137">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"religion"</span>))</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    .geom_bar(</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        aes(y<span class="op">=</span>p9.after_stat(<span class="st">"prop"</span>), group<span class="op">=</span><span class="st">"bigregion"</span>),</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        position<span class="op">=</span><span class="st">"dodge"</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    .facet_wrap(<span class="st">"bigregion"</span>, ncol<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    .scale_y_continuous(labels<span class="op">=</span>percent_format())</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
 <div id="fig-ch-04-faceted-proportions" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-faceted-proportions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -896,12 +893,12 @@ Figure&nbsp;4.14: Faceting proportions within region.
 <h2 data-number="4.6" class="anchored" data-anchor-id="histograms-and-density-plots"><span class="header-section-number">4.6</span> Histograms and Density Plots</h2>
 <p>The <code>midwest</code> data is available from <code>plotnine.data</code> as a pandas data frame, so we convert it to Polars with <code>pl.from_pandas()</code>.</p>
 <div id="cell-fig-ch-04-hist-area-default" class="cell" data-execution_count="18">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    midwest</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"area"</span>))</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    .geom_histogram()</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="138">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    midwest</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"area"</span>))</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    .geom_histogram()</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
 <div id="fig-ch-04-hist-area-default" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-hist-area-default-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -915,12 +912,12 @@ Figure&nbsp;4.15: A histogram of county area using plotnine’s default bin choi
 </div>
 </div>
 <div id="cell-fig-ch-04-hist-area-bins" class="cell" data-execution_count="19">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    midwest</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"area"</span>))</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    .geom_histogram(bins<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="139">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    midwest</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"area"</span>))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    .geom_histogram(bins<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
 <div id="fig-ch-04-hist-area-bins" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-hist-area-bins-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -935,15 +932,15 @@ Figure&nbsp;4.16: The same county-area histogram using ten bins.
 </div>
 <p>In Polars, filtering to more than one value uses <code>.filter(pl.col("state").is_in([...]))</code>.</p>
 <div id="cell-fig-ch-04-hist-oh-wi" class="cell" data-execution_count="20">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>oh_wi <span class="op">=</span> [<span class="st">"OH"</span>, <span class="st">"WI"</span>]</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    midwest</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"state"</span>).is_in(oh_wi))</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"percollege"</span>, fill<span class="op">=</span><span class="st">"state"</span>))</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    .geom_histogram(alpha<span class="op">=</span><span class="fl">0.4</span>, bins<span class="op">=</span><span class="dv">20</span>)</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="140">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>oh_wi <span class="op">=</span> [<span class="st">"OH"</span>, <span class="st">"WI"</span>]</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    midwest</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"state"</span>).is_in(oh_wi))</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"percollege"</span>, fill<span class="op">=</span><span class="st">"state"</span>))</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    .geom_histogram(alpha<span class="op">=</span><span class="fl">0.4</span>, bins<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
 <div id="fig-ch-04-hist-oh-wi" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-hist-oh-wi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -957,12 +954,12 @@ Figure&nbsp;4.17: Comparing percent college educated in Ohio and Wisconsin count
 </div>
 </div>
 <div id="cell-fig-ch-04-density-area" class="cell" data-execution_count="21">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    midwest</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"area"</span>))</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    .geom_density()</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="141">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    midwest</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"area"</span>))</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    .geom_density()</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
 <div id="fig-ch-04-density-area" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-density-area-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -976,12 +973,12 @@ Figure&nbsp;4.18: Kernel density estimate of county area.
 </div>
 </div>
 <div id="cell-fig-ch-04-density-state" class="cell" data-execution_count="22">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    midwest</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"area"</span>, fill<span class="op">=</span><span class="st">"state"</span>, color<span class="op">=</span><span class="st">"state"</span>))</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    .geom_density(alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="142">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    midwest</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"area"</span>, fill<span class="op">=</span><span class="st">"state"</span>, color<span class="op">=</span><span class="st">"state"</span>))</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    .geom_density(alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
 <div id="fig-ch-04-density-state" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-density-state-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -996,13 +993,13 @@ Figure&nbsp;4.19: Comparing area distributions by state.
 </div>
 <p>The density statistic also exposes computed values. Here <code>p9.after_stat("scaled")</code> is the plotnine form of the ggplot idiom <code>..scaled..</code>.</p>
 <div id="cell-fig-ch-04-density-scaled" class="cell" data-execution_count="23">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    midwest</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"state"</span>).is_in(oh_wi))</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"area"</span>, fill<span class="op">=</span><span class="st">"state"</span>, color<span class="op">=</span><span class="st">"state"</span>))</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    .geom_density(aes(y<span class="op">=</span>p9.after_stat(<span class="st">"scaled"</span>)), alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="143">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    midwest</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"state"</span>).is_in(oh_wi))</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"area"</span>, fill<span class="op">=</span><span class="st">"state"</span>, color<span class="op">=</span><span class="st">"state"</span>))</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    .geom_density(aes(y<span class="op">=</span>p9.after_stat(<span class="st">"scaled"</span>)), alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
 <div id="fig-ch-04-density-scaled" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-density-scaled-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1020,13 +1017,13 @@ Figure&nbsp;4.20: Scaled density estimates for Ohio and Wisconsin counties.
 <h2 data-number="4.7" class="anchored" data-anchor-id="avoid-transformations-when-necessary"><span class="header-section-number">4.7</span> Avoid Transformations When Necessary</h2>
 <p>When the data already contains the values to draw, use <code>.geom_col()</code>. It is the convenient form of <code>geom_bar(stat = "identity")</code>.</p>
 <div id="cell-fig-ch-04-titanic" class="cell" data-execution_count="24">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    titanic</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"fate"</span>, y<span class="op">=</span><span class="st">"percent"</span>, fill<span class="op">=</span><span class="st">"sex"</span>))</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    .geom_col(position<span class="op">=</span><span class="st">"dodge"</span>)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    .add_theme(legend_position<span class="op">=</span><span class="st">"top"</span>)</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="144">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    titanic</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"fate"</span>, y<span class="op">=</span><span class="st">"percent"</span>, fill<span class="op">=</span><span class="st">"sex"</span>))</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    .geom_col(position<span class="op">=</span><span class="st">"dodge"</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    .add_theme(legend_position<span class="op">=</span><span class="st">"top"</span>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="24">
 <div id="fig-ch-04-titanic" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-titanic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1040,20 +1037,20 @@ Figure&nbsp;4.21: Survival on the Titanic, by sex.
 </div>
 </div>
 <div id="cell-fig-ch-04-oecd-gap" class="cell" data-execution_count="25">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    oecd_sum</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"diff"</span>, fill<span class="op">=</span><span class="st">"hi_lo"</span>))</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    .add_guides(fill<span class="op">=</span><span class="st">"none"</span>)</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    .labs(</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"Difference in Years"</span>,</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"The US Life Expectancy Gap"</span>,</span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>        subtitle<span class="op">=</span><span class="st">"Difference between US and OECD average life expectancies"</span>,</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>        caption<span class="op">=</span><span class="st">"Data: OECD. After a chart by Christopher Ingraham."</span></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="145">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    oecd_sum</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"diff"</span>, fill<span class="op">=</span><span class="st">"hi_lo"</span>))</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    .add_guides(fill<span class="op">=</span><span class="st">"none"</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    .labs(</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"Difference in Years"</span>,</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"The US Life Expectancy Gap"</span>,</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>        subtitle<span class="op">=</span><span class="st">"Difference between US and OECD average life expectancies"</span>,</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>        caption<span class="op">=</span><span class="st">"Data: OECD. After a chart by Christopher Ingraham."</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="25">
 <div id="fig-ch-04-oecd-gap" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-04-oecd-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">

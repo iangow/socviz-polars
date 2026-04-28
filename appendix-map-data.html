@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.9.35">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -76,9 +76,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-22b4aaf4c2978829df3684e8f2c068db.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-c0f9e757bd1bbe5faf3da83a888945c0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
@@ -445,366 +445,434 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>us_states <span class="ot">&lt;-</span> ggplot2<span class="sc">::</span><span class="fu">map_data</span>(<span class="st">"state"</span>)</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>arrow<span class="sc">::</span><span class="fu">write_parquet</span>(us_states, <span class="st">"data/us_states.parquet"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The county files are built from Census cartographic county boundaries and ACS 5-year county data. DuckDB’s spatial extension handles the geometry work; Polars handles the tabular ACS data and derived variables.</p>
-<div id="ccd18753" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> zipfile <span class="im">import</span> ZipFile</span>
+<p>The <code>states_sf</code> data set starts from the <code>geoda.ncovr</code> geometry in the <code>geodatasets</code> package. It stores one row per state exterior-ring vertex, keeping longitude and latitude unprojected so the map chapter can apply the Albers projection just before plotting.</p>
+<div id="a588227f" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geodatasets</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _download_file(url, path):</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    path <span class="op">=</span> Path(path)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    path.parent.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> path.exists():</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> path</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> requests.get(url, timeout<span class="op">=</span><span class="dv">120</span>)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    response.raise_for_status()</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    path.write_bytes(response.content)</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> path</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _county_boundary_path(year, resolution, cache_dir):</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    cache_dir <span class="op">=</span> Path(cache_dir)</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    zip_path <span class="op">=</span> cache_dir <span class="op">/</span> <span class="ss">f"cb_</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">_us_county_</span><span class="sc">{</span>resolution<span class="sc">}</span><span class="ss">.zip"</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    shp_dir <span class="op">=</span> cache_dir <span class="op">/</span> <span class="ss">f"cb_</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">_us_county_</span><span class="sc">{</span>resolution<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    shp_path <span class="op">=</span> shp_dir <span class="op">/</span> <span class="ss">f"cb_</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">_us_county_</span><span class="sc">{</span>resolution<span class="sc">}</span><span class="ss">.shp"</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> (</span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"https://www2.census.gov/geo/tiger/GENZ</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">/shp/"</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"cb_</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">_us_county_</span><span class="sc">{</span>resolution<span class="sc">}</span><span class="ss">.zip"</span></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    _download_file(url, zip_path)</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> shp_path.exists():</span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        shp_dir.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> ZipFile(zip_path) <span class="im">as</span> zf:</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>            zf.extractall(shp_dir)</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> shp_path</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _acs_county_data(year, api_key<span class="op">=</span><span class="va">None</span>):</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    acs_vars <span class="op">=</span> {</span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01003_001E"</span>: <span class="st">"pop"</span>,</span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01001B_001E"</span>: <span class="st">"black"</span>,</span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01001A_001E"</span>: <span class="st">"white"</span>,</span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01001H_001E"</span>: <span class="st">"nh_white"</span>,</span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01001I_001E"</span>: <span class="st">"hispanic"</span>,</span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01001D_001E"</span>: <span class="st">"asian"</span>,</span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>        <span class="st">"get"</span>: <span class="st">"NAME,"</span> <span class="op">+</span> <span class="st">","</span>.join(acs_vars),</span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>        <span class="st">"for"</span>: <span class="st">"county:*"</span>,</span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> api_key <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>        params[<span class="st">"key"</span>] <span class="op">=</span> api_key</span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> requests.get(</span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"https://api.census.gov/data/</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">/acs/acs5"</span>,</span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>        params<span class="op">=</span>params,</span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>        timeout<span class="op">=</span><span class="dv">120</span>,</span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>    response.raise_for_status()</span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> response.json()</span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> (</span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>        pl.DataFrame(rows[<span class="dv">1</span>:], schema<span class="op">=</span>rows[<span class="dv">0</span>], orient<span class="op">=</span><span class="st">"row"</span>)</span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>        .rename(acs_vars)</span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>        .with_columns(</span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="bu">list</span>(acs_vars.values())).cast(pl.Int64),</span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>            <span class="bu">id</span><span class="op">=</span>pl.col(<span class="st">"state"</span>) <span class="op">+</span> pl.col(<span class="st">"county"</span>),</span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>        .drop(<span class="st">"county"</span>)</span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">filter</span>(pl.col(<span class="st">"state"</span>) <span class="op">!=</span> <span class="st">"72"</span>)</span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> data</span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_counties(</span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>    year<span class="op">=</span><span class="dv">2023</span>,</span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>    resolution<span class="op">=</span><span class="st">"500k"</span>,</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>    out_dir<span class="op">=</span><span class="st">"data"</span>,</span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>    cache_dir<span class="op">=</span><span class="st">"data/_cache/census"</span>,</span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>    api_key<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>    shift<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>    crop<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>    simplify_tolerance<span class="op">=</span><span class="dv">1000</span>,</span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>    legacy_county_data_path<span class="op">=</span><span class="st">"data/county_data.parquet"</span>,</span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>):</span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Build county_data.parquet and county_map.parquet from Census sources.</span></span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a><span class="co">    This mirrors the chapter's lightweight plotting interface: attributes live</span></span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="co">    in county_data.parquet, while county_map.parquet is a fortified polygon</span></span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="co">    table with one row per exterior-ring vertex.</span></span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>    out_dir <span class="op">=</span> Path(out_dir)</span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>    out_dir.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>    county_data_path <span class="op">=</span> out_dir <span class="op">/</span> <span class="st">"county_data.parquet"</span></span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>    county_map_path <span class="op">=</span> out_dir <span class="op">/</span> <span class="st">"county_map.parquet"</span></span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>    boundaries <span class="op">=</span> _county_boundary_path(year, resolution, cache_dir)</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>    acs <span class="op">=</span> _acs_county_data(year, api_key<span class="op">=</span>api_key)</span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>    state_lookup <span class="op">=</span> {</span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>        <span class="st">"01"</span>: (<span class="st">"AL"</span>, <span class="st">"South"</span>), <span class="st">"02"</span>: (<span class="st">"AK"</span>, <span class="st">"West"</span>), <span class="st">"04"</span>: (<span class="st">"AZ"</span>, <span class="st">"West"</span>),</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>        <span class="st">"05"</span>: (<span class="st">"AR"</span>, <span class="st">"South"</span>), <span class="st">"06"</span>: (<span class="st">"CA"</span>, <span class="st">"West"</span>), <span class="st">"08"</span>: (<span class="st">"CO"</span>, <span class="st">"West"</span>),</span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>        <span class="st">"09"</span>: (<span class="st">"CT"</span>, <span class="st">"Northeast"</span>), <span class="st">"10"</span>: (<span class="st">"DE"</span>, <span class="st">"South"</span>),</span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>        <span class="st">"11"</span>: (<span class="st">"DC"</span>, <span class="st">"South"</span>), <span class="st">"12"</span>: (<span class="st">"FL"</span>, <span class="st">"South"</span>), <span class="st">"13"</span>: (<span class="st">"GA"</span>, <span class="st">"South"</span>),</span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>        <span class="st">"15"</span>: (<span class="st">"HI"</span>, <span class="st">"West"</span>), <span class="st">"16"</span>: (<span class="st">"ID"</span>, <span class="st">"West"</span>), <span class="st">"17"</span>: (<span class="st">"IL"</span>, <span class="st">"Midwest"</span>),</span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>        <span class="st">"18"</span>: (<span class="st">"IN"</span>, <span class="st">"Midwest"</span>), <span class="st">"19"</span>: (<span class="st">"IA"</span>, <span class="st">"Midwest"</span>),</span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>        <span class="st">"20"</span>: (<span class="st">"KS"</span>, <span class="st">"Midwest"</span>), <span class="st">"21"</span>: (<span class="st">"KY"</span>, <span class="st">"South"</span>),</span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>        <span class="st">"22"</span>: (<span class="st">"LA"</span>, <span class="st">"South"</span>), <span class="st">"23"</span>: (<span class="st">"ME"</span>, <span class="st">"Northeast"</span>),</span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>        <span class="st">"24"</span>: (<span class="st">"MD"</span>, <span class="st">"South"</span>), <span class="st">"25"</span>: (<span class="st">"MA"</span>, <span class="st">"Northeast"</span>),</span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>        <span class="st">"26"</span>: (<span class="st">"MI"</span>, <span class="st">"Midwest"</span>), <span class="st">"27"</span>: (<span class="st">"MN"</span>, <span class="st">"Midwest"</span>),</span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>        <span class="st">"28"</span>: (<span class="st">"MS"</span>, <span class="st">"South"</span>), <span class="st">"29"</span>: (<span class="st">"MO"</span>, <span class="st">"Midwest"</span>),</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>        <span class="st">"30"</span>: (<span class="st">"MT"</span>, <span class="st">"West"</span>), <span class="st">"31"</span>: (<span class="st">"NE"</span>, <span class="st">"Midwest"</span>),</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>        <span class="st">"32"</span>: (<span class="st">"NV"</span>, <span class="st">"West"</span>), <span class="st">"33"</span>: (<span class="st">"NH"</span>, <span class="st">"Northeast"</span>),</span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>        <span class="st">"34"</span>: (<span class="st">"NJ"</span>, <span class="st">"Northeast"</span>), <span class="st">"35"</span>: (<span class="st">"NM"</span>, <span class="st">"West"</span>),</span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>        <span class="st">"36"</span>: (<span class="st">"NY"</span>, <span class="st">"Northeast"</span>), <span class="st">"37"</span>: (<span class="st">"NC"</span>, <span class="st">"South"</span>),</span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>        <span class="st">"38"</span>: (<span class="st">"ND"</span>, <span class="st">"Midwest"</span>), <span class="st">"39"</span>: (<span class="st">"OH"</span>, <span class="st">"Midwest"</span>),</span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>        <span class="st">"40"</span>: (<span class="st">"OK"</span>, <span class="st">"South"</span>), <span class="st">"41"</span>: (<span class="st">"OR"</span>, <span class="st">"West"</span>),</span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>        <span class="st">"42"</span>: (<span class="st">"PA"</span>, <span class="st">"Northeast"</span>), <span class="st">"44"</span>: (<span class="st">"RI"</span>, <span class="st">"Northeast"</span>),</span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>        <span class="st">"45"</span>: (<span class="st">"SC"</span>, <span class="st">"South"</span>), <span class="st">"46"</span>: (<span class="st">"SD"</span>, <span class="st">"Midwest"</span>),</span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>        <span class="st">"47"</span>: (<span class="st">"TN"</span>, <span class="st">"South"</span>), <span class="st">"48"</span>: (<span class="st">"TX"</span>, <span class="st">"South"</span>),</span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>        <span class="st">"49"</span>: (<span class="st">"UT"</span>, <span class="st">"West"</span>), <span class="st">"50"</span>: (<span class="st">"VT"</span>, <span class="st">"Northeast"</span>),</span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>        <span class="st">"51"</span>: (<span class="st">"VA"</span>, <span class="st">"South"</span>), <span class="st">"53"</span>: (<span class="st">"WA"</span>, <span class="st">"West"</span>),</span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>        <span class="st">"54"</span>: (<span class="st">"WV"</span>, <span class="st">"South"</span>), <span class="st">"55"</span>: (<span class="st">"WI"</span>, <span class="st">"Midwest"</span>),</span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>        <span class="st">"56"</span>: (<span class="st">"WY"</span>, <span class="st">"West"</span>),</span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>    states <span class="op">=</span> pl.DataFrame(</span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>        {</span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>            <span class="st">"state"</span>: <span class="bu">list</span>(state_lookup),</span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>            <span class="st">"st"</span>: [v[<span class="dv">0</span>] <span class="cf">for</span> v <span class="kw">in</span> state_lookup.values()],</span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>            <span class="st">"census_region"</span>: [v[<span class="dv">1</span>] <span class="cf">for</span> v <span class="kw">in</span> state_lookup.values()],</span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>    state_fips_sql <span class="op">=</span> <span class="st">", "</span>.join(<span class="ss">f"'</span><span class="sc">{</span>state<span class="sc">}</span><span class="ss">'"</span> <span class="cf">for</span> state <span class="kw">in</span> state_lookup)</span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>    con <span class="op">=</span> duckdb.<span class="ex">connect</span>()</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>        con.sql(<span class="st">"LOAD spatial"</span>)</span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span>:</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>        con.sql(<span class="st">"INSTALL spatial"</span>)</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>        con.sql(<span class="st">"LOAD spatial"</span>)</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>    con.register(<span class="st">"acs"</span>, acs)</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="ss">f"""</span></span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a><span class="ss">        CREATE OR REPLACE TABLE counties_raw AS</span></span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a><span class="ss">        SELECT</span></span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a><span class="ss">            GEOID AS id,</span></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="ss">            STATEFP AS state,</span></span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a><span class="ss">            ST_Transform(geom, 'EPSG:4269', 'ESRI:102003', always_xy := true) AS geom_us,</span></span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a><span class="ss">            ST_Transform(geom, 'EPSG:4269', 'EPSG:3338', always_xy := true) AS geom_ak,</span></span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a><span class="ss">            ST_Transform(geom, 'EPSG:4269', 'ESRI:102007', always_xy := true) AS geom_hi</span></span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a><span class="ss">        FROM ST_Read('</span><span class="sc">{</span>boundaries<span class="sc">.</span>as_posix()<span class="sc">}</span><span class="ss">')</span></span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a><span class="ss">        WHERE STATEFP IN (</span><span class="sc">{</span>state_fips_sql<span class="sc">}</span><span class="ss">)</span></span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a><span class="ss">    """</span>)</span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="st">"""</span></span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a><span class="st">        CREATE OR REPLACE TABLE lower48_bbox AS</span></span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a><span class="st">        SELECT</span></span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_XMin(ST_Extent_Agg(geom_us)) AS xmin,</span></span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_XMax(ST_Extent_Agg(geom_us)) AS xmax,</span></span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_YMin(ST_Extent_Agg(geom_us)) AS ymin,</span></span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_YMax(ST_Extent_Agg(geom_us)) AS ymax</span></span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM counties_raw</span></span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="st">        WHERE state NOT IN ('02', '15')</span></span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a><span class="st">    """</span>)</span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="st">"""</span></span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="st">        CREATE OR REPLACE TABLE shift_params AS</span></span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a><span class="st">        WITH</span></span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a><span class="st">        bb AS (</span></span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="st">            SELECT *, xmax - xmin AS width, ymax - ymin AS height</span></span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a><span class="st">            FROM lower48_bbox</span></span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a><span class="st">        ),</span></span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a><span class="st">        centroids AS (</span></span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="st">            SELECT</span></span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a><span class="st">                ST_X(ST_Centroid(ST_Union_Agg(geom_ak) FILTER (WHERE state = '02'))) AS ak_x,</span></span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="st">                ST_Y(ST_Centroid(ST_Union_Agg(geom_ak) FILTER (WHERE state = '02'))) AS ak_y,</span></span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a><span class="st">                ST_X(ST_Centroid(ST_Union_Agg(geom_hi) FILTER (WHERE state = '15'))) AS hi_x,</span></span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="st">                ST_Y(ST_Centroid(ST_Union_Agg(geom_hi) FILTER (WHERE state = '15'))) AS hi_y</span></span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="st">            FROM counties_raw</span></span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a><span class="st">        )</span></span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a><span class="st">        SELECT</span></span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="st">            bb.xmin + 0.08 * bb.width AS ak_target_x,</span></span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="st">            bb.ymin + 0.07 * bb.height AS ak_target_y,</span></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="st">            bb.xmin + 0.35 * bb.width AS hi_target_x,</span></span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a><span class="st">            bb.ymin + 0.00 * bb.height AS hi_target_y,</span></span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a><span class="st">            centroids.*</span></span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM bb, centroids</span></span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a><span class="st">    """</span>)</span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> shift:</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>        geometry_expr <span class="op">=</span> <span class="st">"""</span></span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a><span class="st">            CASE</span></span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="st">                WHEN state = '02' THEN</span></span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="st">                    ST_Affine(</span></span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a><span class="st">                        geom_ak,</span></span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a><span class="st">                        0.5, 0.0, 0.0, 0.5,</span></span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a><span class="st">                        ak_target_x - 0.5 * ak_x,</span></span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="st">                        ak_target_y - 0.5 * ak_y</span></span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a><span class="st">                    )</span></span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a><span class="st">                WHEN state = '15' THEN</span></span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a><span class="st">                    ST_Affine(</span></span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a><span class="st">                        geom_hi,</span></span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a><span class="st">                        1.5, 0.0, 0.0, 1.5,</span></span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="st">                        hi_target_x - 1.5 * hi_x,</span></span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a><span class="st">                        hi_target_y - 1.5 * hi_y</span></span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="st">                    )</span></span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a><span class="st">                ELSE geom_us</span></span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a><span class="st">            END</span></span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a><span class="st">        """</span></span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>        geometry_expr <span class="op">=</span> <span class="st">"geom_us"</span></span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="ss">f"""</span></span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="ss">        CREATE OR REPLACE TABLE counties_projected AS</span></span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="ss">        SELECT</span></span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="ss">            id,</span></span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a><span class="ss">            state,</span></span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="ss">            </span><span class="sc">{</span>geometry_expr<span class="sc">}</span><span class="ss"> AS geometry</span></span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a><span class="ss">        FROM counties_raw, shift_params</span></span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="ss">    """</span>)</span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>    geom_for_map <span class="op">=</span> <span class="st">"geometry"</span></span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> crop:</span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>        geom_for_map <span class="op">=</span> <span class="st">"""</span></span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_Intersection(</span></span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a><span class="st">                geometry,</span></span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="st">                ST_MakeEnvelope(-2500000, -1697746, 2258200, 1565782)</span></span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a><span class="st">            )</span></span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a><span class="st">        """</span></span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> simplify_tolerance <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> simplify_tolerance <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>        geom_for_map <span class="op">=</span> <span class="ss">f"ST_Simplify(</span><span class="sc">{</span>geom_for_map<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span><span class="bu">float</span>(simplify_tolerance)<span class="sc">}</span><span class="ss">)"</span></span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="ss">f"""</span></span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a><span class="ss">        CREATE OR REPLACE TABLE counties_map_geom AS</span></span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a><span class="ss">        SELECT</span></span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a><span class="ss">            id,</span></span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a><span class="ss">            </span><span class="sc">{</span>geom_for_map<span class="sc">}</span><span class="ss"> AS geometry</span></span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a><span class="ss">        FROM counties_projected</span></span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a><span class="ss">        WHERE NOT ST_IsEmpty(</span><span class="sc">{</span>geom_for_map<span class="sc">}</span><span class="ss">)</span></span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a><span class="ss">    """</span>)</span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>    area <span class="op">=</span> con.sql(<span class="st">"""</span></span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a><span class="st">        SELECT</span></span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a><span class="st">            id,</span></span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_Area(geometry) / 2589988.110336 AS area_sqmi</span></span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM counties_projected</span></span>
-<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a><span class="st">    """</span>).pl()</span>
-<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>    county_data <span class="op">=</span> (</span>
-<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>        acs.join(area, on<span class="op">=</span><span class="st">"id"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
-<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>        .join(states, on<span class="op">=</span><span class="st">"state"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
-<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a>        .with_columns(</span>
-<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>            name<span class="op">=</span>pl.col(<span class="st">"NAME"</span>).<span class="bu">str</span>.replace(<span class="vs">r", </span><span class="dv">.</span><span class="op">*</span><span class="dv">$</span><span class="vs">"</span>, <span class="st">""</span>),</span>
-<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>            pop_dens_value<span class="op">=</span>pl.col(<span class="st">"pop"</span>) <span class="op">/</span> pl.col(<span class="st">"area_sqmi"</span>),</span>
-<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>            pct_black_value<span class="op">=</span>pl.col(<span class="st">"black"</span>) <span class="op">/</span> pl.col(<span class="st">"pop"</span>) <span class="op">*</span> <span class="dv">100</span>,</span>
-<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>        .with_columns(</span>
-<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>            pop_dens<span class="op">=</span>(</span>
-<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>                pl.when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">10</span>).then(pl.lit(<span class="st">"[    0,   10)"</span>))</span>
-<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">50</span>).then(pl.lit(<span class="st">"[   10,   50)"</span>))</span>
-<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">100</span>).then(pl.lit(<span class="st">"[   50,  100)"</span>))</span>
-<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">500</span>).then(pl.lit(<span class="st">"[  100,  500)"</span>))</span>
-<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">1000</span>).then(pl.lit(<span class="st">"[  500, 1000)"</span>))</span>
-<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">5000</span>).then(pl.lit(<span class="st">"[ 1000, 5000)"</span>))</span>
-<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>                .otherwise(pl.lit(<span class="st">"[ 5000,71672]"</span>))</span>
-<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>            ),</span>
-<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>            pct_black<span class="op">=</span>(</span>
-<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>                pl.when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">2</span>).then(pl.lit(<span class="st">"[ 0.0, 2.0)"</span>))</span>
-<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">5</span>).then(pl.lit(<span class="st">"[ 2.0, 5.0)"</span>))</span>
-<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">10</span>).then(pl.lit(<span class="st">"[ 5.0,10.0)"</span>))</span>
-<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">15</span>).then(pl.lit(<span class="st">"[10.0,15.0)"</span>))</span>
-<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">25</span>).then(pl.lit(<span class="st">"[15.0,25.0)"</span>))</span>
-<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">50</span>).then(pl.lit(<span class="st">"[25.0,50.0)"</span>))</span>
-<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>                .otherwise(pl.lit(<span class="st">"[50.0,85.3]"</span>))</span>
-<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>            ),</span>
-<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>        .select(</span>
-<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>            <span class="st">"id"</span>, <span class="st">"name"</span>, <span class="st">"st"</span>, <span class="st">"state"</span>, <span class="st">"census_region"</span>,</span>
-<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>            <span class="st">"area_sqmi"</span>, <span class="st">"white"</span>, <span class="st">"black"</span>, <span class="st">"asian"</span>, <span class="st">"nh_white"</span>, <span class="st">"hispanic"</span>,</span>
-<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>            <span class="st">"pop"</span>, <span class="st">"pop_dens_value"</span>, <span class="st">"pct_black_value"</span>, <span class="st">"pop_dens"</span>, <span class="st">"pct_black"</span>,</span>
-<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>    legacy_path <span class="op">=</span> Path(legacy_county_data_path) <span class="cf">if</span> legacy_county_data_path <span class="cf">else</span> <span class="va">None</span></span>
-<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> legacy_path <span class="kw">and</span> legacy_path.exists():</span>
-<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>        legacy_source <span class="op">=</span> pl.read_parquet(legacy_path)</span>
-<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>        legacy <span class="op">=</span> legacy_source.select(</span>
-<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a>            [c <span class="cf">for</span> c <span class="kw">in</span> [<span class="st">"id"</span>, <span class="st">"su_gun6"</span>, <span class="st">"pop_dens6"</span>] <span class="cf">if</span> c <span class="kw">in</span> legacy_source.columns]</span>
-<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> legacy.columns <span class="op">!=</span> [<span class="st">"id"</span>]:</span>
-<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>            county_data <span class="op">=</span> county_data.join(legacy, on<span class="op">=</span><span class="st">"id"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
-<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>    county_data.write_parquet(county_data_path)</span>
-<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="ss">f"""</span></span>
-<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a><span class="ss">        COPY (</span></span>
-<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a><span class="ss">            WITH</span></span>
-<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a><span class="ss">            raw_parts AS (</span></span>
-<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a><span class="ss">                SELECT</span></span>
-<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a><span class="ss">                    id,</span></span>
-<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a><span class="ss">                    dump.geom AS geom,</span></span>
-<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a><span class="ss">                    dump.path AS path</span></span>
-<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a><span class="ss">                FROM counties_map_geom,</span></span>
-<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a><span class="ss">                UNNEST(ST_Dump(geometry)) AS t(dump)</span></span>
-<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a><span class="ss">            ),</span></span>
-<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a><span class="ss">            parts AS (</span></span>
-<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a><span class="ss">                SELECT</span></span>
-<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a><span class="ss">                    id,</span></span>
-<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a><span class="ss">                    geom,</span></span>
-<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a><span class="ss">                    row_number() OVER (</span></span>
-<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a><span class="ss">                        PARTITION BY id</span></span>
-<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a><span class="ss">                        ORDER BY CAST(path AS VARCHAR)</span></span>
-<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a><span class="ss">                    ) AS piece</span></span>
-<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a><span class="ss">                FROM raw_parts</span></span>
-<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a><span class="ss">                WHERE ST_GeometryType(geom) = 'POLYGON'</span></span>
-<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a><span class="ss">            ),</span></span>
-<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a><span class="ss">            rings AS (</span></span>
-<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a><span class="ss">                SELECT</span></span>
-<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a><span class="ss">                    id,</span></span>
-<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a><span class="ss">                    piece,</span></span>
-<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a><span class="ss">                    ST_ExteriorRing(geom) AS ring</span></span>
-<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a><span class="ss">                FROM parts</span></span>
-<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a><span class="ss">            ),</span></span>
-<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a><span class="ss">            points AS (</span></span>
-<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a><span class="ss">                SELECT</span></span>
-<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a><span class="ss">                    id,</span></span>
-<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a><span class="ss">                    piece,</span></span>
-<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a><span class="ss">                    i AS ord,</span></span>
-<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a><span class="ss">                    ST_PointN(ring, i::INTEGER) AS pt</span></span>
-<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a><span class="ss">                FROM rings,</span></span>
-<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a><span class="ss">                generate_series(1, ST_NumPoints(ring)::INTEGER) AS t(i)</span></span>
-<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a><span class="ss">            )</span></span>
-<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a><span class="ss">            SELECT</span></span>
-<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a><span class="ss">                ST_X(pt) AS long,</span></span>
-<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a><span class="ss">                ST_Y(pt) AS lat,</span></span>
-<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a><span class="ss">                ord::DOUBLE AS "order",</span></span>
-<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a><span class="ss">                false AS hole,</span></span>
-<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a><span class="ss">                piece::VARCHAR AS piece,</span></span>
-<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a><span class="ss">                '0500000US' || id || '.' || piece::VARCHAR AS "group",</span></span>
-<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a><span class="ss">                id</span></span>
-<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a><span class="ss">            FROM points</span></span>
-<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a><span class="ss">            ORDER BY id, piece, ord</span></span>
-<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a><span class="ss">        )</span></span>
-<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a><span class="ss">        TO '</span><span class="sc">{</span>county_map_path<span class="sc">.</span>as_posix()<span class="sc">}</span><span class="ss">'</span></span>
-<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a><span class="ss">        (FORMAT PARQUET)</span></span>
-<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a><span class="ss">    """</span>)</span>
-<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
-<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a>        <span class="st">"county_data"</span>: county_data_path,</span>
-<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a>        <span class="st">"county_map"</span>: county_map_path,</span>
-<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> geodatasets.get_path(<span class="st">"geoda.ncovr"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>con <span class="op">=</span> duckdb.<span class="ex">connect</span>()</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>con.sql(<span class="st">"INSTALL spatial"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>con.sql(<span class="st">"LOAD spatial"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>states <span class="op">=</span> con.sql(<span class="ss">f"""</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ss">    SELECT</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ss">        STATE_NAME AS state,</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="ss">        ST_Union_Agg(geom) AS geom</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="ss">    FROM ST_Read('</span><span class="sc">{</span>path<span class="sc">}</span><span class="ss">')</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="ss">    GROUP BY state</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ss">    ORDER BY state</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>states_sf <span class="op">=</span> con.sql(<span class="st">"""</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="st">WITH</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="st">raw_parts AS (</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="st">  SELECT</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="st">    state,</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="st">    dump.geom AS geom,</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="st">    dump.path AS path</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM states,</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="st">  UNNEST(ST_Dump(geom)) AS t(dump)</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="st">),</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="st">parts AS (</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="st">  SELECT</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="st">    state,</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="st">    geom,</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="st">    row_number() OVER (</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="st">      PARTITION BY state</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="st">      ORDER BY CAST(path AS VARCHAR)</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="st">    ) AS part_id</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM raw_parts</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="st">),</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="st">rings AS (</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="st">  SELECT</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="st">    state,</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="st">    state || '_' || part_id::VARCHAR AS group_id,</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="st">    ST_ExteriorRing(geom) AS ring</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM parts</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="st">),</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="st">points AS (</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="st">  SELECT</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="st">    state,</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="st">    group_id,</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="st">    i AS ord,</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="st">    ST_PointN(ring, i::INTEGER) AS pt</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM rings,</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="st">  generate_series(1, ST_NumPoints(ring)::INTEGER) AS t(i)</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="st">  state,</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="st">  group_id,</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a><span class="st">  ord,</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="st">  ST_X(pt) AS long,</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="st">  ST_Y(pt) AS lat</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="st">FROM points</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="st">ORDER BY state, group_id, ord</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>).pl()</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>states_sf.write_parquet(<span class="st">"data/states_sf.parquet"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The county files are built from Census cartographic county boundaries and ACS 5-year county data. DuckDB’s spatial extension handles the geometry work; Polars handles the tabular ACS data and derived variables.</p>
+<div id="fa7d01a0" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> zipfile <span class="im">import</span> ZipFile</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _download_file(url, path):</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    path <span class="op">=</span> Path(path)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    path.parent.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> path.exists():</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> path</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> requests.get(url, timeout<span class="op">=</span><span class="dv">120</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    response.raise_for_status()</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    path.write_bytes(response.content)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> path</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _county_boundary_path(year, resolution, cache_dir):</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    cache_dir <span class="op">=</span> Path(cache_dir)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    zip_path <span class="op">=</span> cache_dir <span class="op">/</span> <span class="ss">f"cb_</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">_us_county_</span><span class="sc">{</span>resolution<span class="sc">}</span><span class="ss">.zip"</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    shp_dir <span class="op">=</span> cache_dir <span class="op">/</span> <span class="ss">f"cb_</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">_us_county_</span><span class="sc">{</span>resolution<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    shp_path <span class="op">=</span> shp_dir <span class="op">/</span> <span class="ss">f"cb_</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">_us_county_</span><span class="sc">{</span>resolution<span class="sc">}</span><span class="ss">.shp"</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> (</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"https://www2.census.gov/geo/tiger/GENZ</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">/shp/"</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"cb_</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">_us_county_</span><span class="sc">{</span>resolution<span class="sc">}</span><span class="ss">.zip"</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    _download_file(url, zip_path)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> shp_path.exists():</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>        shp_dir.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> ZipFile(zip_path) <span class="im">as</span> zf:</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>            zf.extractall(shp_dir)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> shp_path</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _acs_county_data(year, api_key<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    acs_vars <span class="op">=</span> {</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01003_001E"</span>: <span class="st">"pop"</span>,</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01001B_001E"</span>: <span class="st">"black"</span>,</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01001A_001E"</span>: <span class="st">"white"</span>,</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01001H_001E"</span>: <span class="st">"nh_white"</span>,</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01001I_001E"</span>: <span class="st">"hispanic"</span>,</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B01001D_001E"</span>: <span class="st">"asian"</span>,</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>        <span class="st">"get"</span>: <span class="st">"NAME,"</span> <span class="op">+</span> <span class="st">","</span>.join(acs_vars),</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>        <span class="st">"for"</span>: <span class="st">"county:*"</span>,</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> api_key <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>        params[<span class="st">"key"</span>] <span class="op">=</span> api_key</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> requests.get(</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"https://api.census.gov/data/</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">/acs/acs5"</span>,</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>        params<span class="op">=</span>params,</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>        timeout<span class="op">=</span><span class="dv">120</span>,</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>    response.raise_for_status()</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> response.json()</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> (</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>        pl.DataFrame(rows[<span class="dv">1</span>:], schema<span class="op">=</span>rows[<span class="dv">0</span>], orient<span class="op">=</span><span class="st">"row"</span>)</span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>        .rename(acs_vars)</span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>        .with_columns(</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="bu">list</span>(acs_vars.values())).cast(pl.Int64),</span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>            <span class="bu">id</span><span class="op">=</span>pl.col(<span class="st">"state"</span>) <span class="op">+</span> pl.col(<span class="st">"county"</span>),</span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>        .drop(<span class="st">"county"</span>)</span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">filter</span>(pl.col(<span class="st">"state"</span>) <span class="op">!=</span> <span class="st">"72"</span>)</span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> data</span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_counties(</span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>    year<span class="op">=</span><span class="dv">2023</span>,</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>    resolution<span class="op">=</span><span class="st">"500k"</span>,</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>    out_dir<span class="op">=</span><span class="st">"data"</span>,</span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>    cache_dir<span class="op">=</span><span class="st">"data/_cache/census"</span>,</span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>    api_key<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>    shift<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>    crop<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>    simplify_tolerance<span class="op">=</span><span class="dv">1000</span>,</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>    legacy_county_data_path<span class="op">=</span><span class="st">"data/county_data.parquet"</span>,</span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Build county_data.parquet and county_map.parquet from Census sources.</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a><span class="co">    This mirrors the chapter's lightweight plotting interface: attributes live</span></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a><span class="co">    in county_data.parquet, while county_map.parquet is a fortified polygon</span></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a><span class="co">    table with one row per exterior-ring vertex.</span></span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>    out_dir <span class="op">=</span> Path(out_dir)</span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>    out_dir.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>    county_data_path <span class="op">=</span> out_dir <span class="op">/</span> <span class="st">"county_data.parquet"</span></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>    county_map_path <span class="op">=</span> out_dir <span class="op">/</span> <span class="st">"county_map.parquet"</span></span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>    boundaries <span class="op">=</span> _county_boundary_path(year, resolution, cache_dir)</span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>    acs <span class="op">=</span> _acs_county_data(year, api_key<span class="op">=</span>api_key)</span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>    state_lookup <span class="op">=</span> {</span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>        <span class="st">"01"</span>: (<span class="st">"AL"</span>, <span class="st">"South"</span>), <span class="st">"02"</span>: (<span class="st">"AK"</span>, <span class="st">"West"</span>), <span class="st">"04"</span>: (<span class="st">"AZ"</span>, <span class="st">"West"</span>),</span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>        <span class="st">"05"</span>: (<span class="st">"AR"</span>, <span class="st">"South"</span>), <span class="st">"06"</span>: (<span class="st">"CA"</span>, <span class="st">"West"</span>), <span class="st">"08"</span>: (<span class="st">"CO"</span>, <span class="st">"West"</span>),</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>        <span class="st">"09"</span>: (<span class="st">"CT"</span>, <span class="st">"Northeast"</span>), <span class="st">"10"</span>: (<span class="st">"DE"</span>, <span class="st">"South"</span>),</span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>        <span class="st">"11"</span>: (<span class="st">"DC"</span>, <span class="st">"South"</span>), <span class="st">"12"</span>: (<span class="st">"FL"</span>, <span class="st">"South"</span>), <span class="st">"13"</span>: (<span class="st">"GA"</span>, <span class="st">"South"</span>),</span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>        <span class="st">"15"</span>: (<span class="st">"HI"</span>, <span class="st">"West"</span>), <span class="st">"16"</span>: (<span class="st">"ID"</span>, <span class="st">"West"</span>), <span class="st">"17"</span>: (<span class="st">"IL"</span>, <span class="st">"Midwest"</span>),</span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>        <span class="st">"18"</span>: (<span class="st">"IN"</span>, <span class="st">"Midwest"</span>), <span class="st">"19"</span>: (<span class="st">"IA"</span>, <span class="st">"Midwest"</span>),</span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>        <span class="st">"20"</span>: (<span class="st">"KS"</span>, <span class="st">"Midwest"</span>), <span class="st">"21"</span>: (<span class="st">"KY"</span>, <span class="st">"South"</span>),</span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>        <span class="st">"22"</span>: (<span class="st">"LA"</span>, <span class="st">"South"</span>), <span class="st">"23"</span>: (<span class="st">"ME"</span>, <span class="st">"Northeast"</span>),</span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>        <span class="st">"24"</span>: (<span class="st">"MD"</span>, <span class="st">"South"</span>), <span class="st">"25"</span>: (<span class="st">"MA"</span>, <span class="st">"Northeast"</span>),</span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>        <span class="st">"26"</span>: (<span class="st">"MI"</span>, <span class="st">"Midwest"</span>), <span class="st">"27"</span>: (<span class="st">"MN"</span>, <span class="st">"Midwest"</span>),</span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>        <span class="st">"28"</span>: (<span class="st">"MS"</span>, <span class="st">"South"</span>), <span class="st">"29"</span>: (<span class="st">"MO"</span>, <span class="st">"Midwest"</span>),</span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>        <span class="st">"30"</span>: (<span class="st">"MT"</span>, <span class="st">"West"</span>), <span class="st">"31"</span>: (<span class="st">"NE"</span>, <span class="st">"Midwest"</span>),</span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>        <span class="st">"32"</span>: (<span class="st">"NV"</span>, <span class="st">"West"</span>), <span class="st">"33"</span>: (<span class="st">"NH"</span>, <span class="st">"Northeast"</span>),</span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>        <span class="st">"34"</span>: (<span class="st">"NJ"</span>, <span class="st">"Northeast"</span>), <span class="st">"35"</span>: (<span class="st">"NM"</span>, <span class="st">"West"</span>),</span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>        <span class="st">"36"</span>: (<span class="st">"NY"</span>, <span class="st">"Northeast"</span>), <span class="st">"37"</span>: (<span class="st">"NC"</span>, <span class="st">"South"</span>),</span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a>        <span class="st">"38"</span>: (<span class="st">"ND"</span>, <span class="st">"Midwest"</span>), <span class="st">"39"</span>: (<span class="st">"OH"</span>, <span class="st">"Midwest"</span>),</span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a>        <span class="st">"40"</span>: (<span class="st">"OK"</span>, <span class="st">"South"</span>), <span class="st">"41"</span>: (<span class="st">"OR"</span>, <span class="st">"West"</span>),</span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a>        <span class="st">"42"</span>: (<span class="st">"PA"</span>, <span class="st">"Northeast"</span>), <span class="st">"44"</span>: (<span class="st">"RI"</span>, <span class="st">"Northeast"</span>),</span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a>        <span class="st">"45"</span>: (<span class="st">"SC"</span>, <span class="st">"South"</span>), <span class="st">"46"</span>: (<span class="st">"SD"</span>, <span class="st">"Midwest"</span>),</span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a>        <span class="st">"47"</span>: (<span class="st">"TN"</span>, <span class="st">"South"</span>), <span class="st">"48"</span>: (<span class="st">"TX"</span>, <span class="st">"South"</span>),</span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a>        <span class="st">"49"</span>: (<span class="st">"UT"</span>, <span class="st">"West"</span>), <span class="st">"50"</span>: (<span class="st">"VT"</span>, <span class="st">"Northeast"</span>),</span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a>        <span class="st">"51"</span>: (<span class="st">"VA"</span>, <span class="st">"South"</span>), <span class="st">"53"</span>: (<span class="st">"WA"</span>, <span class="st">"West"</span>),</span>
+<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a>        <span class="st">"54"</span>: (<span class="st">"WV"</span>, <span class="st">"South"</span>), <span class="st">"55"</span>: (<span class="st">"WI"</span>, <span class="st">"Midwest"</span>),</span>
+<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a>        <span class="st">"56"</span>: (<span class="st">"WY"</span>, <span class="st">"West"</span>),</span>
+<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a>    states <span class="op">=</span> pl.DataFrame(</span>
+<span id="cb3-129"><a href="#cb3-129" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb3-130"><a href="#cb3-130" aria-hidden="true" tabindex="-1"></a>            <span class="st">"state"</span>: <span class="bu">list</span>(state_lookup),</span>
+<span id="cb3-131"><a href="#cb3-131" aria-hidden="true" tabindex="-1"></a>            <span class="st">"st"</span>: [v[<span class="dv">0</span>] <span class="cf">for</span> v <span class="kw">in</span> state_lookup.values()],</span>
+<span id="cb3-132"><a href="#cb3-132" aria-hidden="true" tabindex="-1"></a>            <span class="st">"census_region"</span>: [v[<span class="dv">1</span>] <span class="cf">for</span> v <span class="kw">in</span> state_lookup.values()],</span>
+<span id="cb3-133"><a href="#cb3-133" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a>    state_fips_sql <span class="op">=</span> <span class="st">", "</span>.join(<span class="ss">f"'</span><span class="sc">{</span>state<span class="sc">}</span><span class="ss">'"</span> <span class="cf">for</span> state <span class="kw">in</span> state_lookup)</span>
+<span id="cb3-136"><a href="#cb3-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-137"><a href="#cb3-137" aria-hidden="true" tabindex="-1"></a>    con <span class="op">=</span> duckdb.<span class="ex">connect</span>()</span>
+<span id="cb3-138"><a href="#cb3-138" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb3-139"><a href="#cb3-139" aria-hidden="true" tabindex="-1"></a>        con.sql(<span class="st">"LOAD spatial"</span>)</span>
+<span id="cb3-140"><a href="#cb3-140" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span>:</span>
+<span id="cb3-141"><a href="#cb3-141" aria-hidden="true" tabindex="-1"></a>        con.sql(<span class="st">"INSTALL spatial"</span>)</span>
+<span id="cb3-142"><a href="#cb3-142" aria-hidden="true" tabindex="-1"></a>        con.sql(<span class="st">"LOAD spatial"</span>)</span>
+<span id="cb3-143"><a href="#cb3-143" aria-hidden="true" tabindex="-1"></a>    con.register(<span class="st">"acs"</span>, acs)</span>
+<span id="cb3-144"><a href="#cb3-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-145"><a href="#cb3-145" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="ss">f"""</span></span>
+<span id="cb3-146"><a href="#cb3-146" aria-hidden="true" tabindex="-1"></a><span class="ss">        CREATE OR REPLACE TABLE counties_raw AS</span></span>
+<span id="cb3-147"><a href="#cb3-147" aria-hidden="true" tabindex="-1"></a><span class="ss">        SELECT</span></span>
+<span id="cb3-148"><a href="#cb3-148" aria-hidden="true" tabindex="-1"></a><span class="ss">            GEOID AS id,</span></span>
+<span id="cb3-149"><a href="#cb3-149" aria-hidden="true" tabindex="-1"></a><span class="ss">            STATEFP AS state,</span></span>
+<span id="cb3-150"><a href="#cb3-150" aria-hidden="true" tabindex="-1"></a><span class="ss">            ST_Transform(geom, 'EPSG:4269', 'ESRI:102003', always_xy := true) AS geom_us,</span></span>
+<span id="cb3-151"><a href="#cb3-151" aria-hidden="true" tabindex="-1"></a><span class="ss">            ST_Transform(geom, 'EPSG:4269', 'EPSG:3338', always_xy := true) AS geom_ak,</span></span>
+<span id="cb3-152"><a href="#cb3-152" aria-hidden="true" tabindex="-1"></a><span class="ss">            ST_Transform(geom, 'EPSG:4269', 'ESRI:102007', always_xy := true) AS geom_hi</span></span>
+<span id="cb3-153"><a href="#cb3-153" aria-hidden="true" tabindex="-1"></a><span class="ss">        FROM ST_Read('</span><span class="sc">{</span>boundaries<span class="sc">.</span>as_posix()<span class="sc">}</span><span class="ss">')</span></span>
+<span id="cb3-154"><a href="#cb3-154" aria-hidden="true" tabindex="-1"></a><span class="ss">        WHERE STATEFP IN (</span><span class="sc">{</span>state_fips_sql<span class="sc">}</span><span class="ss">)</span></span>
+<span id="cb3-155"><a href="#cb3-155" aria-hidden="true" tabindex="-1"></a><span class="ss">    """</span>)</span>
+<span id="cb3-156"><a href="#cb3-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-157"><a href="#cb3-157" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="st">"""</span></span>
+<span id="cb3-158"><a href="#cb3-158" aria-hidden="true" tabindex="-1"></a><span class="st">        CREATE OR REPLACE TABLE lower48_bbox AS</span></span>
+<span id="cb3-159"><a href="#cb3-159" aria-hidden="true" tabindex="-1"></a><span class="st">        SELECT</span></span>
+<span id="cb3-160"><a href="#cb3-160" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_XMin(ST_Extent_Agg(geom_us)) AS xmin,</span></span>
+<span id="cb3-161"><a href="#cb3-161" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_XMax(ST_Extent_Agg(geom_us)) AS xmax,</span></span>
+<span id="cb3-162"><a href="#cb3-162" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_YMin(ST_Extent_Agg(geom_us)) AS ymin,</span></span>
+<span id="cb3-163"><a href="#cb3-163" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_YMax(ST_Extent_Agg(geom_us)) AS ymax</span></span>
+<span id="cb3-164"><a href="#cb3-164" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM counties_raw</span></span>
+<span id="cb3-165"><a href="#cb3-165" aria-hidden="true" tabindex="-1"></a><span class="st">        WHERE state NOT IN ('02', '15')</span></span>
+<span id="cb3-166"><a href="#cb3-166" aria-hidden="true" tabindex="-1"></a><span class="st">    """</span>)</span>
+<span id="cb3-167"><a href="#cb3-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-168"><a href="#cb3-168" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="st">"""</span></span>
+<span id="cb3-169"><a href="#cb3-169" aria-hidden="true" tabindex="-1"></a><span class="st">        CREATE OR REPLACE TABLE shift_params AS</span></span>
+<span id="cb3-170"><a href="#cb3-170" aria-hidden="true" tabindex="-1"></a><span class="st">        WITH</span></span>
+<span id="cb3-171"><a href="#cb3-171" aria-hidden="true" tabindex="-1"></a><span class="st">        bb AS (</span></span>
+<span id="cb3-172"><a href="#cb3-172" aria-hidden="true" tabindex="-1"></a><span class="st">            SELECT *, xmax - xmin AS width, ymax - ymin AS height</span></span>
+<span id="cb3-173"><a href="#cb3-173" aria-hidden="true" tabindex="-1"></a><span class="st">            FROM lower48_bbox</span></span>
+<span id="cb3-174"><a href="#cb3-174" aria-hidden="true" tabindex="-1"></a><span class="st">        ),</span></span>
+<span id="cb3-175"><a href="#cb3-175" aria-hidden="true" tabindex="-1"></a><span class="st">        centroids AS (</span></span>
+<span id="cb3-176"><a href="#cb3-176" aria-hidden="true" tabindex="-1"></a><span class="st">            SELECT</span></span>
+<span id="cb3-177"><a href="#cb3-177" aria-hidden="true" tabindex="-1"></a><span class="st">                ST_X(ST_Centroid(ST_Union_Agg(geom_ak) FILTER (WHERE state = '02'))) AS ak_x,</span></span>
+<span id="cb3-178"><a href="#cb3-178" aria-hidden="true" tabindex="-1"></a><span class="st">                ST_Y(ST_Centroid(ST_Union_Agg(geom_ak) FILTER (WHERE state = '02'))) AS ak_y,</span></span>
+<span id="cb3-179"><a href="#cb3-179" aria-hidden="true" tabindex="-1"></a><span class="st">                ST_X(ST_Centroid(ST_Union_Agg(geom_hi) FILTER (WHERE state = '15'))) AS hi_x,</span></span>
+<span id="cb3-180"><a href="#cb3-180" aria-hidden="true" tabindex="-1"></a><span class="st">                ST_Y(ST_Centroid(ST_Union_Agg(geom_hi) FILTER (WHERE state = '15'))) AS hi_y</span></span>
+<span id="cb3-181"><a href="#cb3-181" aria-hidden="true" tabindex="-1"></a><span class="st">            FROM counties_raw</span></span>
+<span id="cb3-182"><a href="#cb3-182" aria-hidden="true" tabindex="-1"></a><span class="st">        )</span></span>
+<span id="cb3-183"><a href="#cb3-183" aria-hidden="true" tabindex="-1"></a><span class="st">        SELECT</span></span>
+<span id="cb3-184"><a href="#cb3-184" aria-hidden="true" tabindex="-1"></a><span class="st">            bb.xmin + 0.08 * bb.width AS ak_target_x,</span></span>
+<span id="cb3-185"><a href="#cb3-185" aria-hidden="true" tabindex="-1"></a><span class="st">            bb.ymin + 0.07 * bb.height AS ak_target_y,</span></span>
+<span id="cb3-186"><a href="#cb3-186" aria-hidden="true" tabindex="-1"></a><span class="st">            bb.xmin + 0.35 * bb.width AS hi_target_x,</span></span>
+<span id="cb3-187"><a href="#cb3-187" aria-hidden="true" tabindex="-1"></a><span class="st">            bb.ymin + 0.00 * bb.height AS hi_target_y,</span></span>
+<span id="cb3-188"><a href="#cb3-188" aria-hidden="true" tabindex="-1"></a><span class="st">            centroids.*</span></span>
+<span id="cb3-189"><a href="#cb3-189" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM bb, centroids</span></span>
+<span id="cb3-190"><a href="#cb3-190" aria-hidden="true" tabindex="-1"></a><span class="st">    """</span>)</span>
+<span id="cb3-191"><a href="#cb3-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-192"><a href="#cb3-192" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> shift:</span>
+<span id="cb3-193"><a href="#cb3-193" aria-hidden="true" tabindex="-1"></a>        geometry_expr <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb3-194"><a href="#cb3-194" aria-hidden="true" tabindex="-1"></a><span class="st">            CASE</span></span>
+<span id="cb3-195"><a href="#cb3-195" aria-hidden="true" tabindex="-1"></a><span class="st">                WHEN state = '02' THEN</span></span>
+<span id="cb3-196"><a href="#cb3-196" aria-hidden="true" tabindex="-1"></a><span class="st">                    ST_Affine(</span></span>
+<span id="cb3-197"><a href="#cb3-197" aria-hidden="true" tabindex="-1"></a><span class="st">                        geom_ak,</span></span>
+<span id="cb3-198"><a href="#cb3-198" aria-hidden="true" tabindex="-1"></a><span class="st">                        0.5, 0.0, 0.0, 0.5,</span></span>
+<span id="cb3-199"><a href="#cb3-199" aria-hidden="true" tabindex="-1"></a><span class="st">                        ak_target_x - 0.5 * ak_x,</span></span>
+<span id="cb3-200"><a href="#cb3-200" aria-hidden="true" tabindex="-1"></a><span class="st">                        ak_target_y - 0.5 * ak_y</span></span>
+<span id="cb3-201"><a href="#cb3-201" aria-hidden="true" tabindex="-1"></a><span class="st">                    )</span></span>
+<span id="cb3-202"><a href="#cb3-202" aria-hidden="true" tabindex="-1"></a><span class="st">                WHEN state = '15' THEN</span></span>
+<span id="cb3-203"><a href="#cb3-203" aria-hidden="true" tabindex="-1"></a><span class="st">                    ST_Affine(</span></span>
+<span id="cb3-204"><a href="#cb3-204" aria-hidden="true" tabindex="-1"></a><span class="st">                        geom_hi,</span></span>
+<span id="cb3-205"><a href="#cb3-205" aria-hidden="true" tabindex="-1"></a><span class="st">                        1.5, 0.0, 0.0, 1.5,</span></span>
+<span id="cb3-206"><a href="#cb3-206" aria-hidden="true" tabindex="-1"></a><span class="st">                        hi_target_x - 1.5 * hi_x,</span></span>
+<span id="cb3-207"><a href="#cb3-207" aria-hidden="true" tabindex="-1"></a><span class="st">                        hi_target_y - 1.5 * hi_y</span></span>
+<span id="cb3-208"><a href="#cb3-208" aria-hidden="true" tabindex="-1"></a><span class="st">                    )</span></span>
+<span id="cb3-209"><a href="#cb3-209" aria-hidden="true" tabindex="-1"></a><span class="st">                ELSE geom_us</span></span>
+<span id="cb3-210"><a href="#cb3-210" aria-hidden="true" tabindex="-1"></a><span class="st">            END</span></span>
+<span id="cb3-211"><a href="#cb3-211" aria-hidden="true" tabindex="-1"></a><span class="st">        """</span></span>
+<span id="cb3-212"><a href="#cb3-212" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb3-213"><a href="#cb3-213" aria-hidden="true" tabindex="-1"></a>        geometry_expr <span class="op">=</span> <span class="st">"geom_us"</span></span>
+<span id="cb3-214"><a href="#cb3-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-215"><a href="#cb3-215" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="ss">f"""</span></span>
+<span id="cb3-216"><a href="#cb3-216" aria-hidden="true" tabindex="-1"></a><span class="ss">        CREATE OR REPLACE TABLE counties_projected AS</span></span>
+<span id="cb3-217"><a href="#cb3-217" aria-hidden="true" tabindex="-1"></a><span class="ss">        SELECT</span></span>
+<span id="cb3-218"><a href="#cb3-218" aria-hidden="true" tabindex="-1"></a><span class="ss">            id,</span></span>
+<span id="cb3-219"><a href="#cb3-219" aria-hidden="true" tabindex="-1"></a><span class="ss">            state,</span></span>
+<span id="cb3-220"><a href="#cb3-220" aria-hidden="true" tabindex="-1"></a><span class="ss">            </span><span class="sc">{</span>geometry_expr<span class="sc">}</span><span class="ss"> AS geometry</span></span>
+<span id="cb3-221"><a href="#cb3-221" aria-hidden="true" tabindex="-1"></a><span class="ss">        FROM counties_raw, shift_params</span></span>
+<span id="cb3-222"><a href="#cb3-222" aria-hidden="true" tabindex="-1"></a><span class="ss">    """</span>)</span>
+<span id="cb3-223"><a href="#cb3-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-224"><a href="#cb3-224" aria-hidden="true" tabindex="-1"></a>    geom_for_map <span class="op">=</span> <span class="st">"geometry"</span></span>
+<span id="cb3-225"><a href="#cb3-225" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> crop:</span>
+<span id="cb3-226"><a href="#cb3-226" aria-hidden="true" tabindex="-1"></a>        geom_for_map <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb3-227"><a href="#cb3-227" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_Intersection(</span></span>
+<span id="cb3-228"><a href="#cb3-228" aria-hidden="true" tabindex="-1"></a><span class="st">                geometry,</span></span>
+<span id="cb3-229"><a href="#cb3-229" aria-hidden="true" tabindex="-1"></a><span class="st">                ST_MakeEnvelope(-2500000, -1697746, 2258200, 1565782)</span></span>
+<span id="cb3-230"><a href="#cb3-230" aria-hidden="true" tabindex="-1"></a><span class="st">            )</span></span>
+<span id="cb3-231"><a href="#cb3-231" aria-hidden="true" tabindex="-1"></a><span class="st">        """</span></span>
+<span id="cb3-232"><a href="#cb3-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-233"><a href="#cb3-233" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> simplify_tolerance <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> simplify_tolerance <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb3-234"><a href="#cb3-234" aria-hidden="true" tabindex="-1"></a>        geom_for_map <span class="op">=</span> <span class="ss">f"ST_Simplify(</span><span class="sc">{</span>geom_for_map<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span><span class="bu">float</span>(simplify_tolerance)<span class="sc">}</span><span class="ss">)"</span></span>
+<span id="cb3-235"><a href="#cb3-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-236"><a href="#cb3-236" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="ss">f"""</span></span>
+<span id="cb3-237"><a href="#cb3-237" aria-hidden="true" tabindex="-1"></a><span class="ss">        CREATE OR REPLACE TABLE counties_map_geom AS</span></span>
+<span id="cb3-238"><a href="#cb3-238" aria-hidden="true" tabindex="-1"></a><span class="ss">        SELECT</span></span>
+<span id="cb3-239"><a href="#cb3-239" aria-hidden="true" tabindex="-1"></a><span class="ss">            id,</span></span>
+<span id="cb3-240"><a href="#cb3-240" aria-hidden="true" tabindex="-1"></a><span class="ss">            </span><span class="sc">{</span>geom_for_map<span class="sc">}</span><span class="ss"> AS geometry</span></span>
+<span id="cb3-241"><a href="#cb3-241" aria-hidden="true" tabindex="-1"></a><span class="ss">        FROM counties_projected</span></span>
+<span id="cb3-242"><a href="#cb3-242" aria-hidden="true" tabindex="-1"></a><span class="ss">        WHERE NOT ST_IsEmpty(</span><span class="sc">{</span>geom_for_map<span class="sc">}</span><span class="ss">)</span></span>
+<span id="cb3-243"><a href="#cb3-243" aria-hidden="true" tabindex="-1"></a><span class="ss">    """</span>)</span>
+<span id="cb3-244"><a href="#cb3-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-245"><a href="#cb3-245" aria-hidden="true" tabindex="-1"></a>    area <span class="op">=</span> con.sql(<span class="st">"""</span></span>
+<span id="cb3-246"><a href="#cb3-246" aria-hidden="true" tabindex="-1"></a><span class="st">        SELECT</span></span>
+<span id="cb3-247"><a href="#cb3-247" aria-hidden="true" tabindex="-1"></a><span class="st">            id,</span></span>
+<span id="cb3-248"><a href="#cb3-248" aria-hidden="true" tabindex="-1"></a><span class="st">            ST_Area(geometry) / 2589988.110336 AS area_sqmi</span></span>
+<span id="cb3-249"><a href="#cb3-249" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM counties_projected</span></span>
+<span id="cb3-250"><a href="#cb3-250" aria-hidden="true" tabindex="-1"></a><span class="st">    """</span>).pl()</span>
+<span id="cb3-251"><a href="#cb3-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-252"><a href="#cb3-252" aria-hidden="true" tabindex="-1"></a>    county_data <span class="op">=</span> (</span>
+<span id="cb3-253"><a href="#cb3-253" aria-hidden="true" tabindex="-1"></a>        acs.join(area, on<span class="op">=</span><span class="st">"id"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb3-254"><a href="#cb3-254" aria-hidden="true" tabindex="-1"></a>        .join(states, on<span class="op">=</span><span class="st">"state"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb3-255"><a href="#cb3-255" aria-hidden="true" tabindex="-1"></a>        .with_columns(</span>
+<span id="cb3-256"><a href="#cb3-256" aria-hidden="true" tabindex="-1"></a>            name<span class="op">=</span>pl.col(<span class="st">"NAME"</span>).<span class="bu">str</span>.replace(<span class="vs">r", </span><span class="dv">.</span><span class="op">*</span><span class="dv">$</span><span class="vs">"</span>, <span class="st">""</span>),</span>
+<span id="cb3-257"><a href="#cb3-257" aria-hidden="true" tabindex="-1"></a>            pop_dens_value<span class="op">=</span>pl.col(<span class="st">"pop"</span>) <span class="op">/</span> pl.col(<span class="st">"area_sqmi"</span>),</span>
+<span id="cb3-258"><a href="#cb3-258" aria-hidden="true" tabindex="-1"></a>            pct_black_value<span class="op">=</span>pl.col(<span class="st">"black"</span>) <span class="op">/</span> pl.col(<span class="st">"pop"</span>) <span class="op">*</span> <span class="dv">100</span>,</span>
+<span id="cb3-259"><a href="#cb3-259" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-260"><a href="#cb3-260" aria-hidden="true" tabindex="-1"></a>        .with_columns(</span>
+<span id="cb3-261"><a href="#cb3-261" aria-hidden="true" tabindex="-1"></a>            pop_dens<span class="op">=</span>(</span>
+<span id="cb3-262"><a href="#cb3-262" aria-hidden="true" tabindex="-1"></a>                pl.when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">10</span>).then(pl.lit(<span class="st">"[    0,   10)"</span>))</span>
+<span id="cb3-263"><a href="#cb3-263" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">50</span>).then(pl.lit(<span class="st">"[   10,   50)"</span>))</span>
+<span id="cb3-264"><a href="#cb3-264" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">100</span>).then(pl.lit(<span class="st">"[   50,  100)"</span>))</span>
+<span id="cb3-265"><a href="#cb3-265" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">500</span>).then(pl.lit(<span class="st">"[  100,  500)"</span>))</span>
+<span id="cb3-266"><a href="#cb3-266" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">1000</span>).then(pl.lit(<span class="st">"[  500, 1000)"</span>))</span>
+<span id="cb3-267"><a href="#cb3-267" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pop_dens_value"</span>) <span class="op">&lt;</span> <span class="dv">5000</span>).then(pl.lit(<span class="st">"[ 1000, 5000)"</span>))</span>
+<span id="cb3-268"><a href="#cb3-268" aria-hidden="true" tabindex="-1"></a>                .otherwise(pl.lit(<span class="st">"[ 5000,71672]"</span>))</span>
+<span id="cb3-269"><a href="#cb3-269" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb3-270"><a href="#cb3-270" aria-hidden="true" tabindex="-1"></a>            pct_black<span class="op">=</span>(</span>
+<span id="cb3-271"><a href="#cb3-271" aria-hidden="true" tabindex="-1"></a>                pl.when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">2</span>).then(pl.lit(<span class="st">"[ 0.0, 2.0)"</span>))</span>
+<span id="cb3-272"><a href="#cb3-272" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">5</span>).then(pl.lit(<span class="st">"[ 2.0, 5.0)"</span>))</span>
+<span id="cb3-273"><a href="#cb3-273" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">10</span>).then(pl.lit(<span class="st">"[ 5.0,10.0)"</span>))</span>
+<span id="cb3-274"><a href="#cb3-274" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">15</span>).then(pl.lit(<span class="st">"[10.0,15.0)"</span>))</span>
+<span id="cb3-275"><a href="#cb3-275" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">25</span>).then(pl.lit(<span class="st">"[15.0,25.0)"</span>))</span>
+<span id="cb3-276"><a href="#cb3-276" aria-hidden="true" tabindex="-1"></a>                .when(pl.col(<span class="st">"pct_black_value"</span>) <span class="op">&lt;</span> <span class="dv">50</span>).then(pl.lit(<span class="st">"[25.0,50.0)"</span>))</span>
+<span id="cb3-277"><a href="#cb3-277" aria-hidden="true" tabindex="-1"></a>                .otherwise(pl.lit(<span class="st">"[50.0,85.3]"</span>))</span>
+<span id="cb3-278"><a href="#cb3-278" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb3-279"><a href="#cb3-279" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-280"><a href="#cb3-280" aria-hidden="true" tabindex="-1"></a>        .select(</span>
+<span id="cb3-281"><a href="#cb3-281" aria-hidden="true" tabindex="-1"></a>            <span class="st">"id"</span>, <span class="st">"name"</span>, <span class="st">"st"</span>, <span class="st">"state"</span>, <span class="st">"census_region"</span>,</span>
+<span id="cb3-282"><a href="#cb3-282" aria-hidden="true" tabindex="-1"></a>            <span class="st">"area_sqmi"</span>, <span class="st">"white"</span>, <span class="st">"black"</span>, <span class="st">"asian"</span>, <span class="st">"nh_white"</span>, <span class="st">"hispanic"</span>,</span>
+<span id="cb3-283"><a href="#cb3-283" aria-hidden="true" tabindex="-1"></a>            <span class="st">"pop"</span>, <span class="st">"pop_dens_value"</span>, <span class="st">"pct_black_value"</span>, <span class="st">"pop_dens"</span>, <span class="st">"pct_black"</span>,</span>
+<span id="cb3-284"><a href="#cb3-284" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-285"><a href="#cb3-285" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-286"><a href="#cb3-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-287"><a href="#cb3-287" aria-hidden="true" tabindex="-1"></a>    legacy_path <span class="op">=</span> Path(legacy_county_data_path) <span class="cf">if</span> legacy_county_data_path <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb3-288"><a href="#cb3-288" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> legacy_path <span class="kw">and</span> legacy_path.exists():</span>
+<span id="cb3-289"><a href="#cb3-289" aria-hidden="true" tabindex="-1"></a>        legacy_source <span class="op">=</span> pl.read_parquet(legacy_path)</span>
+<span id="cb3-290"><a href="#cb3-290" aria-hidden="true" tabindex="-1"></a>        legacy <span class="op">=</span> legacy_source.select(</span>
+<span id="cb3-291"><a href="#cb3-291" aria-hidden="true" tabindex="-1"></a>            [c <span class="cf">for</span> c <span class="kw">in</span> [<span class="st">"id"</span>, <span class="st">"su_gun6"</span>, <span class="st">"pop_dens6"</span>] <span class="cf">if</span> c <span class="kw">in</span> legacy_source.columns]</span>
+<span id="cb3-292"><a href="#cb3-292" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-293"><a href="#cb3-293" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> legacy.columns <span class="op">!=</span> [<span class="st">"id"</span>]:</span>
+<span id="cb3-294"><a href="#cb3-294" aria-hidden="true" tabindex="-1"></a>            county_data <span class="op">=</span> county_data.join(legacy, on<span class="op">=</span><span class="st">"id"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb3-295"><a href="#cb3-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-296"><a href="#cb3-296" aria-hidden="true" tabindex="-1"></a>    county_data.write_parquet(county_data_path)</span>
+<span id="cb3-297"><a href="#cb3-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-298"><a href="#cb3-298" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="ss">f"""</span></span>
+<span id="cb3-299"><a href="#cb3-299" aria-hidden="true" tabindex="-1"></a><span class="ss">        COPY (</span></span>
+<span id="cb3-300"><a href="#cb3-300" aria-hidden="true" tabindex="-1"></a><span class="ss">            WITH</span></span>
+<span id="cb3-301"><a href="#cb3-301" aria-hidden="true" tabindex="-1"></a><span class="ss">            raw_parts AS (</span></span>
+<span id="cb3-302"><a href="#cb3-302" aria-hidden="true" tabindex="-1"></a><span class="ss">                SELECT</span></span>
+<span id="cb3-303"><a href="#cb3-303" aria-hidden="true" tabindex="-1"></a><span class="ss">                    id,</span></span>
+<span id="cb3-304"><a href="#cb3-304" aria-hidden="true" tabindex="-1"></a><span class="ss">                    dump.geom AS geom,</span></span>
+<span id="cb3-305"><a href="#cb3-305" aria-hidden="true" tabindex="-1"></a><span class="ss">                    dump.path AS path</span></span>
+<span id="cb3-306"><a href="#cb3-306" aria-hidden="true" tabindex="-1"></a><span class="ss">                FROM counties_map_geom,</span></span>
+<span id="cb3-307"><a href="#cb3-307" aria-hidden="true" tabindex="-1"></a><span class="ss">                UNNEST(ST_Dump(geometry)) AS t(dump)</span></span>
+<span id="cb3-308"><a href="#cb3-308" aria-hidden="true" tabindex="-1"></a><span class="ss">            ),</span></span>
+<span id="cb3-309"><a href="#cb3-309" aria-hidden="true" tabindex="-1"></a><span class="ss">            parts AS (</span></span>
+<span id="cb3-310"><a href="#cb3-310" aria-hidden="true" tabindex="-1"></a><span class="ss">                SELECT</span></span>
+<span id="cb3-311"><a href="#cb3-311" aria-hidden="true" tabindex="-1"></a><span class="ss">                    id,</span></span>
+<span id="cb3-312"><a href="#cb3-312" aria-hidden="true" tabindex="-1"></a><span class="ss">                    geom,</span></span>
+<span id="cb3-313"><a href="#cb3-313" aria-hidden="true" tabindex="-1"></a><span class="ss">                    row_number() OVER (</span></span>
+<span id="cb3-314"><a href="#cb3-314" aria-hidden="true" tabindex="-1"></a><span class="ss">                        PARTITION BY id</span></span>
+<span id="cb3-315"><a href="#cb3-315" aria-hidden="true" tabindex="-1"></a><span class="ss">                        ORDER BY CAST(path AS VARCHAR)</span></span>
+<span id="cb3-316"><a href="#cb3-316" aria-hidden="true" tabindex="-1"></a><span class="ss">                    ) AS piece</span></span>
+<span id="cb3-317"><a href="#cb3-317" aria-hidden="true" tabindex="-1"></a><span class="ss">                FROM raw_parts</span></span>
+<span id="cb3-318"><a href="#cb3-318" aria-hidden="true" tabindex="-1"></a><span class="ss">                WHERE ST_GeometryType(geom) = 'POLYGON'</span></span>
+<span id="cb3-319"><a href="#cb3-319" aria-hidden="true" tabindex="-1"></a><span class="ss">            ),</span></span>
+<span id="cb3-320"><a href="#cb3-320" aria-hidden="true" tabindex="-1"></a><span class="ss">            rings AS (</span></span>
+<span id="cb3-321"><a href="#cb3-321" aria-hidden="true" tabindex="-1"></a><span class="ss">                SELECT</span></span>
+<span id="cb3-322"><a href="#cb3-322" aria-hidden="true" tabindex="-1"></a><span class="ss">                    id,</span></span>
+<span id="cb3-323"><a href="#cb3-323" aria-hidden="true" tabindex="-1"></a><span class="ss">                    piece,</span></span>
+<span id="cb3-324"><a href="#cb3-324" aria-hidden="true" tabindex="-1"></a><span class="ss">                    ST_ExteriorRing(geom) AS ring</span></span>
+<span id="cb3-325"><a href="#cb3-325" aria-hidden="true" tabindex="-1"></a><span class="ss">                FROM parts</span></span>
+<span id="cb3-326"><a href="#cb3-326" aria-hidden="true" tabindex="-1"></a><span class="ss">            ),</span></span>
+<span id="cb3-327"><a href="#cb3-327" aria-hidden="true" tabindex="-1"></a><span class="ss">            points AS (</span></span>
+<span id="cb3-328"><a href="#cb3-328" aria-hidden="true" tabindex="-1"></a><span class="ss">                SELECT</span></span>
+<span id="cb3-329"><a href="#cb3-329" aria-hidden="true" tabindex="-1"></a><span class="ss">                    id,</span></span>
+<span id="cb3-330"><a href="#cb3-330" aria-hidden="true" tabindex="-1"></a><span class="ss">                    piece,</span></span>
+<span id="cb3-331"><a href="#cb3-331" aria-hidden="true" tabindex="-1"></a><span class="ss">                    i AS ord,</span></span>
+<span id="cb3-332"><a href="#cb3-332" aria-hidden="true" tabindex="-1"></a><span class="ss">                    ST_PointN(ring, i::INTEGER) AS pt</span></span>
+<span id="cb3-333"><a href="#cb3-333" aria-hidden="true" tabindex="-1"></a><span class="ss">                FROM rings,</span></span>
+<span id="cb3-334"><a href="#cb3-334" aria-hidden="true" tabindex="-1"></a><span class="ss">                generate_series(1, ST_NumPoints(ring)::INTEGER) AS t(i)</span></span>
+<span id="cb3-335"><a href="#cb3-335" aria-hidden="true" tabindex="-1"></a><span class="ss">            )</span></span>
+<span id="cb3-336"><a href="#cb3-336" aria-hidden="true" tabindex="-1"></a><span class="ss">            SELECT</span></span>
+<span id="cb3-337"><a href="#cb3-337" aria-hidden="true" tabindex="-1"></a><span class="ss">                ST_X(pt) AS long,</span></span>
+<span id="cb3-338"><a href="#cb3-338" aria-hidden="true" tabindex="-1"></a><span class="ss">                ST_Y(pt) AS lat,</span></span>
+<span id="cb3-339"><a href="#cb3-339" aria-hidden="true" tabindex="-1"></a><span class="ss">                ord::DOUBLE AS "order",</span></span>
+<span id="cb3-340"><a href="#cb3-340" aria-hidden="true" tabindex="-1"></a><span class="ss">                false AS hole,</span></span>
+<span id="cb3-341"><a href="#cb3-341" aria-hidden="true" tabindex="-1"></a><span class="ss">                piece::VARCHAR AS piece,</span></span>
+<span id="cb3-342"><a href="#cb3-342" aria-hidden="true" tabindex="-1"></a><span class="ss">                '0500000US' || id || '.' || piece::VARCHAR AS "group",</span></span>
+<span id="cb3-343"><a href="#cb3-343" aria-hidden="true" tabindex="-1"></a><span class="ss">                id</span></span>
+<span id="cb3-344"><a href="#cb3-344" aria-hidden="true" tabindex="-1"></a><span class="ss">            FROM points</span></span>
+<span id="cb3-345"><a href="#cb3-345" aria-hidden="true" tabindex="-1"></a><span class="ss">            ORDER BY id, piece, ord</span></span>
+<span id="cb3-346"><a href="#cb3-346" aria-hidden="true" tabindex="-1"></a><span class="ss">        )</span></span>
+<span id="cb3-347"><a href="#cb3-347" aria-hidden="true" tabindex="-1"></a><span class="ss">        TO '</span><span class="sc">{</span>county_map_path<span class="sc">.</span>as_posix()<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb3-348"><a href="#cb3-348" aria-hidden="true" tabindex="-1"></a><span class="ss">        (FORMAT PARQUET)</span></span>
+<span id="cb3-349"><a href="#cb3-349" aria-hidden="true" tabindex="-1"></a><span class="ss">    """</span>)</span>
+<span id="cb3-350"><a href="#cb3-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-351"><a href="#cb3-351" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb3-352"><a href="#cb3-352" aria-hidden="true" tabindex="-1"></a>        <span class="st">"county_data"</span>: county_data_path,</span>
+<span id="cb3-353"><a href="#cb3-353" aria-hidden="true" tabindex="-1"></a>        <span class="st">"county_map"</span>: county_map_path,</span>
+<span id="cb3-354"><a href="#cb3-354" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Run this chunk when the county Parquet files need to be regenerated.</p>
-<div id="4780215d" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>build_counties(year<span class="op">=</span><span class="dv">2023</span>, resolution<span class="op">=</span><span class="st">"500k"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="7cab2a31" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>build_counties(year<span class="op">=</span><span class="dv">2023</span>, resolution<span class="op">=</span><span class="st">"500k"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 
