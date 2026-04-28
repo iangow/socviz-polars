@@ -1,6 +1,4 @@
----
-title: "Preparing Map Data"
----
+# "Preparing Map Data" {#sec-adx-map}
 
 This appendix contains the data-preparation code used to create the Parquet files read by the maps chapter.
 The chapter itself reads the prepared files so that the plotting examples can stay focused on drawing maps with Polars and `plotnine_polars`.
