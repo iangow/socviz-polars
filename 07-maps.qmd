@@ -578,7 +578,7 @@ opiates_link = (
 ```{python}
 #| label: fig-ch-07-opiates-map
 #| fig-cap: A small multiple map.
-#| column: body-outset 
+#| column: body-outset
 (
     states_sf
     .filter(pl.col("long").max().over("group") >= -2.2e6)
@@ -622,13 +622,26 @@ p9.theme_set(sv.theme_socviz())
 
 ```{python}
 #| label: fig-ch-07-opiates-lines
-#| fig-cap: "All state-level opiate death-rate trends at once."
+#| fig-cap: "All the states at once."
 (
     opiates
     .filter(pl.col("st") != "DC")
     .ggplot(aes(x="year", y="adjusted", group="st"))
     .geom_line(color="#B3B3B3")
     .labs(x="Year", y="Rate per 100,000 population")
+)
+```
+
+```{python}
+st_top_div = (
+    opiates
+    .filter(
+        pl.col("year") == pl.col("year").max(),
+        pl.col("st") != "DC"
+    )
+    .sort("adjusted", descending=True)
+    .group_by("division_name", maintain_order=True)
+    .head(2)
 )
 ```
 
@@ -640,45 +653,52 @@ division_means = (
     .agg(pl.col("adjusted").mean().alias("division_mean"))
 )
 
-division_order = (
-    division_means
-    .sort("division_mean", descending=True)
-    .get_column("division_name")
-    .to_list()
-)
-
 opiates_div = (
     opiates
     .filter(pl.col("division_name").is_not_null())
     .join(division_means, on="division_name", how="left")
-    .with_columns(division_ordered=pl.col("division_name").cast(pl.Enum(division_order)))
+    .with_columns(
+        pl.col("st").is_in(st_top_div["st"].to_list()).alias("top")
+    )
 )
 
-opiates_labels = opiates_div.filter(pl.col("year") == pl.col("year").max().over("st"))
+opiates_labels = (
+    opiates_div
+    .filter(pl.col("year") == pl.col("year").max().over("st"))
+)
 ```
 
 ```{python}
 #| label: fig-ch-07-opiates-faceted-lines
 #| fig-cap: "The opiate data as a faceted time series."
+#| column: body-outset
 (
     opiates_div
-    .ggplot(aes(x="year", y="adjusted"))
-    .geom_line(aes(group="st"), color="#B3B3B3")
-    .geom_smooth(aes(group="division_name"), se=False)
-    .geom_text(
+    .ggplot(aes(x="year", y="adjusted", color="top"))
+    .geom_line(aes(group="st"))
+    .scale_x_continuous(limits=(None, 2022))
+    .scale_color_manual(values=["#666666", "firebrick"])
+    .geom_label(
         data=opiates_labels,
-        mapping=aes(x="year", y="adjusted", label="st"),
+        mapping=aes(x="year", y="adjusted", label="st", color="top"),
         size=6,
-        nudge_x=0.45,
+        nudge_x=1,
+        nudge_y=0.2,
+        label_size=0.3,
     )
-    .facet_wrap("division_ordered", nrow=3)
+    .facet_wrap("division_name", nrow=3)
     .labs(
         x="",
         y="Rate per 100,000 population",
         title="State-Level Opiate Death Rates by Census Division, 1999-2019",
     )
     .theme_minimal()
-    .add_theme(strip_background=p9.element_blank())
+    .add_theme(
+        legend_position="none",
+        strip_background=p9.element_blank(),
+        strip_text=p9.element_blank(),
+        figure_size=(8, 10),
+    )
 )
 ```
 
