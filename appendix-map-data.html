@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Appendix A — Preparing Map Data – Data Visualization: A Python/Polars Companion</title>
+<title>Appendix A — “Preparing Map Data” – Data Visualization: A Python/Polars Companion</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -296,7 +296,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./appendix-map-data.html">Appendices</a></li><li class="breadcrumb-item"><a href="./appendix-map-data.html"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Preparing Map Data</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./appendix-map-data.html">Appendices</a></li><li class="breadcrumb-item"><a href="./appendix-map-data.html"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">“Preparing Map Data”</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -384,7 +384,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./appendix-map-data.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Preparing Map Data</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">“Preparing Map Data”</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -407,9 +407,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./appendix-map-data.html">Appendices</a></li><li class="breadcrumb-item"><a href="./appendix-map-data.html"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Preparing Map Data</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./appendix-map-data.html">Appendices</a></li><li class="breadcrumb-item"><a href="./appendix-map-data.html"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">“Preparing Map Data”</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Appendix A — Preparing Map Data</h1>
+<h1 class="title"><span id="sec-adx-map" class="quarto-section-identifier">Appendix A — “Preparing Map Data”</span></h1>
 </div>
 
 
@@ -446,7 +446,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>us_states <span class="ot">&lt;-</span> ggplot2<span class="sc">::</span><span class="fu">map_data</span>(<span class="st">"state"</span>)</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>arrow<span class="sc">::</span><span class="fu">write_parquet</span>(us_states, <span class="st">"data/us_states.parquet"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>states_sf</code> data set starts from the <code>geoda.ncovr</code> geometry in the <code>geodatasets</code> package. It stores one row per state exterior-ring vertex, keeping longitude and latitude unprojected so the map chapter can apply the Albers projection just before plotting.</p>
-<div id="a588227f" class="cell" data-execution_count="1">
+<div id="796bec5b" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geodatasets</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -514,7 +514,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>states_sf.write_parquet(<span class="st">"data/states_sf.parquet"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The county files are built from Census cartographic county boundaries and ACS 5-year county data. DuckDB’s spatial extension handles the geometry work; Polars handles the tabular ACS data and derived variables.</p>
-<div id="fa7d01a0" class="cell" data-execution_count="2">
+<div id="1b410172" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> zipfile <span class="im">import</span> ZipFile</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -871,7 +871,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-354"><a href="#cb3-354" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Run this chunk when the county Parquet files need to be regenerated.</p>
-<div id="7cab2a31" class="cell" data-execution_count="3">
+<div id="a6229e37" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>build_counties(year<span class="op">=</span><span class="dv">2023</span>, resolution<span class="op">=</span><span class="st">"500k"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
