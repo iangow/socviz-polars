@@ -15,26 +15,21 @@ import polars as pl
 
 from plotnine_polars import aes
 import plotnine_polars as p9
-from socviz_pl import load_data, theme_socviz, theme_socviz_map
-
-p9.theme_set(theme_socviz())
+import socviz_pl as sv
 ```
 
 ```{python}
-election24 = load_data("election24").with_columns(
+election24 = sv.load_data("election24").with_columns(
     fips_str=pl.col("fips").cast(pl.Utf8).str.zfill(2),
     region=pl.col("state").str.to_lowercase(),
 )
 
-county_map = load_data("county_map").with_columns(
-    state_fips=pl.col("id").str.slice(0, 2),
-)
-us_states = load_data("us_states")
-states_sf = load_data("states_sf")
-county_data = load_data("county_data")
+us_states = sv.load_data("us_states")
+states_sf = sv.load_data("states_sf")
+county_data = sv.load_data("county_data")
 
 opiates = (
-    load_data("opiates")
+    sv.load_data("opiates")
     .with_columns(
         year=pl.col("year").cast(pl.Int64),
         state_fips=pl.col("fips"),
@@ -78,6 +73,7 @@ election24 = election24.with_columns(
 ```
 
 ```{python}
+p9.theme_set(sv.theme_socviz())
 party_colors = ["#2E74C0", "#CB454A"]
 ```
 
@@ -159,23 +155,35 @@ us_states
 ```{python}
 from pyproj import Transformer
 
-albers = Transformer.from_crs(
-    "EPSG:4326",
-    "+proj=aea +lat_1=39 +lat_2=45 +lon_0=-96 +datum=WGS84 +units=m +no_defs",
-    always_xy=True,
-)
+def albers_transform(long, lat):
 
-x, y = albers.transform(us_states["long"], us_states["lat"])
+    albers = Transformer.from_crs(
+        "EPSG:4326",
+        "+proj=aea +lat_1=39 +lat_2=45 +lon_0=-96"
+        " +datum=WGS84 +units=m +no_defs",
+        always_xy=True,
+    )
 
-us_states_albers = us_states.with_columns(
-    pl.Series("x", x),
-    pl.Series("y", y),
+    def _transform(series_list):
+        long, lat = series_list
+        x, y = albers.transform(long, lat)
+        return pl.DataFrame({"x": x, "y": y}).to_struct("coords")
+    return pl.map_batches([long, lat], _transform).alias("coords")
+
+us_states_albers = (
+    us_states
+    .with_columns(
+        albers_transform(pl.col("long"), pl.col("lat"))
+    )
+    .unnest("coords")
 )
 ```
 
 ```{python}
 #| label: fig-7-5
 #| fig-caption: Adding a fill and improving the projection.
+#| column: margin
+#| out-width: "90%"
 ( 
     us_states_albers
     .ggplot(aes(x="x", y="y", group="group", fill="region"))
@@ -238,42 +246,68 @@ con.sql("""
 ```
 
 ```{python}
-x, y = albers.transform(states_sf["long"], states_sf["lat"])
-
-states_sf = states_sf.with_columns(
-    pl.Series("x", x),
-    pl.Series("y", y),
+states_sf = (
+    states_sf
+    .with_columns(
+        albers_transform(pl.col("long"), pl.col("lat"))
+    )
+    .unnest("coords")
 )
-
-states_sf
 ```
 
 ```{python}
+county_map = sv.load_data("county_map").with_columns(
+    state_fips=pl.col("id").str.slice(0, 2),
+)
+```
+
+```{python}
+states_sf = sv.load_data("states_sf")
+
 elections24_sf = (
     election24
     .join(states_sf, on="state", how="inner")
+    .filter(pl.col("long").max().over("group") >= -2.2e6)
 )
 ```
 
 ```{python}
 #| include: false
-p9.theme_set(theme_socviz_map())
+p9.theme_set(sv.theme_socviz_map())
 ```
 
 Once the data are joined, we can fill the polygons by the winning party.
+
+```{python}
+#| label: fig-7-6
+#| fig-cap:  Mapping the winner by state.
+(
+    elections24_sf
+    .ggplot(aes(x="long", y="lat", group="group", fill="party"))
+    .geom_polygon()
+    .coord_equal()
+)
+```
+
+
 The important practical point is the same as in ggplot: make sure the keys used for the join really match.
 Here those keys are the lower-case state names in `region`.
 
 ```{python}
 #| label: fig-ch-07-election-map
-#| fig-cap: "2024 election results by state."
+#| fig-cap: "The 2024 presidential election by state, with political party colors."
 (
     elections24_sf
-    .ggplot(aes(x="x", y="y", group="group_id", fill="party"))
+    .ggplot(aes(x="long", y="lat", group="group", fill="party"))
     .geom_polygon(color="white", size=0.05)
     .coord_equal()
     .scale_fill_manual(values=party_colors)
     .labs(fill=None)
+    .add_theme(
+        legend_direction="horizontal",
+        legend_position_inside=(0.6, 0.0),
+        figure_size=(7, 5)
+    )
 )
 ```
 
@@ -285,11 +319,16 @@ The default continuous fill is not ideal for election data, so we specify the gr
 #| fig-cap: "Trump vote share by state."
 (
     elections24_sf
-    .ggplot(aes(x="x", y="y", group="group_id", fill="pct_trump"))
+    .ggplot(aes(x="long", y="lat", group="group", fill="pct_trump"))
     .geom_polygon(color="white", size=0.05)
     .coord_equal()
     .scale_fill_gradient(low="white", high="#CB454A", labels=lambda lst: [f"{v:.0%}" for v in lst])
     .labs(fill="Percent")
+    .add_theme(
+        legend_direction="horizontal",
+        legend_position_inside=(0.6, 0.0),
+        figure_size=(7, 5)
+    )
 )
 ```
 
@@ -302,11 +341,16 @@ The `d_points` variable is positive when Harris's margin is larger and negative 
 (
     elections24_sf
     .filter(pl.col("st") != "DC")
-    .ggplot(aes(x="x", y="y", group="group_id", fill="d_points"))
+    .ggplot(aes(x="long", y="lat", group="group", fill="d_points"))
     .geom_polygon(color="white", size=0.05)
     .coord_equal()
     .scale_fill_gradient2(low="red", mid="#756BB1", high="blue")
     .labs(fill="Percent")
+    .add_theme(
+        legend_direction="horizontal",
+        legend_position_inside=(0.6, 0.0),
+        figure_size=(7, 5)
+    )
 )
 ```
 
@@ -316,7 +360,11 @@ The county map and county data objects join on the county FIPS code.
 This gives us the same large polygon table used in the book, with county-level variables attached.
 
 ```{python}
-county_data.select("id", "name", "state", "pop_dens", "pct_black").sample(5, seed=7)
+(
+    county_data
+    .select("id", "name", "state", "pop_dens", "pct_black")
+    .sample(5, seed=7)
+)
 ```
 
 ```{python}
@@ -528,7 +576,7 @@ The same opiate data can be shown as time series, grouped by Census division.
 This makes the state trajectories and regional variation easier to compare.
 
 ```{python}
-p9.theme_set(theme_socviz())
+p9.theme_set(sv.theme_socviz())
 ```
 
 ```{python}

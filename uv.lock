@@ -2249,7 +2249,7 @@ requires-dist = [
 [[package]]
 name = "socviz-py"
 version = "0.0.3"
-source = { git = "https://github.com/iangow/socviz_py.git#d5576174dec5362aa5d8920b96de3b947ab2eee8" }
+source = { git = "https://github.com/iangow/socviz_py.git#e1de6eeba49c1fe844f0bf83359fd6848cb30bc3" }
 dependencies = [
     { name = "polars", extra = ["pyarrow"] },
 ]

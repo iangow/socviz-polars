@@ -20,3 +20,4 @@ dependencies = [
 
 [tool.uv.sources]
 socviz-py = { git = "https://github.com/iangow/socviz_py.git" }
+# socviz-py = { path = "/Users/iangow/git/socviz_py", editable = true }
