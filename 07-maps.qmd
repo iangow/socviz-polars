@@ -388,33 +388,17 @@ This gives us the same large polygon table used in the book, with county-level v
 ```
 
 ```{python}
-county_full = county_map.join(county_data, on="id", how="left")
+county_full = (
+    county_map
+    .filter(pl.col("long").max().over("group") >= -2.2e6)
+    .join(county_data, on="id", how="left")
+)
 ```
 
 ```{python}
-pop_dens_levels = [
-    "[    0,   10)",
-    "[   10,   50)",
-    "[   50,  100)",
-    "[  100,  500)",
-    "[  500, 1000)",
-    "[ 1000, 5000)",
-    "[ 5000,71672]",
-]
-
-pct_black_levels = [
-    "[ 0.0, 2.0)",
-    "[ 2.0, 5.0)",
-    "[ 5.0,10.0)",
-    "[10.0,15.0)",
-    "[15.0,25.0)",
-    "[25.0,50.0)",
-    "[50.0,85.3]",
-]
-
 county_full = county_full.with_columns(
-    pop_dens_ord=pl.col("pop_dens").cast(pl.Enum(pop_dens_levels)),
-    pct_black_ord=pl.col("pct_black").cast(pl.Enum(pct_black_levels)),
+    pop_dens_ord=(pl.col("pop") / pl.col("area_sqmi")).cut([10, 50, 100, 500, 1000, 5000]),
+    pct_black_ord=(pl.col("black") / pl.col("pop") * 100).cut([2.0, 5.0, 10.0, 15.0, 25.0, 50.0]),
 )
 ```
 
@@ -432,6 +416,10 @@ county_full = county_full.with_columns(
     )
     .labs(fill="Population per\nsquare mile")
     .add_guides(fill=p9.guide_legend(nrow=1))
+    .add_theme(
+        legend_title=p9.element_text(family="DIN Condensed", size=7),
+        legend_text=p9.element_text(family="DIN Condensed", size=7),
+    )
 )
 ```
 
@@ -446,6 +434,10 @@ county_full = county_full.with_columns(
     .scale_fill_brewer(palette="Greens")
     .labs(fill="US Population,\nPercent Black")
     .add_guides(fill=p9.guide_legend(nrow=1))
+    .add_theme(
+        legend_title=p9.element_text(family="DIN Condensed", size=7),
+        legend_text=p9.element_text(family="DIN Condensed", size=7),
+    )
 )
 ```
 
@@ -467,6 +459,12 @@ orange_rev = list(reversed(orange_pal))
     .coord_equal()
     .scale_fill_manual(values=orange_pal)
     .labs(title="Gun-Related Suicides, 1999-2015", fill="Rate per 100,000 pop.")
+    .add_guides(fill=p9.guide_legend(nrow=1))
+    .add_theme(
+        legend_direction="horizontal",
+        legend_title=p9.element_text(family="DIN Condensed", size=7),
+        legend_text=p9.element_text(family="DIN Condensed", size=7),
+    )
 )
 ```
 
@@ -480,6 +478,12 @@ orange_rev = list(reversed(orange_pal))
     .coord_equal()
     .scale_fill_manual(values=orange_rev)
     .labs(title="Reverse-coded Population Density", fill="People per square mile")
+    .add_guides(fill=p9.guide_legend(nrow=1))
+    .add_theme(
+        legend_direction="horizontal",
+        legend_title=p9.element_text(family="DIN Condensed", size=7),
+        legend_text=p9.element_text(family="DIN Condensed", size=7),
+    )
 )
 ```
 
@@ -493,33 +497,34 @@ This is not a replacement for a dedicated statebins library, but it is enough to
 state_grid = pl.DataFrame(
     {
         "st": [
-            "AK", "ME",
-            "VT", "NH", "WA", "ID", "MT", "ND", "MN", "IL", "WI", "MI", "NY", "MA",
+            "ME",
+            "WI", "VT", "NH",
+            "WA", "ID", "MT", "ND", "MN", "IL", "MI", "NY", "MA",
             "OR", "NV", "WY", "SD", "IA", "IN", "OH", "PA", "NJ", "CT", "RI",
             "CA", "UT", "CO", "NE", "MO", "KY", "WV", "VA", "MD", "DE",
             "AZ", "NM", "KS", "AR", "TN", "NC", "SC", "DC",
-            "OK", "LA", "MS", "AL", "GA",
+            "AK", "OK", "LA", "MS", "AL", "GA",
             "HI", "TX", "FL",
         ],
         "x": [
-            0,                                11,
-                                          10, 11, 
-            0, 1, 2, 3, 4, 5, 6, 7,    9, 10,
-            0, 1, 2, 3, 4, 5, 6,    8, 9, 10, 11,
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-            0, 1, 2, 3, 4, 5, 6,    8,
-                  2, 3, 4, 5, 6,
-            0,       3,             8,
+            11,
+            6, 10, 11,
+            1, 2, 3, 4, 5, 6, 7, 9, 10,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+            2, 3, 4, 5, 6, 7, 8, 9,
+            0, 4, 5, 6, 7, 8,
+            0, 4, 9,
         ],
         "y": [
-            0,                               0,
-                                          1, 1,
-            2, 2, 2, 2, 2, 2, 2, 2,    2, 2,
-            3, 3, 3, 3, 3, 3, 3,    3, 3, 3, 3,
+            0,
+            1, 1, 1,
+            2, 2, 2, 2, 2, 2, 2, 2, 2,
+            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
             4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
             5, 5, 5, 5, 5, 5, 5, 5,
-                  6, 6, 6, 6, 6,
-            7,       7,             7,
+            6, 6, 6, 6, 6, 6,
+            7, 7, 7,
         ],
     }
 )
@@ -538,6 +543,7 @@ election_bins = state_grid.join(election24, on="st", how="left")
     .scale_fill_gradient(low="#FEE5D9", high="#A50F15", labels=lambda lst: [f"{v:.0%}" for v in lst])
     .coord_equal()
     .labs(fill="Percent Trump")
+    .add_theme(legend_position="bottom")
 )
 ```
 
@@ -553,6 +559,7 @@ election_bins = state_grid.join(election24, on="st", how="left")
     .scale_fill_manual(values={"Democrat": "#2E74C0", "Republican": "#CB454A"})
     .coord_equal()
     .labs(fill="Winner")
+    .add_theme(legend_position="bottom")
 )
 ```
 
