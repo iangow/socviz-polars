@@ -453,32 +453,29 @@ div.csl-indent {
 
 <p>This appendix discusses the data-preparation code used to create the Parquet files <code>county_map</code> and <code>states_sf</code> used in <a href="07-maps.html" class="quarto-xref"><span>Chapter 7</span></a>. The chapter itself reads the prepared files so that the plotting examples can stay focused on drawing maps with Polars and <code>plotnine_polars</code>.</p>
 <p>Both <code>county_map</code> and <code>states_sf</code> are built from the US Census Bureau’s cartographic county boundary shapefiles. This section covers <code>county_map</code> but here we focus on just the contiguous 48 states for simplicity. A similar pipeline is used for <code>states_sf</code>, as discussed at the end.</p>
-<div id="55062209" class="cell" data-execution_count="1">
+<div id="feb666e7" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> socviz_pl <span class="im">as</span> sv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>sv.get_county_boundaries</code> downloads and caches the Census shapefile, returning the path to the <code>.shp</code> file.</p>
-<div id="2722b65d" class="cell" data-execution_count="2">
+<div id="5924b9bd" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>boundaries_file <span class="op">=</span> sv.get_county_boundaries(<span class="dv">2023</span>, <span class="st">"500k"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>boundaries_file</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>PosixPath('/Users/igow/.cache/socviz/census/cb_2023_us_county_500k/cb_2023_us_county_500k.shp')</code></pre>
 </div>
 </div>
-<p>The Census shapefiles use <a href="https://epsg.io/4269">NAD83</a> (<code>EPSG:4269</code>). We project to <a href="https://epsg.io/102003">Albers Equal Area</a> (<code>ESRI:102003</code>), a conic projection that preserves area and is standard for contiguous US maps.</p>
+<p>The Census shapefiles store positions as latitude and longitude in degrees, using <a href="https://epsg.io/4269">NAD83</a> (<code>EPSG:4269</code>) — the standard geodetic datum for US federal mapping data. Before plotting, we project these spherical coordinates onto a flat plane using <a href="https://epsg.io/102003">Albers Equal Area</a> (<code>ESRI:102003</code>), a conic projection that preserves area and is the standard choice for contiguous US maps.</p>
 <p>The final step — fortification — explodes each projected (possibly multi-)polygon into one row per exterior-ring vertex. The <code>group</code> column encodes the polygon identity that <code>plotnine</code> uses for the <code>group</code> aesthetic.</p>
-<div id="af121a10" class="cell" data-execution_count="3">
+<div id="c6533a8c" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>con <span class="op">=</span> duckdb.<span class="ex">connect</span>()</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="st">"LOAD spatial"</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">Exception</span>:</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="st">"INSTALL spatial"</span>)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    con.sql(<span class="st">"LOAD spatial"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>con.sql(<span class="st">"INSTALL spatial"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>con.sql(<span class="st">"LOAD spatial"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Load the county boundaries and project to Albers Equal Area, excluding Alaska and Hawaii.</p>
-<div id="ce9d28ad" class="cell" data-execution_count="4">
+<div id="c23d4da9" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>counties_projected <span class="op">=</span> con.sql(<span class="ss">f"""</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ss">    SELECT</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ss">        GEOID AS id,</span></span>
@@ -491,7 +488,7 @@ div.csl-indent {
 </div>
 <p>The remaining steps convert the polygon geometries into the row-per-vertex format that <code>plotnine</code> needs to draw filled polygons — a process often called <em>fortification</em>. For a deeper treatment of vector geometry concepts, see <span class="citation" data-cites="pebesma2023spatial">Pebesma and Bivand (<a href="references.html#ref-pebesma2023spatial" role="doc-biblioref">2023</a>)</span> (available at <a href="https://r-spatial.org/book/" class="uri">https://r-spatial.org/book/</a>). The DuckDB spatial functions used below are documented at <a href="https://duckdb.org/docs/extensions/spatial/overview.html" class="uri">https://duckdb.org/docs/extensions/spatial/overview.html</a>.</p>
 <p><code>ST_Simplify</code> applies the <a href="https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm">Douglas–Peucker algorithm</a> to reduce the number of vertices in each polygon while preserving its approximate shape. The tolerance (<code>1000.0</code> meters in Albers Equal Area) controls the trade-off between fidelity and file size. The <code>WHERE NOT ST_IsEmpty</code> filter removes any county whose simplified geometry collapses to nothing.</p>
-<div id="86ea30ed" class="cell" data-execution_count="5">
+<div id="f50d82d5" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tol <span class="op">=</span> <span class="fl">1000.0</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>simplified <span class="op">=</span> con.sql(<span class="ss">f"""</span></span>
@@ -501,7 +498,7 @@ div.csl-indent {
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Some counties consist of multiple disconnected areas — island counties, for example — so their geometry type is <code>MULTIPOLYGON</code>. <code>ST_Dump</code> explodes each (possibly multi-)polygon into its individual <code>POLYGON</code> pieces, recording each piece’s position within the original geometry as <code>path</code>.</p>
-<div id="628daa1c" class="cell" data-execution_count="6">
+<div id="28e737e5" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>raw_parts <span class="op">=</span> con.sql(<span class="st">"""</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="st">        id,</span></span>
@@ -512,7 +509,7 @@ div.csl-indent {
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Each piece gets a sequential <code>piece</code> number within its county, ordered by the dump path. The <code>WHERE ST_GeometryType(geom) = 'POLYGON'</code> filter removes any point or line degenerate geometries that can arise from simplification.</p>
-<div id="799b0e7c" class="cell" data-execution_count="7">
+<div id="5853f174" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>parts <span class="op">=</span> con.sql(<span class="st">"""</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="st">        id, geom,</span></span>
@@ -524,14 +521,14 @@ div.csl-indent {
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>ST_ExteriorRing</code> extracts the outer boundary of each polygon as a <code>LINESTRING</code>. Polygons can also have interior rings (holes), but for filled polygon maps only the exterior ring is needed.</p>
-<div id="b55715e6" class="cell" data-execution_count="8">
+<div id="43b76e87" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>rings <span class="op">=</span> con.sql(<span class="st">"""</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT id, piece, ST_ExteriorRing(geom) AS ring</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM parts</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>generate_series</code> produces the sequence 1, 2, …, N (where N is the number of vertices in the ring), and <code>ST_PointN</code> extracts each vertex in turn, giving one row per vertex with <code>ord</code> recording its position along the ring.</p>
-<div id="af3aef7d" class="cell" data-execution_count="9">
+<div id="cbd441fa" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>points <span class="op">=</span> con.sql(<span class="st">"""</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="st">        id, piece::VARCHAR AS piece,</span></span>
@@ -542,7 +539,7 @@ div.csl-indent {
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>ST_X</code> and <code>ST_Y</code> extract the projected coordinates from each point. The <code>group</code> column combines the Census <a href="https://www.census.gov/programs-surveys/geography/guidance/geo-identifiers.html">GEOID</a> prefix <code>0500000US</code> (county level) with the county FIPS code and piece number; <code>plotnine</code> uses this to identify which vertices form a single closed polygon.</p>
-<div id="a480594f" class="cell" data-execution_count="10">
+<div id="995cc28b" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>county_map <span class="op">=</span> con.sql(<span class="st">"""</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="st">        ST_X(pt) AS long,</span></span>
@@ -555,14 +552,14 @@ div.csl-indent {
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="st">    ORDER BY id, piece, ord</span></span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>).pl()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="6033a400" class="cell" data-execution_count="11">
+<div id="8e57524c" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotnine_polars <span class="im">as</span> p9</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>county_data <span class="op">=</span> sv.load_data(<span class="st">"county_data"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The county map and county data objects join on the county FIPS code. This gives us the same large polygon table used in the book, with county-level variables attached.</p>
-<div id="01b09202" class="cell" data-execution_count="12">
+<div id="9ef6542b" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pop_cuts <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">500</span>, <span class="dv">1000</span>, <span class="dv">5000</span>]</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>county_full <span class="op">=</span> (</span>
@@ -602,7 +599,7 @@ Figure&nbsp;A.1: Continental US population density by county.
 </div>
 </div>
 <p><code>states_sf</code> uses the same pipeline as <code>county_map</code>. The only difference is that county boundaries are dissolved to state level before the simplification and fortification steps. Replace <code>counties_projected</code> with the following, then apply the same simplify-and-fortify steps.</p>
-<div id="87d972c1" class="cell" data-execution_count="15">
+<div id="90dd57da" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>states_projected <span class="op">=</span> con.sql(<span class="st">"""</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT state, ST_Union_Agg(geometry) AS geometry</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM counties_projected</span></span>
