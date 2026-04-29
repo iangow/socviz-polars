@@ -124,7 +124,7 @@ points = con.sql("""
 The `group` column combines the Census [GEOID](https://www.census.gov/programs-surveys/geography/guidance/geo-identifiers.html) prefix `0500000US` (county level) with the county FIPS code and piece number; `plotnine` uses this to identify which vertices form a single closed polygon.
 
 ```{python}
-county_map_db = con.sql("""
+county_map = con.sql("""
     SELECT
         ST_X(pt) AS long,
         ST_Y(pt) AS lat,
