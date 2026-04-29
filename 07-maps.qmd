@@ -265,6 +265,7 @@ elections24_sf = (
 ```{python}
 #| include: false
 p9.theme_set(sv.theme_socviz_map())
+small_font = p9.element_text(family="DIN Condensed", size=7)
 ```
 
 Once the data are joined, we can fill the polygons by the winning party.
@@ -284,8 +285,8 @@ Once the data are joined, we can fill the polygons by the winning party.
     .add_theme(
         legend_direction="horizontal",
         legend_position_inside=(0.35, -0.1),
-        legend_title=p9.element_text(family="DIN Condensed", size=7),
-        legend_text=p9.element_text(family="DIN Condensed", size=7),
+        legend_title=small_font,
+        legend_text=small_font,
         figure_size=(2.5, 2.1)
     )
 )
@@ -313,8 +314,8 @@ The default continuous fill is not ideal for election data:
         legend_direction="horizontal",
         legend_key_size=8,
         legend_position_inside=(0.5, -0.1),
-        legend_title=p9.element_text(family="DIN Condensed", size=7),
-        legend_text=p9.element_text(family="DIN Condensed", size=7),
+        legend_title=small_font,
+        legend_text=small_font,
         figure_size=(2.5, 2.1)
     )
 )
@@ -338,8 +339,8 @@ So we specify the gradient directly:
         legend_direction="horizontal",
         legend_key_size=8,
         legend_position_inside=(0.5, -0.1),
-        legend_title=p9.element_text(family="DIN Condensed", size=7),
-        legend_text=p9.element_text(family="DIN Condensed", size=7),
+        legend_title=small_font,
+        legend_text=small_font,
         figure_size=(2.5, 2.1)
     )
 )
@@ -382,9 +383,17 @@ This gives us the same large polygon table used in the book, with county-level v
 ```{python}
 (
     county_data
-    .select("id", "name", "state", "pop_dens", "pct_black")
+    .select("id", "name", "st", "area_sqmi", "black", "pop")
     .sample(5, seed=7)
 )
+```
+
+```{python}
+def drop_unused(s: pl.Series) -> pl.Series:
+    all_cats = s.cat.get_categories().to_list()
+    used_cats = set(s.cast(pl.Utf8).drop_nulls().unique().to_list())
+    ordered_used = [c for c in all_cats if c in used_cats]
+    return s.cast(pl.Utf8).cast(pl.Enum(ordered_used)).alias(s.name)
 ```
 
 ```{python}
@@ -392,33 +401,33 @@ county_full = (
     county_map
     .filter(pl.col("long").max().over("group") >= -2.2e6)
     .join(county_data, on="id", how="left")
-)
-```
-
-```{python}
-county_full = county_full.with_columns(
-    pop_dens_ord=(pl.col("pop") / pl.col("area_sqmi")).cut([10, 50, 100, 500, 1000, 5000]),
-    pct_black_ord=(pl.col("black") / pl.col("pop") * 100).cut([2.0, 5.0, 10.0, 15.0, 25.0, 50.0]),
+    .with_columns(
+        pop_dens=(pl.col("pop") / pl.col("area_sqmi")).cut([0, 10, 50, 100, 500, 1000, 5000]),
+        pct_black=(pl.col("black") / pl.col("pop") * 100).cut([0, 2, 5, 10, 15, 25, 50], left_closed=True),
+    )
+    .pipe(
+        lambda df: df.with_columns([drop_unused(df[col])
+                                    for col in ["pop_dens", "pct_black"]])
+    )
 )
 ```
 
 ```{python}
 #| label: fig-ch-07-pop-density
 #| fig-cap: "U.S. population density by county."
-(
+p = (
     county_full
-    .ggplot(aes(x="long", y="lat", group="group", fill="pop_dens_ord"))
+    .ggplot(aes(x="long", y="lat", group="group", fill="pop_dens"))
     .geom_polygon(color="#F2F2F2", size=0.02)
     .coord_equal()
-    .scale_fill_brewer(
-        palette="Blues",
-        labels=["0-10", "10-50", "50-100", "100-500", "500-1,000", "1,000-5,000", ">5,000"],
-    )
-    .labs(fill="Population per\nsquare mile")
+    .scale_fill_brewer(palette="Blues")
+    .labs(fill="Population per square mile")
     .add_guides(fill=p9.guide_legend(nrow=1))
     .add_theme(
-        legend_title=p9.element_text(family="DIN Condensed", size=7),
-        legend_text=p9.element_text(family="DIN Condensed", size=7),
+        legend_title=small_font,
+        legend_text=small_font,
+        figure_size=(6, 4),
+        legend_position_inside=(0.0, -0.05)
     )
 )
 ```
@@ -428,15 +437,17 @@ county_full = county_full.with_columns(
 #| fig-cap: "Percent Black population by county."
 (
     county_full
-    .ggplot(aes(x="long", y="lat", group="group", fill="pct_black_ord"))
+    .ggplot(aes(x="long", y="lat", group="group", fill="pct_black"))
     .geom_polygon(color="#F2F2F2", size=0.02)
     .coord_equal()
     .scale_fill_brewer(palette="Greens")
-    .labs(fill="US Population,\nPercent Black")
+    .labs(fill="US Population, Percent Black")
     .add_guides(fill=p9.guide_legend(nrow=1))
     .add_theme(
-        legend_title=p9.element_text(family="DIN Condensed", size=7),
-        legend_text=p9.element_text(family="DIN Condensed", size=7),
+        legend_title=small_font,
+        legend_text=small_font,
+        figure_size=(6, 4.8),
+        legend_position_inside=(0.15, -0.05)
     )
 )
 ```
@@ -445,7 +456,8 @@ Population density and percent Black are the two background choropleths that exp
 The next pair of maps repeats the book's comparison between binned gun-related suicide rates and reverse-coded population density.
 
 ```{python}
-orange_pal = ["#FEEDDE", "#FDD0A2", "#FDAE6B", "#FD8D3C", "#E6550D", "#A63603"]
+orange_pal = ["#FEEDDE", "#FDD0A2", "#FDAE6B", 
+              "#FD8D3C", "#E6550D", "#A63603"]
 orange_rev = list(reversed(orange_pal))
 ```
 
@@ -462,8 +474,8 @@ orange_rev = list(reversed(orange_pal))
     .add_guides(fill=p9.guide_legend(nrow=1))
     .add_theme(
         legend_direction="horizontal",
-        legend_title=p9.element_text(family="DIN Condensed", size=7),
-        legend_text=p9.element_text(family="DIN Condensed", size=7),
+        legend_title=small_font,
+        legend_text=small_font,
     )
 )
 ```
@@ -473,16 +485,18 @@ orange_rev = list(reversed(orange_pal))
 #| fig-cap: "Reverse-coded population density by county."
 (
     county_full
-    .ggplot(aes(x="long", y="lat", fill="pop_dens6", group="group"))
+    .ggplot(aes(x="long", y="lat", 
+                fill="pop_dens6", group="group"))
     .geom_polygon(color="#F2F2F2", size=0.02)
     .coord_equal()
     .scale_fill_manual(values=orange_rev)
-    .labs(title="Reverse-coded Population Density", fill="People per square mile")
+    .labs(title="Reverse-coded Population Density", 
+          fill="People per square mile")
     .add_guides(fill=p9.guide_legend(nrow=1))
     .add_theme(
         legend_direction="horizontal",
-        legend_title=p9.element_text(family="DIN Condensed", size=7),
-        legend_text=p9.element_text(family="DIN Condensed", size=7),
+        legend_title=small_font,
+        legend_text=small_font,
     )
 )
 ```
@@ -610,8 +624,8 @@ opiates_link = (
         figure_size=(7, 10),
         legend_direction="horizontal",
         legend_position_inside=(0.0, -0.05),
-        legend_title=p9.element_text(family="DIN Condensed", size=7),
-        legend_text=p9.element_text(family="DIN Condensed", size=7),
+        legend_title=small_font,
+        legend_text=small_font,
     )
     .add_guides(fill=p9.guide_legend(nrow=1))
 )
