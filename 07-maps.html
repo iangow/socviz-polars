@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.35">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -95,9 +95,9 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-22b4aaf4c2978829df3684e8f2c068db.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-c0f9e757bd1bbe5faf3da83a888945c0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
@@ -412,7 +412,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./appendix-map-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">“Preparing Map Data”</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Preparing the Map Data</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -449,7 +449,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Draw Maps</span></h1>
+<h1 class="title"><span id="sec-maps" class="quarto-section-identifier"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Draw Maps</span></span></h1>
 </div>
 
 
@@ -468,14 +468,14 @@ div.csl-indent {
 
 <p>This chapter follows <a href="https://socvis.co/maps.html">Chapter 7 of <span class="citation" data-cites="Healy2026">Healy (<span>2026</span>)</span></a>, translating the main map examples to Python, Polars, and <code>plotnine_polars</code>. The Python setup here is intentionally lightweight: we use some preprojected polygon tables from <code>socviz_py</code> and draw them with ordinary plotnine polygon layers (<code>.geom_polygon()</code>).</p>
 <p>That keeps the data work in Polars and avoids adding a full stack of geospatial tools in an introductory chapter. <a href="appendix-map-data.html" class="quarto-xref"><span>Appendix A</span></a> includes more details on how to construct these datasets.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
-<div id="3ac474f1" class="cell" data-execution_count="1">
+<div id="e4a64fd4" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotnine_polars <span class="im">as</span> p9</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> socviz_pl <span class="im">as</span> sv</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="daaa4ffb" class="cell" data-execution_count="2">
+<div id="fbf19322" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>election24 <span class="op">=</span> sv.load_data(<span class="st">"election24"</span>).with_columns(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    fips_str<span class="op">=</span>pl.col(<span class="st">"fips"</span>).cast(pl.Utf8).<span class="bu">str</span>.zfill(<span class="dv">2</span>),</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    region<span class="op">=</span>pl.col(<span class="st">"state"</span>).<span class="bu">str</span>.to_lowercase(),</span>
@@ -484,7 +484,7 @@ div.csl-indent {
 <section id="draw-a-map-of-us-states" class="level2 page-columns page-full" data-number="7.1">
 <h2 data-number="7.1" class="anchored" data-anchor-id="draw-a-map-of-us-states"><span class="header-section-number">7.1</span> Draw a Map of US States</h2>
 <p>The first thing to remember about spatial data is that you do not have to represent it spatially. Here are the 2024 US presidential election data as a faceted dot plot. This view makes the margins by state more directly comparable than a two-color choropleth would.</p>
-<div id="5857428e" class="cell" data-execution_count="3">
+<div id="9ea89f62" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>election24.select(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"state"</span>, <span class="st">"total_vote"</span>, <span class="st">"r_points"</span>, <span class="st">"pct_trump"</span>, <span class="st">"party"</span>, <span class="st">"census"</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>).sample(<span class="dv">5</span>, seed<span class="op">=</span><span class="dv">7</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -562,7 +562,7 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<div id="68c8329b" class="cell" data-execution_count="4">
+<div id="633b55ec" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>census_order <span class="op">=</span> (</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    election24</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"st"</span>) <span class="op">!=</span> <span class="st">"DC"</span>)</span>
@@ -577,7 +577,7 @@ div.csl-indent {
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"census"</span>).cast(pl.Enum(census_order))</span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="fa444123" class="cell" data-execution_count="5">
+<div id="2935887b" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>p9.theme_set(sv.theme_socviz())</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>party_colors <span class="op">=</span> [<span class="st">"#2E74C0"</span>, <span class="st">"#CB454A"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -620,7 +620,7 @@ Figure&nbsp;7.1: 2024 Election Results. Would a two-color choropleth map be more
 </div>
 </div></div></div>
 <p>In R, the chapter begins by loading state outlines from the <code>maps</code> package. The Python version uses the same state outline data exported from R’s <code>ggplot2::map_data("state")</code>. The result is an ordinary polygon table with one row per outline vertex and a lower-case <code>region</code> column for joining to state-level data.</p>
-<div id="7c8ff2fa" class="cell" data-execution_count="7">
+<div id="a528eab2" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>us_states <span class="op">=</span> sv.load_data(<span class="st">"us_states"</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>us_states</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -794,7 +794,7 @@ Figure&nbsp;7.3: A map of US state borders.
 </figure>
 </div>
 </div></div></div>
-<div id="cbd19c96" class="cell" data-execution_count="10">
+<div id="d816715c" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyproj <span class="im">import</span> Transformer</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> albers_transform(<span class="bu">long</span>, lat):</span>
@@ -821,7 +821,7 @@ Figure&nbsp;7.3: A map of US state borders.
 <span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>At this point, I set the plotnine theme to <code>sv.theme_socviz_map()</code>. This theme is modelled on the theme in the R package <code>socviz</code> and mostly removes elements that don’t have as much use with maps.</p>
-<div id="773e5d26" class="cell" data-execution_count="11">
+<div id="2a5a2827" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>p9.theme_set(sv.theme_socviz_map())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Note that the version of the following plot in <span class="citation" data-cites="Healy2026">Healy (<a href="references.html#ref-Healy2026" role="doc-biblioref">2026</a>)</span> includes axis labels. Because we have projected the latitude and longitude into <code>long</code> and <code>lat</code> and the latter variables don’t have an easy-to-interpret scale, there is already little value in including these values on the plot.</p>
@@ -851,7 +851,7 @@ Figure&nbsp;7.4: Adding a fill and improving the projection.
 </section>
 <section id="use-simple-features-to-draw-maps" class="level2 page-columns page-full" data-number="7.2">
 <h2 data-number="7.2" class="anchored" data-anchor-id="use-simple-features-to-draw-maps"><span class="header-section-number">7.2</span> Use Simple Features to Draw Maps</h2>
-<div id="53808fe7" class="cell" data-execution_count="13">
+<div id="427b8021" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    election24</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .select(<span class="st">"state"</span>, <span class="st">"st"</span>, <span class="st">"fips"</span>, <span class="st">"total_vote"</span>, </span>
@@ -980,19 +980,19 @@ Figure&nbsp;7.4: Adding a fill and improving the projection.
 </div>
 </div>
 <p>Rather than using <code>states_sf</code> from the <code>socviz</code> R package, I grab similar data from the <code>geodatasets</code> package.</p>
-<div id="00b6675c" class="cell" data-execution_count="14">
+<div id="720b8ccf" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geodatasets</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> geodatasets.get_path(<span class="st">"geoda.ncovr"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>I then load the <code>spatial</code> extension of DuckDB.</p>
-<div id="0fd80640" class="cell" data-execution_count="15">
+<div id="39bdf9bf" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>con <span class="op">=</span> duckdb.<span class="ex">connect</span>()</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>con.sql(<span class="st">"INSTALL spatial"</span>)</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>con.sql(<span class="st">"LOAD spatial"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>I use DuckDB to process the data into the required form. The <code>states_sf</code> data set packaged with <code>socviz_py</code> is built from this object.</p>
-<div id="b4df315f" class="cell" data-execution_count="16">
+<div id="7c6018e0" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>states <span class="op">=</span> con.sql(<span class="ss">f"""</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ss">    SELECT</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="ss">        STATE_NAME AS state,</span></span>
@@ -1002,7 +1002,7 @@ Figure&nbsp;7.4: Adding a fill and improving the projection.
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="ss">    ORDER BY state</span></span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="09929baf" class="cell" data-execution_count="17">
+<div id="e7f44d47" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>con.sql(<span class="st">"""</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT</span></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="st">        state,</span></span>
@@ -1030,7 +1030,7 @@ Figure&nbsp;7.4: Adding a fill and improving the projection.
   10 rows                                        2 columns</code></pre>
 </div>
 </div>
-<div id="9d923dfc" class="cell" data-execution_count="18">
+<div id="8b6f67d5" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>states_sf <span class="op">=</span> (</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    sv.load_data(<span class="st">"states_sf"</span>)</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -1039,7 +1039,7 @@ Figure&nbsp;7.4: Adding a fill and improving the projection.
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    .unnest(<span class="st">"coords"</span>)</span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="4edf5010" class="cell" data-execution_count="19">
+<div id="f3f6048c" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>states_sf <span class="op">=</span> sv.load_data(<span class="st">"states_sf"</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>elections24_sf <span class="op">=</span> (</span>
@@ -1172,14 +1172,14 @@ Figure&nbsp;7.8: A Purple America version of the 2024 winning margins.
 </section>
 <section id="americas-ur-choropleths" class="level2" data-number="7.3">
 <h2 data-number="7.3" class="anchored" data-anchor-id="americas-ur-choropleths"><span class="header-section-number">7.3</span> America’s Ur-Choropleths</h2>
-<div id="6d5cbbc0" class="cell" data-execution_count="25">
+<div id="415c8945" class="cell" data-execution_count="25">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>county_data <span class="op">=</span> sv.load_data(<span class="st">"county_data"</span>)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>county_map <span class="op">=</span> sv.load_data(<span class="st">"county_map"</span>).with_columns(</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    state_fips<span class="op">=</span>pl.col(<span class="st">"id"</span>).<span class="bu">str</span>.<span class="bu">slice</span>(<span class="dv">0</span>, <span class="dv">2</span>),</span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The county map and county data objects join on the county FIPS code. This gives us the same large polygon table used in the book, with county-level variables attached.</p>
-<div id="9013f931" class="cell" data-execution_count="26">
+<div id="305180f8" class="cell" data-execution_count="26">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    county_data</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    .select(<span class="st">"id"</span>, <span class="st">"name"</span>, <span class="st">"st"</span>, <span class="st">"area_sqmi"</span>, <span class="st">"black"</span>, <span class="st">"pop"</span>)</span>
@@ -1259,14 +1259,14 @@ Figure&nbsp;7.8: A Purple America version of the 2024 winning margins.
 </div>
 </div>
 </div>
-<div id="d7d9d607" class="cell" data-execution_count="27">
+<div id="0ac30ddf" class="cell" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> drop_unused(s: pl.Series) <span class="op">-&gt;</span> pl.Series:</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    all_cats <span class="op">=</span> s.cat.get_categories().to_list()</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    used_cats <span class="op">=</span> <span class="bu">set</span>(s.cast(pl.Utf8).drop_nulls().unique().to_list())</span>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    ordered_used <span class="op">=</span> [c <span class="cf">for</span> c <span class="kw">in</span> all_cats <span class="cf">if</span> c <span class="kw">in</span> used_cats]</span>
 <span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s.cast(pl.Utf8).cast(pl.Enum(ordered_used)).alias(s.name)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="791fced4" class="cell" data-execution_count="28">
+<div id="7864cabf" class="cell" data-execution_count="28">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>county_full <span class="op">=</span> (</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    county_map</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"long"</span>).<span class="bu">max</span>().over(<span class="st">"group"</span>) <span class="op">&gt;=</span> <span class="op">-</span><span class="fl">2.2e6</span>)</span>
@@ -1335,7 +1335,7 @@ Figure&nbsp;7.10: Percent Black population by county.
 </div>
 </div>
 <p>Population density and percent Black are the two background choropleths that explain, or at least complicate, many maps of the United States. The next pair of maps repeats the book’s comparison between binned gun-related suicide rates and reverse-coded population density.</p>
-<div id="30caf9dc" class="cell" data-execution_count="31">
+<div id="9bfedfa9" class="cell" data-execution_count="31">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>orange_pal <span class="op">=</span> [<span class="st">"#FEEDDE"</span>, <span class="st">"#FDD0A2"</span>, <span class="st">"#FDAE6B"</span>, </span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>              <span class="st">"#FD8D3C"</span>, <span class="st">"#E6550D"</span>, <span class="st">"#A63603"</span>]</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>orange_rev <span class="op">=</span> <span class="bu">list</span>(<span class="bu">reversed</span>(orange_pal))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1402,7 +1402,7 @@ Figure&nbsp;7.12: Reverse-coded population density by county.
 <section id="statebins" class="level2" data-number="7.4">
 <h2 data-number="7.4" class="anchored" data-anchor-id="statebins"><span class="header-section-number">7.4</span> Statebins</h2>
 <p>The R chapter uses the <code>statebins</code> package. Here we build a small statebin grid directly as a Polars data frame and draw it with <code>geom_tile()</code>. This is not a replacement for a dedicated statebins library, but it is enough to show the idea with the same grammar of graphics.</p>
-<div id="97a03e48" class="cell" data-execution_count="34">
+<div id="e9a4b7fa" class="cell" data-execution_count="34">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>state_grid <span class="op">=</span> pl.DataFrame(</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    {</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"st"</span>: [</span>
@@ -1493,10 +1493,10 @@ Figure&nbsp;7.14: A statebin-style view of the state winner.
 <section id="small-multiple-maps" class="level2 page-columns page-full" data-number="7.5">
 <h2 data-number="7.5" class="anchored" data-anchor-id="small-multiple-maps"><span class="header-section-number">7.5</span> Small-Multiple Maps</h2>
 <p>The <code>opiates</code> data have state-level death rates observed over time. We merge them into the same state polygon frame and facet by year.</p>
-<div id="38f40b33" class="cell" data-execution_count="37">
+<div id="3192a263" class="cell" data-execution_count="37">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>opiates <span class="op">=</span> sv.load_data(<span class="st">"opiates"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="586825b5" class="cell" data-execution_count="38">
+<div id="35c7ed93" class="cell" data-execution_count="38">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>opiates_link <span class="op">=</span> (</span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    election24</span>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -1552,10 +1552,10 @@ Figure&nbsp;7.15: A small multiple map.
 <section id="is-your-data-really-spatial" class="level2 page-columns page-full" data-number="7.6">
 <h2 data-number="7.6" class="anchored" data-anchor-id="is-your-data-really-spatial"><span class="header-section-number">7.6</span> Is Your Data Really Spatial?</h2>
 <p>Even if data are collected in spatial units, a map may not be the clearest display. The same opiate data can be shown as time series, grouped by Census division. This makes the state trajectories and regional variation easier to compare.</p>
-<div id="e1c8737e" class="cell" data-execution_count="40">
+<div id="57e5de1b" class="cell" data-execution_count="40">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>p9.theme_set(sv.theme_socviz())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="40">
-<pre><code>&lt;plotnine.themes.theme_minimal.theme_minimal at 0x11de25630&gt;</code></pre>
+<pre><code>&lt;plotnine.themes.theme_minimal.theme_minimal at 0x12145c7d0&gt;</code></pre>
 </div>
 </div>
 <div id="cell-fig-ch-07-opiates-lines" class="cell" data-execution_count="41">
@@ -1579,7 +1579,7 @@ Figure&nbsp;7.16: All the states at once.
 </div>
 </div>
 </div>
-<div id="d739fa1e" class="cell" data-execution_count="42">
+<div id="c9c3c0e7" class="cell" data-execution_count="42">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>st_top_div <span class="op">=</span> (</span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    opiates</span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(</span>
@@ -1591,7 +1591,7 @@ Figure&nbsp;7.16: All the states at once.
 <span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">2</span>)</span>
 <span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="8b75080a" class="cell" data-execution_count="43">
+<div id="7d62ef41" class="cell" data-execution_count="43">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>division_means <span class="op">=</span> (</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    opiates</span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"division_name"</span>).is_not_null())</span>

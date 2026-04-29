@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.35">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -76,9 +76,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-22b4aaf4c2978829df3684e8f2c068db.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-c0f9e757bd1bbe5faf3da83a888945c0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
@@ -393,7 +393,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./appendix-map-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">“Preparing Map Data”</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Preparing the Map Data</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -448,7 +448,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="use-pipes-to-summarize-data" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="use-pipes-to-summarize-data"><span class="header-section-number">5.1</span> Use Pipes to Summarize Data</h2>
-<div id="64684904" class="cell" data-execution_count="1">
+<div id="1cd8794d" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotnine_polars <span class="im">as</span> p9</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes, position_jitter</span>
@@ -463,7 +463,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>gss_sm <span class="op">=</span> load_data(<span class="st">"gss_sm"</span>)</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>religion_levels <span class="op">=</span> [<span class="st">"Protestant"</span>, <span class="st">"Catholic"</span>, <span class="st">"Jewish"</span>, <span class="st">"None"</span>, <span class="st">"Other"</span>, <span class="st">"NA"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="9e3bfeed" class="cell" data-execution_count="2">
+<div id="77905e5f" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>rel_by_region <span class="op">=</span> (</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(religion<span class="op">=</span>pl.col(<span class="st">"religion"</span>).fill_null(<span class="st">"NA"</span>))</span>
@@ -478,7 +478,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"bigregion"</span>, <span class="st">"religion"</span>)</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="9b0ae403" class="cell" data-execution_count="3">
+<div id="33b8e0cb" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rel_by_region</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div><style>
@@ -589,7 +589,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="1b423dd0" class="cell" data-execution_count="4">
+<div id="bfcd81dd" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>rel_by_region.group_by(<span class="st">"bigregion"</span>).agg(<span class="bu">sum</span><span class="op">=</span>pl.col(<span class="st">"pct"</span>).<span class="bu">sum</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <div><style>
@@ -633,7 +633,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="99c6c6e2" class="cell" data-execution_count="5">
+<div id="874fa355" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    rel_by_region</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"bigregion"</span>, y<span class="op">=</span><span class="st">"pct"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
@@ -644,12 +644,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-6-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-6-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="7a830ccc" class="cell" data-execution_count="6">
+<div id="c5452a8c" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    rel_by_region</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(y<span class="op">=</span><span class="st">"pct"</span>, x<span class="op">=</span><span class="st">"religion"</span>, fill<span class="op">=</span><span class="st">"religion"</span>))</span>
@@ -663,7 +663,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-7-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-7-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -671,7 +671,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="more-geoms" class="level2" data-number="5.2">
 <h2 data-number="5.2" class="anchored" data-anchor-id="more-geoms"><span class="header-section-number">5.2</span> More Geoms</h2>
-<div id="ee8fdf96" class="cell" data-execution_count="7">
+<div id="830c5a70" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>organdata <span class="op">=</span> load_data(<span class="st">"organdata"</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>country_order <span class="op">=</span> (</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    organdata</span>
@@ -685,7 +685,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"country"</span>).cast(pl.Enum(country_order))</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="6df60c12" class="cell" data-execution_count="8">
+<div id="0a69e11c" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>organdata.select(pl.<span class="bu">all</span>().exclude(<span class="st">"pop"</span>)).sample(n<span class="op">=</span><span class="dv">10</span>, seed<span class="op">=</span><span class="dv">123</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <div><style>
@@ -969,7 +969,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="a3c5bb1b" class="cell" data-execution_count="9">
+<div id="eedf12b2" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"donors"</span>))</span>
@@ -978,12 +978,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="9">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-10-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-10-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="18a3d0ce" class="cell" data-execution_count="10">
+<div id="43320e6a" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"year"</span>, y<span class="op">=</span><span class="st">"donors"</span>))</span>
@@ -993,12 +993,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="10">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-11-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-11-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="24192fcc" class="cell" data-execution_count="11">
+<div id="b16f82f1" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"country"</span>, y<span class="op">=</span><span class="st">"donors"</span>))</span>
@@ -1007,13 +1007,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="11">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-12-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-12-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>The R plot just flips the <code>aes()</code> arguments. This does not work with <code>plotnine</code>, but <code>.coord_flip()</code> does.</p>
-<div id="29d20c55" class="cell" data-execution_count="12">
+<div id="4a35d70a" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"country"</span>, y<span class="op">=</span><span class="st">"donors"</span>))</span>
@@ -1023,12 +1023,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="12">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-13-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-13-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="d7a09f27" class="cell" data-execution_count="13">
+<div id="79d44d6a" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"donors"</span>)</span>
@@ -1040,12 +1040,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="13">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-14-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-14-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="70caf07b" class="cell" data-execution_count="14">
+<div id="bfa03b67" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(y<span class="op">=</span><span class="st">"donors"</span>, x<span class="op">=</span><span class="st">"country"</span>, fill<span class="op">=</span><span class="st">"world"</span>))</span>
@@ -1057,12 +1057,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="14">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-15-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-15-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="5b952950" class="cell" data-execution_count="15">
+<div id="e4957e11" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"donors"</span>, y<span class="op">=</span><span class="st">"country"</span>, color<span class="op">=</span><span class="st">"world"</span>))</span>
@@ -1073,12 +1073,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="15">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-16-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-16-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="65f3914e" class="cell" data-execution_count="16">
+<div id="457d002b" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"donors"</span>, y<span class="op">=</span><span class="st">"country"</span>, color<span class="op">=</span><span class="st">"world"</span>))</span>
@@ -1089,12 +1089,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="16">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-17-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-17-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="5ab8b627" class="cell" data-execution_count="17">
+<div id="fe2833d1" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"donors"</span>, y<span class="op">=</span><span class="st">"country"</span>, color<span class="op">=</span><span class="st">"world"</span>))</span>
@@ -1105,7 +1105,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="17">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-18-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-18-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1113,7 +1113,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="grouped-summaries" class="level2" data-number="5.3">
 <h2 data-number="5.3" class="anchored" data-anchor-id="grouped-summaries"><span class="header-section-number">5.3</span> Grouped Summaries</h2>
-<div id="25158fe6" class="cell" data-execution_count="18">
+<div id="624ce93e" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>cols<span class="op">=</span>[<span class="st">"donors"</span>, <span class="st">"gdp"</span>, <span class="st">"health"</span>, <span class="st">"roads"</span>, <span class="st">"cerebvas"</span>]</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>by_country <span class="op">=</span> (</span>
@@ -1330,7 +1330,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="9512bfbb" class="cell" data-execution_count="19">
+<div id="6cc8f120" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    by_country</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(</span>
@@ -1345,12 +1345,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="19">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-20-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-20-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="6248caec" class="cell" data-execution_count="20">
+<div id="855c3adf" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    by_country</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"donors_mean"</span>, y<span class="op">=</span><span class="st">"country"</span>))</span>
@@ -1361,13 +1361,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="20">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-21-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-21-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Plotnine’s <code>geom_pointrange()</code> expects vertical ranges, so the horizontal version uses <code>geom_errorbarh()</code> plus points.</p>
-<div id="9c47f26b" class="cell" data-execution_count="21">
+<div id="190b8821" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    by_country</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"donors_mean"</span>, y<span class="op">=</span><span class="st">"country"</span>))</span>
@@ -1382,7 +1382,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="21">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-22-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-22-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1391,7 +1391,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="label-outliers" class="level2" data-number="5.4">
 <h2 data-number="5.4" class="anchored" data-anchor-id="label-outliers"><span class="header-section-number">5.4</span> Label Outliers</h2>
 <p>Plotnine does not provide <code>geom_text_repel()</code> directly, but <code>geom_text()</code> can use the <code>adjustText</code> package via its <code>adjust_text</code> argument. This gives us a close approximation.</p>
-<div id="8139e7c5" class="cell" data-execution_count="22">
+<div id="dd4d5646" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    by_country</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"gdp_mean"</span>, y<span class="op">=</span><span class="st">"health_mean"</span>))</span>
@@ -1402,12 +1402,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="22">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-23-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-23-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="c448cfca" class="cell" data-execution_count="23">
+<div id="35c8945e" class="cell" data-execution_count="23">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    by_country</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"gdp_mean"</span>, y<span class="op">=</span><span class="st">"health_mean"</span>))</span>
@@ -1423,12 +1423,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="23">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-24-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-24-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="4a4a8a48" class="cell" data-execution_count="24">
+<div id="85748d19" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    by_country</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"roads_mean"</span>, y<span class="op">=</span><span class="st">"donors_mean"</span>))</span>
@@ -1439,12 +1439,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="24">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-25-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-25-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="84e63e98" class="cell" data-execution_count="25">
+<div id="0fec04ef" class="cell" data-execution_count="25">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    by_country</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"roads_mean"</span>, y<span class="op">=</span><span class="st">"donors_mean"</span>))</span>
@@ -1457,12 +1457,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="25">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-26-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-26-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="ceec7e68" class="cell" data-execution_count="26">
+<div id="22ed6fe6" class="cell" data-execution_count="26">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    by_country</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"gdp_mean"</span>, y<span class="op">=</span><span class="st">"health_mean"</span>))</span>
@@ -1476,12 +1476,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="26">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-27-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-27-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="dda2f309" class="cell" data-execution_count="27">
+<div id="a049b34a" class="cell" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    by_country</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"gdp_mean"</span>, y<span class="op">=</span><span class="st">"health_mean"</span>))</span>
@@ -1499,12 +1499,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="27">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-28-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-28-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="bfc7484e" class="cell" data-execution_count="28">
+<div id="3d515bd4" class="cell" data-execution_count="28">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>my_organdata <span class="op">=</span> organdata.with_columns(</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    ind<span class="op">=</span>(</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"ccode"</span>).is_in([<span class="st">"Ita"</span>, <span class="st">"Spa"</span>]) <span class="op">&amp;</span></span>
@@ -1526,12 +1526,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="28">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-29-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-29-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="ec203a9c" class="cell" data-execution_count="29">
+<div id="9f221512" class="cell" data-execution_count="29">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>elections_historic <span class="op">=</span> load_data(<span class="st">"elections_historic"</span>)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>p_title <span class="op">=</span> <span class="st">"Popular Vote and Electoral College Shares"</span></span>
@@ -1562,7 +1562,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="29">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-30-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-30-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1571,7 +1571,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="add-annotations" class="level2" data-number="5.5">
 <h2 data-number="5.5" class="anchored" data-anchor-id="add-annotations"><span class="header-section-number">5.5</span> Add Annotations</h2>
 <p>The original R example also shows <code>I()</code> for placing annotations with relative coordinates inside the plotting area. There does not appear to be a direct <code>I()</code> equivalent for <code>annotate()</code> in plotnine, so these examples use data coordinates.</p>
-<div id="aab1510c" class="cell" data-execution_count="30">
+<div id="1efbd240" class="cell" data-execution_count="30">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"roads"</span>, y<span class="op">=</span><span class="st">"donors"</span>))</span>
@@ -1589,12 +1589,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="30">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-31-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-31-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="68212e05" class="cell" data-execution_count="31">
+<div id="9511d1dd" class="cell" data-execution_count="31">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"roads"</span>, y<span class="op">=</span><span class="st">"donors"</span>))</span>
@@ -1621,7 +1621,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="31">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-32-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-32-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1629,7 +1629,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="understanding-scales-guides-and-themes" class="level2" data-number="5.6">
 <h2 data-number="5.6" class="anchored" data-anchor-id="understanding-scales-guides-and-themes"><span class="header-section-number">5.6</span> Understanding Scales, Guides, and Themes</h2>
-<div id="f5af0655" class="cell" data-execution_count="32">
+<div id="94f42f03" class="cell" data-execution_count="32">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"roads"</span>, y<span class="op">=</span><span class="st">"donors"</span>, color<span class="op">=</span><span class="st">"world"</span>))</span>
@@ -1638,12 +1638,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="32">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-33-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-33-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="60f5dcf5" class="cell" data-execution_count="33">
+<div id="59e5fabf" class="cell" data-execution_count="33">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"roads"</span>, y<span class="op">=</span><span class="st">"donors"</span>, color<span class="op">=</span><span class="st">"world"</span>))</span>
@@ -1657,12 +1657,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="33">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-34-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-34-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="caa20fd7" class="cell" data-execution_count="34">
+<div id="973c435c" class="cell" data-execution_count="34">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"roads"</span>, y<span class="op">=</span><span class="st">"donors"</span>, color<span class="op">=</span><span class="st">"world"</span>))</span>
@@ -1679,12 +1679,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="34">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-35-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-35-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="1130675f" class="cell" data-execution_count="35">
+<div id="b67bb035" class="cell" data-execution_count="35">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    organdata</span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"roads"</span>, y<span class="op">=</span><span class="st">"donors"</span>, color<span class="op">=</span><span class="st">"world"</span>))</span>
@@ -1695,7 +1695,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-display" data-execution_count="35">
 <div>
 <figure class="figure">
-<p><img src="05-more-on-geoms_files/figure-html/cell-36-output-1.png" width="700" height="500" class="figure-img"></p>
+<p><img src="05-more-on-geoms_files/figure-html/cell-36-output-1.png" width="600" height="350" class="figure-img"></p>
 </figure>
 </div>
 </div>

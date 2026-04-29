@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.35">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -95,9 +95,9 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-22b4aaf4c2978829df3684e8f2c068db.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-c0f9e757bd1bbe5faf3da83a888945c0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
@@ -412,7 +412,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./appendix-map-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">“Preparing Map Data”</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Preparing the Map Data</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -468,7 +468,7 @@ div.csl-indent {
 
 
 <p>This chapter follows <a href="https://socviz.co/06-modeling.html">Chapter 6 of <span class="citation" data-cites="Healy2026">Healy (<span>2026</span>)</span></a>, translating the main model-based graphics to Python, Polars, <code>statsmodels</code>, and <code>plotnine_polars</code>. The goal is not to teach statistical modeling, but to show how model objects can be turned into tidy tables that we can graph.</p>
-<div id="22b056f3" class="cell" data-execution_count="1">
+<div id="b6a2b5d0" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -481,7 +481,7 @@ div.csl-indent {
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>p9.theme_set(theme_socviz())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="c073e75b" class="cell" data-execution_count="2">
+<div id="baa3efdb" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>gapminder <span class="op">=</span> pl.read_csv(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://raw.githubusercontent.com/jennybc/"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gapminder/main/inst/extdata/gapminder.tsv"</span>,</span>
@@ -494,7 +494,7 @@ div.csl-indent {
 <section id="show-several-fits-at-once" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="show-several-fits-at-once"><span class="header-section-number">6.1</span> Show Several Fits at Once</h2>
 <p>Plotnine can fit several smoothers directly inside a plot, much as ggplot does. For the robust regression smoother, plotnine currently warns that confidence intervals are not implemented, so these examples suppress the interval for that layer.</p>
-<div id="b3777afd" class="cell" data-execution_count="3">
+<div id="9dd2c23e" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> (</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    gapminder</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(log_gdp<span class="op">=</span>pl.col(<span class="st">"gdpPercap"</span>).log())</span>
@@ -514,7 +514,7 @@ div.csl-indent {
 <div id="fig-ch-06-ols-rlm" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-06-ols-rlm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="06-modeling_files/figure-html/fig-ch-06-ols-rlm-output-1.png" width="700" height="500" class="figure-img">
+<img src="06-modeling_files/figure-html/fig-ch-06-ols-rlm-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-ols-rlm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.1: Comparing ordinary least squares and robust regression smoothers.
@@ -539,7 +539,7 @@ Figure&nbsp;6.1: Comparing ordinary least squares and robust regression smoother
 <div id="fig-ch-06-spline" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-06-spline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="06-modeling_files/figure-html/fig-ch-06-spline-output-1.png" width="700" height="500" class="figure-img">
+<img src="06-modeling_files/figure-html/fig-ch-06-spline-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-spline-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.2: A cubic spline smoother.
@@ -562,7 +562,7 @@ Figure&nbsp;6.2: A cubic spline smoother.
 <div id="fig-ch-06-quantile" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-06-quantile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="06-modeling_files/figure-html/fig-ch-06-quantile-output-1.png" width="700" height="500" class="figure-img">
+<img src="06-modeling_files/figure-html/fig-ch-06-quantile-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-quantile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.3: Quantile regression lines.
@@ -572,7 +572,7 @@ Figure&nbsp;6.3: Quantile regression lines.
 </div>
 </div>
 <p>When separate smoother layers map <code>color</code> and <code>fill</code> to literal labels, plotnine can build a legend for the model types. As in R, this is a useful trick: the labels are not variables in the data, but one-value aesthetic mappings created for each layer.</p>
-<div id="c1d33536" class="cell" data-execution_count="7">
+<div id="a2d90926" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>model_colors <span class="op">=</span> [<span class="st">"#E41A1C"</span>, <span class="st">"#377EB8"</span>, <span class="st">"#4DAF4A"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="cell-fig-ch-06-smoothers-legend" class="cell" data-execution_count="8">
@@ -603,7 +603,7 @@ Figure&nbsp;6.3: Quantile regression lines.
 <div id="fig-ch-06-smoothers-legend" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-06-smoothers-legend-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="06-modeling_files/figure-html/fig-ch-06-smoothers-legend-output-1.png" width="700" height="500" class="figure-img">
+<img src="06-modeling_files/figure-html/fig-ch-06-smoothers-legend-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-smoothers-legend-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.4: Fitting several smoothers with a legend.
@@ -616,13 +616,13 @@ Figure&nbsp;6.4: Fitting several smoothers with a legend.
 <section id="look-inside-model-objects" class="level2" data-number="6.2">
 <h2 data-number="6.2" class="anchored" data-anchor-id="look-inside-model-objects"><span class="header-section-number">6.2</span> Look Inside Model Objects</h2>
 <p>Statsmodels uses formulas via <code>patsy</code>, so model fitting happens most naturally against a pandas data frame. The companion keeps Polars as the main data-frame library, but converts to pandas at the modeling boundary.</p>
-<div id="401dd7f9" class="cell" data-execution_count="9">
+<div id="4ac1e5e6" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> smf.ols(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lifeExp ~ gdpPercap + pop + C(continent)"</span>,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>gapminder_pd</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>).fit()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="e8b986dc" class="cell" data-execution_count="10">
+<div id="b2c4a215" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(out.summary())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                            OLS Regression Results                            
@@ -631,7 +631,7 @@ Dep. Variable:                lifeExp   R-squared:                       0.582
 Model:                            OLS   Adj. R-squared:                  0.581
 Method:                 Least Squares   F-statistic:                     393.9
 Date:                Mon, 27 Apr 2026   Prob (F-statistic):          3.94e-317
-Time:                        08:10:15   Log-Likelihood:                -6033.8
+Time:                        11:10:21   Log-Likelihood:                -6033.8
 No. Observations:                1704   AIC:                         1.208e+04
 Df Residuals:                    1697   BIC:                         1.212e+04
 Df Model:                           6                                         
@@ -660,7 +660,7 @@ strong multicollinearity or other numerical problems.</code></pre>
 </div>
 </div>
 <p>The printed summary is convenient for reading, but not convenient for plotting. The following small helpers provide the pieces of <code>broom::tidy()</code>, <code>augment()</code>, and <code>glance()</code> that this chapter needs.</p>
-<div id="96c5140c" class="cell" data-execution_count="11">
+<div id="ce10eefb" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tidy_result(result, conf_int<span class="op">=</span><span class="va">False</span>):</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> pl.DataFrame({</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"term"</span>: result.params.index,</span>
@@ -708,7 +708,7 @@ strong multicollinearity or other numerical problems.</code></pre>
 <span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>        <span class="st">"df_resid"</span>: [result.df_resid],</span>
 <span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>    })</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="eae7b4ce" class="cell" data-execution_count="12">
+<div id="e9189893" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    tidy_result(out)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(pl.selectors.numeric().<span class="bu">round</span>(<span class="dv">2</span>))</span>
@@ -798,7 +798,7 @@ strong multicollinearity or other numerical problems.</code></pre>
 <section id="generate-predictions-to-graph" class="level2" data-number="6.3">
 <h2 data-number="6.3" class="anchored" data-anchor-id="generate-predictions-to-graph"><span class="header-section-number">6.3</span> Generate Predictions to Graph</h2>
 <p>R’s <code>expand.grid()</code> creates all combinations of supplied values. Here Polars can do the same thing by building the columns explicitly and cross-joining them.</p>
-<div id="64945edb" class="cell" data-execution_count="13">
+<div id="8de400f7" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gdp_grid <span class="op">=</span> pl.DataFrame({</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gdpPercap"</span>: np.linspace(</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        gapminder[<span class="st">"gdpPercap"</span>].<span class="bu">min</span>(),</span>
@@ -822,7 +822,7 @@ strong multicollinearity or other numerical problems.</code></pre>
 <pre><code>(500, 3)</code></pre>
 </div>
 </div>
-<div id="c5394505" class="cell" data-execution_count="14">
+<div id="512ebaa6" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pred_out <span class="op">=</span> pl.from_pandas(</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    out</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .get_prediction(pred_df.to_pandas())</span>
@@ -947,7 +947,7 @@ strong multicollinearity or other numerical problems.</code></pre>
 <div id="fig-ch-06-ols-predictions" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-06-ols-predictions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="06-modeling_files/figure-html/fig-ch-06-ols-predictions-output-1.png" width="700" height="500" class="figure-img">
+<img src="06-modeling_files/figure-html/fig-ch-06-ols-predictions-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-ols-predictions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.5: OLS predictions for Europe and Africa.
@@ -960,7 +960,7 @@ Figure&nbsp;6.5: OLS predictions for Europe and Africa.
 <section id="tidy-model-objects" class="level2" data-number="6.4">
 <h2 data-number="6.4" class="anchored" data-anchor-id="tidy-model-objects"><span class="header-section-number">6.4</span> Tidy Model Objects</h2>
 <p>The coefficient table can be plotted once it is turned into a data frame. Categorical terms from statsmodels include <code>C(continent)[T.&lt;level&gt;]</code>; for display we strip that formula syntax away.</p>
-<div id="72f8cd94" class="cell" data-execution_count="16">
+<div id="14307aa0" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>out_conf <span class="op">=</span> (</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    tidy_result(out, conf_int<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"term"</span>) <span class="op">!=</span> <span class="st">"Intercept"</span>)</span>
@@ -1083,7 +1083,7 @@ Figure&nbsp;6.5: OLS predictions for Europe and Africa.
 <div id="fig-ch-06-coef-basic" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-06-coef-basic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="06-modeling_files/figure-html/fig-ch-06-coef-basic-output-1.png" width="700" height="500" class="figure-img">
+<img src="06-modeling_files/figure-html/fig-ch-06-coef-basic-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-coef-basic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.6: A basic plot of OLS estimates.
@@ -1110,7 +1110,7 @@ Figure&nbsp;6.6: A basic plot of OLS estimates.
 <div id="fig-ch-06-coef-intervals" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-06-coef-intervals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="06-modeling_files/figure-html/fig-ch-06-coef-intervals-output-1.png" width="700" height="500" class="figure-img">
+<img src="06-modeling_files/figure-html/fig-ch-06-coef-intervals-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-coef-intervals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.7: OLS estimates and confidence intervals.
@@ -1120,7 +1120,7 @@ Figure&nbsp;6.7: OLS estimates and confidence intervals.
 </div>
 </div>
 <p>Observation-level statistics are also useful. The helper here omits broom’s leading dots in column names, because plain Python expressions and plotnine mappings are easier to read without them.</p>
-<div id="3b96cd94" class="cell" data-execution_count="19">
+<div id="530d9d50" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>out_aug <span class="op">=</span> augment_ols(out, gapminder_pd)</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    out_aug</span>
@@ -1226,7 +1226,7 @@ Figure&nbsp;6.7: OLS estimates and confidence intervals.
 <div id="fig-ch-06-residuals-fitted" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-06-residuals-fitted-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="06-modeling_files/figure-html/fig-ch-06-residuals-fitted-output-1.png" width="700" height="500" class="figure-img">
+<img src="06-modeling_files/figure-html/fig-ch-06-residuals-fitted-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-residuals-fitted-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.8: Residuals versus fitted values.
@@ -1235,7 +1235,7 @@ Figure&nbsp;6.8: Residuals versus fitted values.
 </div>
 </div>
 </div>
-<div id="f12dc9cf" class="cell" data-execution_count="21">
+<div id="dd153563" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>glance_ols(out).with_columns(pl.selectors.numeric().<span class="bu">round</span>(<span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="21">
 <div><style>
@@ -1299,7 +1299,7 @@ Figure&nbsp;6.8: Residuals versus fitted values.
 <section id="grouped-analysis" class="level2" data-number="6.5">
 <h2 data-number="6.5" class="anchored" data-anchor-id="grouped-analysis"><span class="header-section-number">6.5</span> Grouped Analysis</h2>
 <p>The R chapter uses nested list columns and <code>purrr::map()</code> to fit one model per continent-year group. Here <code>group_by().map_groups()</code> keeps the grouping work in Polars, while the helper converts each group to pandas only at the statsmodels boundary.</p>
-<div id="bc1b3288" class="cell" data-execution_count="22">
+<div id="5eac7ab0" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_life_exp_group(df):</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    fit_df <span class="op">=</span> df.with_columns(log_gdp<span class="op">=</span>pl.col(<span class="st">"gdpPercap"</span>).log())</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> smf.ols(<span class="st">"lifeExp ~ log_gdp"</span>, data<span class="op">=</span>fit_df.to_pandas()).fit()</span>
@@ -1437,7 +1437,7 @@ Figure&nbsp;6.8: Residuals versus fitted values.
 <div id="fig-ch-06-grouped-ols" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-06-grouped-ols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="06-modeling_files/figure-html/fig-ch-06-grouped-ols-output-1.png" width="700" height="500" class="figure-img">
+<img src="06-modeling_files/figure-html/fig-ch-06-grouped-ols-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-grouped-ols-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.9: Yearly estimates of the association between GDP and life expectancy, pooled by continent.
@@ -1450,7 +1450,7 @@ Figure&nbsp;6.9: Yearly estimates of the association between GDP and life expect
 <section id="plot-marginal-effects" class="level2" data-number="6.6">
 <h2 data-number="6.6" class="anchored" data-anchor-id="plot-marginal-effects"><span class="header-section-number">6.6</span> Plot Marginal Effects</h2>
 <p>Statsmodels can estimate logistic regression models and calculate average marginal effects. The model below mirrors the R example by predicting the binary <code>obama</code> variable from political views, sex, race, and a sex-by-race interaction.</p>
-<div id="aea1487d" class="cell" data-execution_count="24">
+<div id="c915459c" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>bo_df <span class="op">=</span> (</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    gss_sm</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(polviews_m<span class="op">=</span>pl.col(<span class="st">"polviews"</span>))</span>
@@ -1465,7 +1465,7 @@ Figure&nbsp;6.9: Yearly estimates of the association between GDP and life expect
 <span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>bo_df.to_pandas()</span>
 <span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>).fit(disp<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="53e89abd" class="cell" data-execution_count="25">
+<div id="a8869baf" class="cell" data-execution_count="25">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(out_bo.summary())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                           Logit Regression Results                           
@@ -1474,7 +1474,7 @@ Dep. Variable:                  obama   No. Observations:                 1698
 Model:                          Logit   Df Residuals:                     1686
 Method:                           MLE   Df Model:                           11
 Date:                Mon, 27 Apr 2026   Pseudo R-squ.:                  0.4013
-Time:                        08:10:16   Log-Likelihood:                -672.94
+Time:                        11:10:21   Log-Likelihood:                -672.94
 converged:                       True   LL-Null:                       -1124.0
 Covariance Type:            nonrobust   LLR p-value:                2.234e-186
 ================================================================================================================================================================
@@ -1495,7 +1495,7 @@ C(sex, Treatment(reference="Male"))[T.Female]:C(race, Treatment(reference="White
 ================================================================================================================================================================</code></pre>
 </div>
 </div>
-<div id="7699d741" class="cell" data-execution_count="26">
+<div id="d48d426e" class="cell" data-execution_count="26">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>bo_m <span class="op">=</span> pl.from_pandas(</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    out_bo</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    .get_margeff(at<span class="op">=</span><span class="st">"overall"</span>, dummy<span class="op">=</span><span class="va">True</span>)</span>
@@ -1542,7 +1542,7 @@ C(sex, Treatment(reference="Male"))[T.Female]:C(race, Treatment(reference="White
 <div id="fig-ch-06-average-marginal-effects" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-06-average-marginal-effects-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="06-modeling_files/figure-html/fig-ch-06-average-marginal-effects-output-1.png" width="700" height="500" class="figure-img">
+<img src="06-modeling_files/figure-html/fig-ch-06-average-marginal-effects-output-1.png" width="600" height="350" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch-06-average-marginal-effects-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;6.10: Average marginal effects from a logistic regression.
