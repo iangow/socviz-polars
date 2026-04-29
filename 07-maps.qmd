@@ -1,9 +1,10 @@
 ---
-title: "Draw Maps"
 execute:
   warning: false
   message: false
 ---
+
+# Draw Maps {#sec-maps}
 
 This chapter follows [Chapter 7 of @Healy2026](https://socvis.co/maps.html), translating the main map examples to Python, Polars, and `plotnine_polars`.
 The Python setup here is intentionally lightweight: we use some preprojected polygon tables from `socviz_py` and draw them with ordinary plotnine polygon layers (`.geom_polygon()`).

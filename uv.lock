@@ -2242,14 +2242,14 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "quarto", specifier = ">=0.1.0" },
     { name = "scikit-misc" },
-    { name = "socviz-py", editable = "/Users/iangow/git/socviz_py" },
+    { name = "socviz-py", editable = "/Users/igow/git/socviz_py" },
     { name = "statsmodels", specifier = ">=0.14.6" },
 ]
 
 [[package]]
 name = "socviz-py"
 version = "0.0.3"
-source = { editable = "/Users/iangow/git/socviz_py" }
+source = { editable = "/Users/igow/git/socviz_py" }
 dependencies = [
     { name = "polars", extra = ["pyarrow"] },
 ]
