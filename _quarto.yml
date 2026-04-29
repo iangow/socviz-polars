@@ -14,6 +14,7 @@ book:
     - 05-more-on-geoms.qmd
     - 06-modeling.qmd
     - 07-maps.qmd
+    - 08-polishing.qmd
   appendices:
     - appendix-map-data.qmd
     - references.qmd
