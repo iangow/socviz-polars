@@ -20,8 +20,8 @@ boundaries_file = sv.get_county_boundaries(2023, "500k")
 boundaries_file
 ```
 
-The Census shapefiles use [NAD83](https://epsg.io/4269) (`EPSG:4269`).
-We project to [Albers Equal Area](https://epsg.io/102003) (`ESRI:102003`), a conic projection that preserves area and is standard for contiguous US maps.
+The Census shapefiles store positions as latitude and longitude in degrees, using [NAD83](https://epsg.io/4269) (`EPSG:4269`) — the standard geodetic datum for US federal mapping data.
+Before plotting, we project these spherical coordinates onto a flat plane using [Albers Equal Area](https://epsg.io/102003) (`ESRI:102003`), a conic projection that preserves area and is the standard choice for contiguous US maps.
 
 The final step — fortification — explodes each projected (possibly multi-)polygon into one row per exterior-ring vertex.
 The `group` column encodes the polygon identity that `plotnine` uses for the `group` aesthetic.
@@ -29,11 +29,8 @@ The `group` column encodes the polygon identity that `plotnine` uses for the `gr
 ```{python}
 con = duckdb.connect()
 
-try:
-    con.sql("LOAD spatial")
-except Exception:
-    con.sql("INSTALL spatial")
-    con.sql("LOAD spatial")
+con.sql("INSTALL spatial")
+con.sql("LOAD spatial")
 ```
 
 Load the county boundaries and project to Albers Equal Area, excluding Alaska and Hawaii.

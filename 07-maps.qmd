@@ -194,6 +194,17 @@ In the code producing @fig-7-5, we use `.coord_equal()` to reflect the idea that
 
 ## Use Simple Features to Draw Maps
 
+In this section, I will follow @Healy2026 in plotting data related to the US presidential election of 2024 on maps of the United States.
+However, because there is no `geom_sf()` in plotnine, I have moved the transformation of **simple features** to points that can be drawn on a plot to make maps to the `socviz_pl` package.
+As such, we can just load the data `states_sf` here.
+A discussion of how I did this transformation can be found in @sec-adx-map.
+
+```{python}
+states_sf = sv.load_data("states_sf")
+```
+
+Here is a sample of the data in `election24`:
+
 ```{python}
 (
     election24
@@ -202,59 +213,8 @@ In the code producing @fig-7-5, we use `.coord_equal()` to reflect the idea that
 )
 ```
 
-Rather than using `states_sf` from the `socviz` R package, I grab similar data from the `geodatasets` package.
-
 ```{python}
-import geodatasets
-path = geodatasets.get_path("geoda.ncovr")
-```
 
-I then load the `spatial` extension of DuckDB.
-
-```{python}
-import duckdb
-con = duckdb.connect()
-con.sql("INSTALL spatial")
-con.sql("LOAD spatial")
-```
-
-I use DuckDB to process the data into the required form.
-The `states_sf` data set packaged with `socviz_py` is built from this object.
-
-```{python}
-states = con.sql(f"""
-    SELECT
-        STATE_NAME AS state,
-        ST_Union_Agg(geom) AS geom
-    FROM ST_Read('{path}')
-    GROUP BY state
-    ORDER BY state
-""")
-```
-
-```{python}
-con.sql("""
-    SELECT
-        state,
-        left(ST_AsText(geom), 30) || '...' AS geom
-    FROM states
-    ORDER BY state
-    LIMIT 10
-""")
-```
-
-```{python}
-states_sf = (
-    sv.load_data("states_sf")
-    .with_columns(
-        albers_transform(pl.col("long"), pl.col("lat"))
-    )
-    .unnest("coords")
-)
-```
-
-```{python}
-states_sf = sv.load_data("states_sf")
 
 elections24_sf = (
     election24
