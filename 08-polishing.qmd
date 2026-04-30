@@ -11,9 +11,10 @@ This chapter follows [Chapter 8 of @Healy2026](https://socviz.co/08-polishing.ht
 import polars as pl
 import plotnine_polars as p9
 import socviz_pl as sv
-
-from mizani.formatters import comma_format, currency_format
+import mizani.formatters as mf
 from plotnine_polars import aes
+import matplotlib.pyplot as plt
+import numpy as np
 ```
 
 The default settings that ggplot (and plotnine) ship with are generally good enough for exploratory work.
@@ -69,8 +70,8 @@ Finally, the legend is moved to the bottom to leave more room for the plot area.
         size=8,
         nudge_y=700,
     )
-    .scale_x_continuous(labels=comma_format())
-    .scale_y_continuous(labels=currency_format())
+    .scale_x_continuous(labels=mf.comma_format())
+    .scale_y_continuous(labels=mf.currency_format())
     .labs(
         x="Membership",
         y="Revenues",
@@ -135,7 +136,8 @@ Matplotlib's perceptually uniform colormaps — `viridis`, `plasma`, `magma`, an
 
 ```{python}
 (
-    organdata.drop_nulls(subset=["donors", "roads", "gdp"])
+    organdata
+    .drop_nulls(subset=["donors", "roads", "gdp"])
     .ggplot(aes(x="roads", y="donors", color="gdp"))
     .geom_point(size=2)
     .scale_color_cmap("viridis")
@@ -312,7 +314,7 @@ The default is `theme_gray()`, but `theme_bw()`, `theme_minimal()`, `theme_class
 We build a base plot and apply several themes to it.
 
 ```{python}
-import plotnine as pn
+import plotnine as p9
 
 gss_lon = sv.load_data("gss_lon")
 
@@ -326,29 +328,29 @@ p_base
 ```
 
 ```{python}
-p_base + pn.theme_bw()
+p_base + p9.theme_bw()
 ```
 
 ```{python}
-p_base + pn.theme_minimal()
+p_base + p9.theme_minimal()
 ```
 
 ```{python}
-p_base + pn.theme_classic()
+p_base + p9.theme_classic()
 ```
 
 `theme_tufte()` follows Edward Tufte's principle of maximizing the data-ink ratio by removing all non-data ink that does not carry information.
 
 ```{python}
-p_base + pn.theme_tufte()
+p_base + p9.theme_tufte()
 ```
 
-To apply a theme to every subsequent plot in a session, use `pn.theme_set()`.
+To apply a theme to every subsequent plot in a session, use `p9.theme_set()`.
 This is useful at the top of a document to establish a house style without repeating the theme call on every plot.
 
 ```{python}
 #| eval: false
-pn.theme_set(pn.theme_minimal())
+p9.theme_set(p9.theme_minimal())
 ```
 
 ### Customizing Theme Elements
@@ -415,18 +417,20 @@ p_age = (
     )
     .scale_x_continuous(breaks=[20, 30, 40, 60, 70, 80])
     .facet_wrap("year", ncol=1)
-    .labs(x="Age", y=None, title="Age Distribution of GSS Respondents")
+    .labs(x="Age", y=None, 
+          title="Age Distribution of GSS Respondents"
+    )
 )
 p_age
 ```
 
 The default output is functional but noisy for a small-multiple chart like this.
-We apply `theme()` to remove unnecessary elements: the y-axis, facet strip labels, minor gridlines, and the panel backgrounds.
+We apply `add_theme()` to remove unnecessary elements: the y-axis, facet strip labels, minor gridlines, and the panel backgrounds.
 
 ```{python}
 (
     p_age
-    + pn.theme(
+    .add_theme(
         axis_line_x=element_blank(),
         axis_text_y=element_blank(),
         axis_title_y=element_blank(),
@@ -453,8 +457,8 @@ Plotnine themes compose with `+`, so the typical pattern is to start from a buil
 ```{python}
 def theme_clean(base_size=11):
     return (
-        pn.theme_minimal(base_size=base_size)
-        + pn.theme(
+        p9.theme_minimal(base_size=base_size)
+        + p9.theme(
             axis_line=element_line(color="#333333", size=0.3),
             panel_grid_minor=element_blank(),
             panel_grid_major=element_line(color="#EEEEEE"),
@@ -516,6 +520,11 @@ Halloween (October 31) stands out as the single most dangerous day for child ped
 We flag it so we can color it differently in the plot.
 
 ```{python}
+p9.theme_set(sv.theme_socviz())
+```
+
+```{python}
+#| column: page
 black_orange = {True: "#E06000", False: "#222222"}
 
 (
@@ -524,7 +533,10 @@ black_orange = {True: "#E06000", False: "#222222"}
     .geom_col(width=1.05)
     .scale_fill_manual(values=black_orange)
     .add_guides(fill="none")
-    .scale_x_date(date_breaks="1 month", date_labels="%b")
+    .scale_x_date(
+        date_breaks="1 month", 
+        date_labels="%b",
+        expand = (0.005, 2))
     .annotate(
         "text",
         x=date(2000, 10, 30),
@@ -532,20 +544,77 @@ black_orange = {True: "#E06000", False: "#222222"}
         label="Halloween",
         ha="right",
         size=9,
-        color="#E06000",
+        color=black_orange[True],
     )
     .labs(
-        x="Day of year",
-        y="Mean number involved",
+        x="Day of the month",
+        y="Mean N involved",
         title="Pedestrians aged 0–17 in Fatal Motor Vehicle Crashes",
         subtitle="Daily average, 2009–2023",
         caption="Data: NHTSA Fatality Analysis Reporting System",
     )
+    .add_theme(figure_size=(10, 3))
 )
 ```
 
 The R version of this section also shows a polar (radial) coordinate version of the same chart using `coord_radial()` and the `geomtextpath` package.
-Plotnine does not currently have a `coord_radial()` or a `geom_textsegment()` equivalent, so we omit that version here.
+Plotnine does not currently have a `coord_radial()` or a `geom_textsegment()` equivalent, but we can produce a similar chart using `matplotlib`'s polar projection.
+
+```{python}
+plot_data = (
+    fars_agg
+    .with_columns(doy=pl.col("fake_yr").dt.ordinal_day())
+    .with_columns(angles = 2 * np.pi * (pl.col('doy') - 1) / n_days)
+)
+
+n_days = 366  # 2000 is a leap year
+
+fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(projection='polar'))
+ax.set_theta_zero_location('N')
+ax.set_theta_direction(-1)
+
+ax.scatter(data.filter(~pl.col('flag')).select('angles').to_series(),
+           data.filter(~pl.col('flag')).select('n').to_series(),
+           s=15, facecolors='none', edgecolors='#222222', linewidths=0.5)
+ax.scatter(data.filter(pl.col('flag')).select('angles').to_series(),
+           data.filter(pl.col('flag')).select('n').to_series(),
+           s=40, color='#E06000', zorder=5)
+
+month_angles = [
+    2 * np.pi * (date(2000, m, 1).timetuple().tm_yday - 1) / n_days
+    for m in range(1, 13)
+]
+month_labels = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+]
+ax.set_xticks(month_angles)
+ax.set_xticklabels(month_labels, size=8)
+ax.set_ylim(-0.3, data['n'].max() + 0.3)
+ax.yaxis.set_tick_params(labelsize=7)
+ax.grid(True, alpha=0.3, color='gray')
+ax.tick_params(axis='x', pad=8)
+
+hw_doy = date(2000, 10, 31).timetuple().tm_yday
+hw_angle = 2 * np.pi * (hw_doy - 1) / n_days
+hw_n = data.filter(pl.col("flag")).select('n').to_series().item()
+ax.annotate(
+    'Halloween',
+    xy=(hw_angle, hw_n),
+    xytext=(hw_angle - 0.35, hw_n + 0.25),
+    color='#E06000',
+    fontsize=8,
+    ha='center',
+)
+ax.set_title(
+    "Pedestrians aged 0–17 in\nFatal Motor Vehicle Crashes\nDaily average, 2009–2023",
+    pad=15,
+    size=9,
+)
+plt.tight_layout()
+plt.show()
+```
+
 The column chart above conveys the same information more directly: lengths are easier to judge than angles.
 
 ### Saying No to Pie
@@ -561,8 +630,6 @@ A faceted bar chart is a straightforward alternative to a pie chart.
 Each panel shows one distribution, and within each panel the bar lengths are directly comparable.
 
 ```{python}
-from mizani.formatters import percent_format
-
 debt_order = [
     "Under $5k", "$5k-$10k", "$10k-$25k", "$25k-$50k",
     "$50k-$75k", "$75k-$100k", "$100k-$200k", "Over $200k",
@@ -584,7 +651,7 @@ p_subtitle = "44 million borrowers owe a total of $1.3 trillion"
     )
     .ggplot(aes(x="pct_prop", y="Debtrc", fill="type"))
     .geom_col()
-    .scale_x_continuous(labels=percent_format())
+    .scale_x_continuous(labels=mf.percent_format())
     .scale_fill_brewer(type="qual", palette="Set2")
     .add_guides(fill="none")
     .facet_grid(". ~ type", labeller=dict(zip(f_labs.keys(), f_labs.values())))
@@ -608,7 +675,7 @@ It sacrifices within-bar comparisons (each segment is harder to read than in the
     )
     .ggplot(aes(x="pct_prop", y="type", fill="Debtrc"))
     .geom_col(color="white", position="stack")
-    .scale_x_continuous(labels=percent_format())
+    .scale_x_continuous(labels=mf.percent_format())
     .scale_fill_brewer(type="qual", palette="Set3", direction=-1)
     .labs(
         x=None, y=None,
@@ -656,7 +723,7 @@ okboomer_long = (
     .geom_line(size=0.5)
     .facet_grid(
         "component ~ .",
-        scales="free_y",
+        # scales="free_y",
         labeller=dict(zip(component_order,
                           [component_labels[c] for c in component_order])),
     )

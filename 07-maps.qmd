@@ -527,11 +527,16 @@ election_bins = state_grid.join(election24, on="st", how="left")
 #| fig-cap: "A statebin-style view of the state winner."
 (
     election_bins
-    .with_columns(color_party=pl.when(pl.col("party") == "Republican").then(pl.lit("Republican")).otherwise(pl.lit("Democrat")))
+    .with_columns(
+        color_party=
+            pl.when(pl.col("party") == "Republican")
+            .then(pl.lit("Republican"))
+            .otherwise(pl.lit("Democrat")))
     .ggplot(aes(x="x", y="-y", fill="color_party"))
     .geom_tile(color="white", size=1)
     .geom_text(aes(label="st"), size=8, color="white")
-    .scale_fill_manual(values={"Democrat": "#2E74C0", "Republican": "#CB454A"})
+    .scale_fill_manual(values={"Democrat": "#2E74C0", 
+                               "Republican": "#CB454A"})
     .coord_equal()
     .labs(fill="Winner")
     .add_theme(legend_position="bottom")
