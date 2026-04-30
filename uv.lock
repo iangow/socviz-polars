@@ -2242,17 +2242,34 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "quarto", specifier = ">=0.1.0" },
     { name = "scikit-misc" },
-    { name = "socviz-py", git = "https://github.com/iangow/socviz_py.git" },
+    { name = "socviz-py", editable = "/Users/igow/git/socviz_py" },
     { name = "statsmodels", specifier = ">=0.14.6" },
 ]
 
 [[package]]
 name = "socviz-py"
 version = "0.0.3"
-source = { git = "https://github.com/iangow/socviz_py.git#9595e2c81fa0f8b333ce842636f10382d0e7c133" }
+source = { editable = "/Users/igow/git/socviz_py" }
 dependencies = [
     { name = "polars", extra = ["pyarrow"] },
 ]
+
+[package.metadata]
+requires-dist = [
+    { name = "build", marker = "extra == 'dev'" },
+    { name = "duckdb", marker = "extra == 'dev'" },
+    { name = "geodatasets", marker = "extra == 'dev'" },
+    { name = "pandas", marker = "extra == 'dev'" },
+    { name = "pandas", marker = "extra == 'pandas'" },
+    { name = "plotnine", marker = "extra == 'dev'" },
+    { name = "plotnine", marker = "extra == 'plots'" },
+    { name = "polars", extras = ["pyarrow"] },
+    { name = "pyarrow", marker = "extra == 'pandas'" },
+    { name = "pytest", marker = "extra == 'dev'" },
+    { name = "requests", marker = "extra == 'dev'" },
+    { name = "twine", marker = "extra == 'dev'" },
+]
+provides-extras = ["plots", "pandas", "dev"]
 
 [[package]]
 name = "soupsieve"
