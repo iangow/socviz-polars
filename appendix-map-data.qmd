@@ -34,13 +34,19 @@ con.sql("LOAD spatial")
 ```
 
 Load the county boundaries and project to Albers Equal Area, excluding Alaska and Hawaii.
+`STATEFP` is the two-character Census FIPS code for the state.
+The condition `CAST(STATEFP AS INTEGER) <= 56` excludes US territories (Puerto Rico is `72`, Guam `66`, etc.) whose FIPS codes are all above 56.
+`STATEFP NOT IN ('02', '15')` then additionally excludes Alaska and Hawaii, whose codes fall within the ≤ 56 range but lie outside the contiguous US.
 
 ```{python}
 counties_projected = con.sql(f"""
     SELECT
         GEOID AS id,
         STATEFP AS state,
-        ST_Transform(geom, 'EPSG:4269', 'ESRI:102003', always_xy := true) AS geometry
+        ST_Transform(geom, 
+                     'EPSG:4269',
+                     'ESRI:102003', 
+                     always_xy := true) AS geometry
     FROM ST_Read('{boundaries_file}')
     WHERE CAST(STATEFP AS INTEGER) <= 56
     AND STATEFP NOT IN ('02', '15')
@@ -51,9 +57,9 @@ The remaining steps convert the polygon geometries into the row-per-vertex forma
 For a deeper treatment of vector geometry concepts, see @pebesma2023spatial (available at <https://r-spatial.org/book/>).
 The DuckDB spatial functions used below are documented at <https://duckdb.org/docs/extensions/spatial/overview.html>.
 
-`ST_Simplify` applies the [Douglas–Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm) to reduce the number of vertices in each polygon while preserving its approximate shape.
+`ST_Simplify()` applies the [Douglas–Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm) to reduce the number of vertices in each polygon while preserving its approximate shape.
 The tolerance (`1000.0` meters in Albers Equal Area) controls the trade-off between fidelity and file size.
-The `WHERE NOT ST_IsEmpty` filter removes any county whose simplified geometry collapses to nothing.
+The `WHERE NOT ST_IsEmpty()` filter removes any county whose simplified geometry collapses to nothing.
 
 ```{python}
 tol = 1000.0
@@ -65,8 +71,13 @@ simplified = con.sql(f"""
 """)
 ```
 
-Some counties consist of multiple disconnected areas — island counties, for example — so their geometry type is `MULTIPOLYGON`.
-`ST_Dump` explodes each (possibly multi-)polygon into its individual `POLYGON` pieces, recording each piece's position within the original geometry as `path`.
+For the 3,109 contiguous-US counties, the 500k files contain 888,422 vertices before simplification.
+A 1,000-metre tolerance reduces that to 65,639 — a 92.6% reduction.
+While this might seem aggressive, it is is appropriate for a national map where individual counties will appear small.
+However, it could produce visibly jagged outlines if you zoomed in to a single state.
+
+Some counties consist of multiple disconnected areas---island counties, for example---so their geometry type is `MULTIPOLYGON`.
+`ST_Dump()` explodes any multi-polygons into its individual `POLYGON` pieces, recording each piece's position within the original geometry as `path`.
 
 ```{python}
 raw_parts = con.sql("""
@@ -94,8 +105,8 @@ parts = con.sql("""
 """)
 ```
 
-`ST_ExteriorRing` extracts the outer boundary of each polygon as a `LINESTRING`.
-Polygons can also have interior rings (holes), but for filled polygon maps only the exterior ring is needed.
+`ST_ExteriorRing()` extracts the outer boundary of each polygon as a `LINESTRING`.
+Polygons can also have interior rings ("holes"), but for filled polygon maps only the exterior ring is needed.
 
 ```{python}
 rings = con.sql("""
@@ -104,7 +115,7 @@ rings = con.sql("""
 """)
 ```
 
-`generate_series` produces the sequence 1, 2, …, N (where N is the number of vertices in the ring), and `ST_PointN` extracts each vertex in turn, giving one row per vertex with `ord` recording its position along the ring.
+`generate_series()` produces the sequence $1, 2, ..., N$ (where $N$ is the number of vertices in the ring), and `ST_PointN()` extracts each vertex in turn, giving one row per vertex with `ord` recording its position along the ring.
 
 ```{python}
 points = con.sql("""
@@ -117,8 +128,8 @@ points = con.sql("""
 """)
 ```
 
-`ST_X` and `ST_Y` extract the projected coordinates from each point.
-The `group` column combines the Census [GEOID](https://www.census.gov/programs-surveys/geography/guidance/geo-identifiers.html) prefix `0500000US` (county level) with the county FIPS code and piece number; `plotnine` uses this to identify which vertices form a single closed polygon.
+Finally, `ST_X` and `ST_Y` extract the projected coordinates for each point.
+The `group` column combines the Census [GEOID](https://www.census.gov/programs-surveys/geography/guidance/geo-identifiers.html) prefix `0500000US` (county level) with the county FIPS code and piece number; `plotnine` will use this to identify which vertices form a single closed polygon.
 
 ```{python}
 county_map = con.sql("""
