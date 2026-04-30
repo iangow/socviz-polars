@@ -561,23 +561,23 @@ The R version of this section also shows a polar (radial) coordinate version of 
 Plotnine does not currently have a `coord_radial()` or a `geom_textsegment()` equivalent, but we can produce a similar chart using `matplotlib`'s polar projection.
 
 ```{python}
+n_days = 366  # 2000 is a leap year
+
 plot_data = (
     fars_agg
     .with_columns(doy=pl.col("fake_yr").dt.ordinal_day())
     .with_columns(angles = 2 * np.pi * (pl.col('doy') - 1) / n_days)
 )
 
-n_days = 366  # 2000 is a leap year
-
 fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(projection='polar'))
 ax.set_theta_zero_location('N')
 ax.set_theta_direction(-1)
 
-ax.scatter(data.filter(~pl.col('flag')).select('angles').to_series(),
-           data.filter(~pl.col('flag')).select('n').to_series(),
+ax.scatter(plot_data.filter(~pl.col('flag')).select('angles').to_series(),
+           plot_data.filter(~pl.col('flag')).select('n').to_series(),
            s=15, facecolors='none', edgecolors='#222222', linewidths=0.5)
-ax.scatter(data.filter(pl.col('flag')).select('angles').to_series(),
-           data.filter(pl.col('flag')).select('n').to_series(),
+ax.scatter(plot_data.filter(pl.col('flag')).select('angles').to_series(),
+           plot_data.filter(pl.col('flag')).select('n').to_series(),
            s=40, color='#E06000', zorder=5)
 
 month_angles = [
@@ -590,24 +590,23 @@ month_labels = [
 ]
 ax.set_xticks(month_angles)
 ax.set_xticklabels(month_labels, size=8)
-ax.set_ylim(-0.3, data['n'].max() + 0.3)
+ax.set_ylim(-0.3, plot_data['n'].max() + 0.3)
 ax.yaxis.set_tick_params(labelsize=7)
 ax.grid(True, alpha=0.3, color='gray')
 ax.tick_params(axis='x', pad=8)
 
-hw_doy = date(2000, 10, 31).timetuple().tm_yday
-hw_angle = 2 * np.pi * (hw_doy - 1) / n_days
-hw_n = data.filter(pl.col("flag")).select('n').to_series().item()
+hw_angle = 2 * np.pi * (date(2000, 10, 31).timetuple().tm_yday - 1) / n_days
+hw_n = plot_data.filter(pl.col("flag")).select('n').to_series().item()
 ax.annotate(
     'Halloween',
     xy=(hw_angle, hw_n),
-    xytext=(hw_angle - 0.35, hw_n + 0.25),
+    xytext=(hw_angle - 0.06, hw_n - 0.25),
     color='#E06000',
     fontsize=8,
     ha='center',
 )
 ax.set_title(
-    "Pedestrians aged 0–17 in\nFatal Motor Vehicle Crashes\nDaily average, 2009–2023",
+    "Pedestrians aged 0–17 in Fatal Motor Vehicle Crashes\nDaily average, 2009–2023",
     pad=15,
     size=9,
 )
