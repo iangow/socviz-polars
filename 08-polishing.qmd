@@ -676,7 +676,7 @@ black_orange = {True: "#E06000", False: "#222222"}
 ```
 
 The R version of this section also shows a polar (radial) coordinate version of the same chart using `coord_radial()` and the `geomtextpath` package.
-Plotnine does not currently have a `coord_radial()` or a `geom_textsegment()` equivalent, but we can produce a similar chart using `matplotlib`'s polar projection.
+For comparison, the `matplotlib` chart below routes through the native polar projection.
 
 ```{python}
 import matplotlib.pyplot as plt
