@@ -14,11 +14,9 @@ dependencies = [
     "pyyaml>=6.0.3",
     "quarto>=0.1.0",
     "scikit-misc",
-    "socviz-py>=0.0.3",
+    "socviz-py>=0.0.5",
     "statsmodels>=0.14.6",
 ]
 
 [tool.uv.sources]
-socviz-py = { git = "https://github.com/iangow/socviz_py.git" }
-# socviz-py = { path = "/Users/igow/git/socviz_py", editable = true }
 plotnine-polars = { path = "/Users/igow/git/plotnine_polars", editable = true }

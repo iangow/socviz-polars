@@ -2280,16 +2280,20 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "quarto", specifier = ">=0.1.0" },
     { name = "scikit-misc" },
-    { name = "socviz-py", git = "https://github.com/iangow/socviz_py.git" },
+    { name = "socviz-py", specifier = ">=0.0.5" },
     { name = "statsmodels", specifier = ">=0.14.6" },
 ]
 
 [[package]]
 name = "socviz-py"
-version = "0.0.3"
-source = { git = "https://github.com/iangow/socviz_py.git#505cb363f0c42a46c744bc036f6aa2094286ed0e" }
+version = "0.0.5"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "polars", extra = ["pyarrow"] },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/18/ce/ec383a62f57455443c1e12114420b8dfff08a83ec756a2246b671fa08807/socviz_py-0.0.5.tar.gz", hash = "sha256:56a9c0443ab6b55b600e8b0b98b11856194e76d996683be939d5e5b6432dceb2", size = 2619125, upload-time = "2026-05-01T22:26:10.477Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6d/4e/63bcf7cb77ceb64ce82e4d9e71c97a3eab7c088a2866e55ae7fb6774e60a/socviz_py-0.0.5-py3-none-any.whl", hash = "sha256:ed1acdab20c3cc93d008fadd24b466da1ab33d5c8d93c78f7e7d9a724fc92184", size = 2623852, upload-time = "2026-05-01T22:26:08.818Z" },
 ]
 
 [[package]]
