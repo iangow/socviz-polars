@@ -394,44 +394,33 @@ p_base = p0.geom_point(data = flipped_yes)
 ```{python}
 #| label: fig-ch-08-theme-parade
 #| column: margin
-_sz = {"figure_size": (2.5, 12)}
 (
     (
         p_base
-        .geom_point(data = flipped_yes)
         .labs(title = "theme_gray()")
         .theme_gray(base_size=6)
-        .add_theme(**_sz)
     ) /
     (
         p_base
-        .geom_point(data = flipped_yes)
         .labs(title = "theme_bw()")
         .theme_bw(base_size=6)
-        .add_theme(**_sz)
     ) /
     (
         p_base
-        .geom_point(data = flipped_yes)
         .labs(title = "theme_minimal()")
         .theme_minimal(base_size=6)
-        .add_theme(**_sz)
     ) /
     (
         p_base
-        .geom_point(data = flipped_yes)
         .labs(title = "theme_linedraw()")
         .theme_linedraw(base_size=6)
-        .add_theme(**_sz)
     ) /
     (
         p_base
-        .geom_point(data = flipped_yes)
         .labs(title = "theme_tufte()")
         .theme_tufte(base_size=6)
-        .add_theme(**_sz)
     )
-)
+) & p9.theme(figure_size=(2.5, 12))
 ```
 
 `theme_tufte()` follows Edward Tufte's principle of maximizing the data-ink ratio by removing all non-data ink that does not carry information.
