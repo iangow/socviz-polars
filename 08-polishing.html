@@ -477,16 +477,17 @@ div.csl-indent {
 
 
 <p>This chapter follows <a href="https://socviz.co/08-polishing.html">Chapter 8 of <span class="citation" data-cites="Healy2026">Healy (<span>2026</span>)</span></a>, translating the main examples to Python, Polars, and <code>plotnine_polars</code>.</p>
-<div id="5958c1e0" class="cell" data-execution_count="1">
+<div id="a424da83" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotnine_polars <span class="im">as</span> p9</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> socviz_pl <span class="im">as</span> sv</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mizani.formatters <span class="im">as</span> mf</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine_polars <span class="im">import</span> aes</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine.composition <span class="im">import</span> plot_annotation</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The default settings that ggplot (and plotnine) ship with are generally good enough for exploratory work. When you want to produce a figure for presentation or publication, though, you will need to make some adjustments. Refining a plot can mean several things: adjusting the look to match your personal taste, meeting the expectations of a journal or audience, or completely transforming the appearance. The grammar of graphics gives us a systematic way to think about these changes in terms of scales, themes, and geoms.</p>
 <p>The <code>asasec</code> dataset records membership and revenue information for American Sociological Association (ASA) special-interest sections.</p>
-<div id="00ee70f8" class="cell" data-execution_count="2">
+<div id="55e344f8" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>asasec <span class="op">=</span> sv.load_data(<span class="st">"asasec"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -494,7 +495,7 @@ div.csl-indent {
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    .select(<span class="st">"Sname"</span>, <span class="st">"Revenues"</span>, <span class="st">"Members"</span>, <span class="st">"Journal"</span>)</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    .sample(<span class="dv">5</span>, seed<span class="op">=</span><span class="dv">7</span>)</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
+<div class="cell-output cell-output-display" data-execution_count="131">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -563,7 +564,7 @@ div.csl-indent {
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    .geom_smooth(color <span class="op">=</span> <span class="st">"steelblue"</span>)</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="4">
+<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="133">
 <div id="fig-ch-08-member-trends-01-1" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-08-member-trends-01-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -584,7 +585,7 @@ Figure&nbsp;8.1: Back to Basics.
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    .geom_point(aes(color<span class="op">=</span><span class="st">"Journal"</span>))</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="5">
+<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="134">
 <div id="fig-ch-08-member-trends-02-1" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-08-member-trends-02-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -624,7 +625,7 @@ Figure&nbsp;8.2: Refining the plot a little.
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    .add_theme(legend_position<span class="op">=</span><span class="st">"bottom"</span>)</span>
 <span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="7">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="136">
 <div id="fig-ch-08-member-trends" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-cap-location="margin">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-ch-08-member-trends-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -693,11 +694,11 @@ Figure&nbsp;8.6: ColorBrewer diverging palettes.
 </div></div></div>
 <section id="qualitative-palettes" class="level3 page-columns page-full" data-number="8.1.1">
 <h3 data-number="8.1.1" class="anchored" data-anchor-id="qualitative-palettes"><span class="header-section-number">8.1.1</span> Qualitative Palettes</h3>
-<div id="7210b237" class="cell" data-execution_count="12">
+<div id="346c6708" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>organdata <span class="op">=</span> sv.load_data(<span class="st">"organdata"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The default discrete colour scale in plotnine (<code>scale_color_hue()</code>) spaces hues evenly around a circle in HCL space — the same approach ggplot2 uses. For three categories it usually looks fine; with more categories the hues can become hard to distinguish.</p>
-<div id="99016006" class="cell" data-execution_count="14">
+<div id="ba30011a" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> (</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    organdata <span class="co">#.drop_nulls(subset=["donors", "roads", "world"])</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"roads"</span>, y<span class="op">=</span><span class="st">"donors"</span>, color<span class="op">=</span><span class="st">"world"</span>))</span>
@@ -713,7 +714,7 @@ Figure&nbsp;8.6: ColorBrewer diverging palettes.
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    (p <span class="op">+</span> p9.scale_color_brewer(<span class="bu">type</span><span class="op">=</span><span class="st">"qual"</span>, palette<span class="op">=</span><span class="st">"Dark2"</span>))</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="15">
+<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="144">
 <div id="fig-ch-08-brewerpals" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-08-brewerpals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -732,7 +733,7 @@ Figure&nbsp;8.7: Some available palettes in use.
 <p>Plotnine’s layered grammar works strongly to our advantage here. A straightforward but effective technique is to draw a base layer of all observations in a muted color, then add a second layer that highlights only the cases of interest, and finally add a text layer to label the most notable ones.</p>
 <p>The same approach works whether you are producing a figure that stands alone or building a slide deck where you reveal layers one at a time to walk an audience through an argument.</p>
 <p>We illustrate the technique with county-level results from the 2024 US general election. We join <code>county_data</code> (which has demographic variables including total population and Black population) with <code>election24_county_df</code> on the county FIPS code. The <code>flipped</code> column records whether the winning party changed between 2020 and 2024.</p>
-<div id="4c6fcae9" class="cell" data-execution_count="17">
+<div id="f194ba58" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>county_data <span class="op">=</span> sv.load_data(<span class="st">"county_data"</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>election24 <span class="op">=</span> sv.load_data(<span class="st">"election24_county_df"</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -747,7 +748,7 @@ Figure&nbsp;8.7: Some available palettes in use.
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We start with a base layer: total county population on the x-axis (on a log scale, because county populations span several orders of magnitude) and the share of the population that is Black on the y-axis. All 3,000-plus counties are drawn in a mid-gray with low alpha so they form a neutral reference backdrop.</p>
-<div id="37fa42e1" class="cell" data-execution_count="18">
+<div id="c0690c52" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>p0 <span class="op">=</span> (</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    flipped</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"pop"</span>, y<span class="op">=</span><span class="st">"prop_black"</span>))</span>
@@ -761,7 +762,7 @@ Figure&nbsp;8.7: Some available palettes in use.
 <div id="cell-fig-ch-08-elec-01" class="cell page-columns page-full" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>p0</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="19">
+<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="148">
 <div id="fig-ch-08-elec-01" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-08-elec-01-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -779,7 +780,7 @@ Figure&nbsp;8.8: The base layer.
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>p0.geom_point(data<span class="op">=</span>flipped_yes, mapping<span class="op">=</span>aes(color<span class="op">=</span><span class="st">"winner"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="20">
+<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="149">
 <div id="fig-ch-08-elec-02" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-08-elec-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -801,7 +802,7 @@ Figure&nbsp;8.9: A second layer.
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    .scale_color_manual(values<span class="op">=</span>party_colors)</span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="21">
+<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="150">
 <div id="fig-ch-08-elec-03" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-08-elec-03-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -813,7 +814,7 @@ Figure&nbsp;8.10: A third layer.
 </figure>
 </div>
 </div></div></div>
-<div id="d0f9bfbc" class="cell" data-execution_count="22">
+<div id="0570a7a6" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>labeled <span class="op">=</span> (</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    flipped</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(</span>
@@ -841,7 +842,7 @@ Figure&nbsp;8.10: A third layer.
 <span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        caption<span class="op">=</span><span class="st">"Counties in gray did not flip."</span>,</span>
 <span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="24">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="153">
 <div id="fig-ch-08-flippers" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-ch-08-flippers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
@@ -863,8 +864,8 @@ Figure&nbsp;8.11: Flipped counties by party, with state identifiers.
 <h3 data-number="8.3.1" class="anchored" data-anchor-id="built-in-themes"><span class="header-section-number">8.3.1</span> Built-in Themes</h3>
 <p>Plotnine ships more built-in themes than ggplot2 does. The default is <code>theme_gray()</code>, but <code>theme_bw()</code>, <code>theme_minimal()</code>, <code>theme_classic()</code>, <code>theme_light()</code>, <code>theme_dark()</code>, <code>theme_linedraw()</code>, <code>theme_void()</code>, <code>theme_538()</code>, <code>theme_seaborn()</code>, <code>theme_matplotlib()</code>, and <code>theme_tufte()</code> are all available without installing any extra packages.</p>
 <p>We build a base plot and apply several themes to it.</p>
-<div id="8f963de2" class="cell" data-execution_count="26">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>p_base <span class="op">=</span> p0.geom_point(data <span class="op">=</span> flipped_yes) <span class="co"># .add_theme(figure_size=(2, 10))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="c4274a3c" class="cell" data-execution_count="26">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>p_base <span class="op">=</span> p0.geom_point(data <span class="op">=</span> flipped_yes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="cell-fig-ch-08-theme-parade" class="cell page-columns page-full" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>_sz <span class="op">=</span> {<span class="st">"figure_size"</span>: (<span class="fl">2.5</span>, <span class="dv">12</span>)}</span>
@@ -906,11 +907,11 @@ Figure&nbsp;8.11: Flipped counties by party, with state identifiers.
 <span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="27">
-<div id="fig-ch-08-theme-parade" class="quarto-float quarto-figure quarto-figure-center anchored" width="240" height="1152">
+<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="156">
+<div id="fig-ch-08-theme-parade" class="quarto-float quarto-figure quarto-figure-center anchored" height="1000" width="800">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-08-theme-parade-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="08-polishing_files/figure-html/fig-ch-08-theme-parade-output-1.png" id="fig-ch-08-theme-parade" width="240" height="1152" class="figure-img">
+<img src="08-polishing_files/figure-html/fig-ch-08-theme-parade-output-1.png" id="fig-ch-08-theme-parade" width="800" height="1000" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-ch-08-theme-parade-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;8.12
@@ -920,10 +921,10 @@ Figure&nbsp;8.12
 </div></div></div>
 <p><code>theme_tufte()</code> follows Edward Tufte’s principle of maximizing the data-ink ratio by removing all non-data ink that does not carry information.</p>
 <p>To apply a theme to every subsequent plot in a session, use <code>p9.theme_set()</code>. This is useful at the top of a document to establish a house style without repeating the theme call on every plot.</p>
-<div id="9ba1138e" class="cell" data-execution_count="28">
+<div id="933eb98c" class="cell" data-execution_count="28">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>p9.theme_set(p9.theme_minimal())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="730c546c" class="cell" data-execution_count="29">
+<div id="6b68048a" class="cell" data-execution_count="29">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    p0</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .geom_point(color<span class="op">=</span><span class="st">"#d9e5ed"</span>)</span>
@@ -939,7 +940,7 @@ Figure&nbsp;8.12
 <span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>        panel_border<span class="op">=</span>p9.element_rect(color<span class="op">=</span><span class="st">"#d9e5ed"</span>),</span>
 <span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="28">
+<div class="cell-output cell-output-display" data-execution_count="157">
 <div>
 <figure class="figure">
 <p><img src="08-polishing_files/figure-html/cell-30-output-1.png" width="672" height="480" class="figure-img"></p>
@@ -958,7 +959,7 @@ Figure&nbsp;8.12
 <li><code>element_blank()</code> to remove an element entirely</li>
 </ul>
 <p>The following example builds a faceted density plot of GSS respondent ages across survey years. We start from the data, define a mean-age annotation table, and then progressively apply theme adjustments to strip away non-essential ink and improve readability.</p>
-<div id="7c6f2075" class="cell" data-execution_count="30">
+<div id="285faa5d" class="cell" data-execution_count="30">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> element_text, element_line, element_rect, element_blank</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>yrs <span class="op">=</span> (</span>
@@ -980,7 +981,7 @@ Figure&nbsp;8.12
 <span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>yr_labs <span class="op">=</span> pl.DataFrame({<span class="st">"x"</span>: <span class="dv">85</span>, <span class="st">"y"</span>: <span class="fl">0.6</span>, <span class="st">"year"</span>: yrs})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="4fb1fa5e" class="cell" data-execution_count="31">
+<div id="849562d5" class="cell" data-execution_count="31">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>p_age <span class="op">=</span> (</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    gss_lon</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"year"</span>).is_in(yrs))</span>
@@ -1042,7 +1043,7 @@ Figure&nbsp;8.12
 <span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="31">
+<div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="160">
 <div id="fig-ch-08-gss-age-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-08-gss-age-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1058,7 +1059,7 @@ Figure&nbsp;8.13: A customized small multiple.
 <section id="building-a-custom-theme" class="level3" data-number="8.3.3">
 <h3 data-number="8.3.3" class="anchored" data-anchor-id="building-a-custom-theme"><span class="header-section-number">8.3.3</span> Building a Custom Theme</h3>
 <p>Rather than adding the same <code>theme()</code> call to every plot, you can wrap your adjustments in a function. Plotnine themes compose with <code>+</code>, so the typical pattern is to start from a built-in theme and override specific elements.</p>
-<div id="6608119b" class="cell" data-execution_count="33">
+<div id="cab72922" class="cell" data-execution_count="33">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> theme_clean(base_size<span class="op">=</span><span class="dv">11</span>):</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>        p9.theme_minimal(base_size<span class="op">=</span>base_size)</span>
@@ -1071,7 +1072,7 @@ Figure&nbsp;8.13: A customized small multiple.
 <span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>p_base <span class="op">+</span> theme_clean()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="32">
+<div class="cell-output cell-output-display" data-execution_count="161">
 <div>
 <figure class="figure">
 <p><img src="08-polishing_files/figure-html/cell-34-output-1.png" width="672" height="480" class="figure-img"></p>
@@ -1079,9 +1080,9 @@ Figure&nbsp;8.13: A customized small multiple.
 </div>
 </div>
 </div>
-<div id="acbd8a9e" class="cell" data-execution_count="34">
+<div id="69afb4e3" class="cell" data-execution_count="34">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>p_base <span class="op">+</span> theme_clean(base_size<span class="op">=</span><span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="33">
+<div class="cell-output cell-output-display" data-execution_count="162">
 <div>
 <figure class="figure">
 <p><img src="08-polishing_files/figure-html/cell-35-output-1.png" width="672" height="480" class="figure-img"></p>
@@ -1097,42 +1098,40 @@ Figure&nbsp;8.13: A customized small multiple.
 <section id="look-both-ways" class="level3 page-columns page-full" data-number="8.4.1">
 <h3 data-number="8.4.1" class="anchored" data-anchor-id="look-both-ways"><span class="header-section-number">8.4.1</span> Look Both Ways</h3>
 <p>The <code>farsinvolved</code> dataset records daily counts of child pedestrians (aged 0–17) involved in fatal motor vehicle crashes in the United States from 2009 to 2023. We are interested in the pattern across the calendar year, so we aggregate by month and day and take the mean count across years. Because we are averaging over many years, February 29th is included; we use year 2000 as a placeholder because 2000 was a leap year.</p>
-<div id="c39530e1" class="cell" data-execution_count="35">
+<div id="f511ac6e" class="cell" data-execution_count="35">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> date</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>farsinvolved <span class="op">=</span> sv.load_data(<span class="st">"farsinvolved"</span>)</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>studebt <span class="op">=</span> sv.load_data(<span class="st">"studebt"</span>)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>okboomer <span class="op">=</span> sv.load_data(<span class="st">"okboomer"</span>)</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>month_order <span class="op">=</span> [</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"January"</span>, <span class="st">"February"</span>, <span class="st">"March"</span>, <span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>,</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"July"</span>, <span class="st">"August"</span>, <span class="st">"September"</span>, <span class="st">"October"</span>, <span class="st">"November"</span>, <span class="st">"December"</span>,</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>month_num <span class="op">=</span> {m: i <span class="op">+</span> <span class="dv">1</span> <span class="cf">for</span> i, m <span class="kw">in</span> <span class="bu">enumerate</span>(month_order)}</span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>fars_agg <span class="op">=</span> (</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    farsinvolved</span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    .with_columns(pl.col(<span class="st">"day"</span>).cast(pl.Int32))</span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>    .group_by(<span class="st">"month"</span>, <span class="st">"day"</span>)</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    .agg(n<span class="op">=</span>pl.col(<span class="st">"n"</span>).mean())</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>        month_num<span class="op">=</span>pl.col(<span class="st">"month"</span>).replace(month_num).cast(pl.Int32),</span>
-<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>        fake_yr<span class="op">=</span>pl.date(<span class="dv">2000</span>, pl.col(<span class="st">"month_num"</span>), pl.col(<span class="st">"day"</span>)),</span>
-<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>        flag<span class="op">=</span>(pl.col(<span class="st">"month"</span>) <span class="op">==</span> <span class="st">"October"</span>) <span class="op">&amp;</span> (pl.col(<span class="st">"day"</span>) <span class="op">==</span> <span class="dv">31</span>),</span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"fake_yr"</span>)</span>
-<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>month_order <span class="op">=</span> [</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"January"</span>, <span class="st">"February"</span>, <span class="st">"March"</span>, <span class="st">"April"</span>, <span class="st">"May"</span>, <span class="st">"June"</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"July"</span>, <span class="st">"August"</span>, <span class="st">"September"</span>, <span class="st">"October"</span>, <span class="st">"November"</span>, <span class="st">"December"</span>,</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>month_num <span class="op">=</span> {m: i <span class="op">+</span> <span class="dv">1</span> <span class="cf">for</span> i, m <span class="kw">in</span> <span class="bu">enumerate</span>(month_order)}</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>fars_agg <span class="op">=</span> (</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    farsinvolved</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    .with_columns(pl.col(<span class="st">"day"</span>).cast(pl.Int32))</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    .group_by(<span class="st">"month"</span>, <span class="st">"day"</span>)</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    .agg(n<span class="op">=</span>pl.col(<span class="st">"n"</span>).mean())</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>        month_num<span class="op">=</span>pl.col(<span class="st">"month"</span>).replace(month_num).cast(pl.Int32),</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>        fake_yr<span class="op">=</span>pl.date(<span class="dv">2000</span>, pl.col(<span class="st">"month_num"</span>), pl.col(<span class="st">"day"</span>)),</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>        flag<span class="op">=</span>(pl.col(<span class="st">"month"</span>) <span class="op">==</span> <span class="st">"October"</span>) <span class="op">&amp;</span> (pl.col(<span class="st">"day"</span>) <span class="op">==</span> <span class="dv">31</span>),</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"fake_yr"</span>)</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Halloween (October 31) stands out as the single most dangerous day for child pedestrians. We flag it so we can color it differently in the plot.</p>
-<div id="f6e1b0a4" class="cell" data-execution_count="36">
+<div id="65573c85" class="cell" data-execution_count="36">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>p9.theme_set(sv.theme_socviz())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="35">
-<pre><code>&lt;plotnine.themes.theme_minimal.theme_minimal at 0x1179382d0&gt;</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="164">
+<pre><code>&lt;plotnine.themes.theme_minimal.theme_minimal at 0x140db7750&gt;</code></pre>
 </div>
 </div>
-<div id="2c9ede7f" class="cell page-columns page-full" data-execution_count="37">
+<div id="7eebed30" class="cell page-columns page-full" data-execution_count="37">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>black_orange <span class="op">=</span> {<span class="va">True</span>: <span class="st">"#E06000"</span>, <span class="va">False</span>: <span class="st">"#222222"</span>}</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1163,7 +1162,7 @@ Figure&nbsp;8.13: A customized small multiple.
 <span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>    .add_theme(figure_size<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">3</span>))</span>
 <span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="36">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="165">
 <div class="page-columns page-full">
 <figure class="figure page-columns page-full">
 <p class="page-columns page-full"><img src="08-polishing_files/figure-html/cell-38-output-1.png" width="1000" height="300" class="figure-img column-page"></p>
@@ -1171,8 +1170,8 @@ Figure&nbsp;8.13: A customized small multiple.
 </div>
 </div>
 </div>
-<p>The R version of this section also shows a polar (radial) coordinate version of the same chart using <code>coord_radial()</code> and the <code>geomtextpath</code> package. Plotnine does not currently have a <code>coord_radial()</code> or a <code>geom_textsegment()</code> equivalent, but we can produce a similar chart using <code>matplotlib</code>’s polar projection.</p>
-<div id="e6f76d26" class="cell" data-execution_count="38">
+<p>The R version of this section also shows a polar (radial) coordinate version of the same chart using <code>coord_radial()</code> and the <code>geomtextpath</code> package. For comparison, the <code>matplotlib</code> chart below routes through the native polar projection.</p>
+<div id="9498e651" class="cell" data-execution_count="38">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1237,12 +1236,13 @@ Figure&nbsp;8.13: A customized small multiple.
 </div>
 <p>The column chart above conveys the same information more directly: lengths are easier to judge than angles.</p>
 </section>
-<section id="saying-no-to-pie" class="level3" data-number="8.4.2">
+<section id="saying-no-to-pie" class="level3 page-columns page-full" data-number="8.4.2">
 <h3 data-number="8.4.2" class="anchored" data-anchor-id="saying-no-to-pie"><span class="header-section-number">8.4.2</span> Saying No to Pie</h3>
 <p>Pie charts ask readers to judge angles and arc lengths, which people do poorly compared to judging position along a common scale or the length of a bar. The <code>studebt</code> dataset describes the distribution of outstanding U.S. student loan debt, broken into debt-amount bands, with separate rows for the share of borrowers and the share of total balances in each band.</p>
-<div id="f1b7777a" class="cell" data-execution_count="39">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>studebt.head(<span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="38">
+<div id="3acd2c4b" class="cell" data-execution_count="39">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>studebt <span class="op">=</span> sv.load_data(<span class="st">"studebt"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>studebt.head(<span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="167">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -1321,128 +1321,164 @@ Figure&nbsp;8.13: A customized small multiple.
 </div>
 </div>
 <p>A faceted bar chart is a straightforward alternative to a pie chart. Each panel shows one distribution, and within each panel the bar lengths are directly comparable.</p>
-<div id="f739d9cf" class="cell" data-execution_count="40">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>debt_order <span class="op">=</span> [</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Under $5k"</span>, <span class="st">"$5k-$10k"</span>, <span class="st">"$10k-$25k"</span>, <span class="st">"$25k-$50k"</span>,</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"$50k-$75k"</span>, <span class="st">"$75k-$100k"</span>, <span class="st">"$100k-$200k"</span>, <span class="st">"Over $200k"</span>,</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>f_labs <span class="op">=</span> {</span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Borrowers"</span>: <span class="st">"Percent of all Borrowers"</span>,</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Balances"</span>:  <span class="st">"Percent of all Balances"</span>,</span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>p_caption <span class="op">=</span> <span class="st">"Source: FRB NY"</span></span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>p_title   <span class="op">=</span> <span class="st">"Outstanding Student Loans"</span></span>
-<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>p_subtitle <span class="op">=</span> <span class="st">"44 million borrowers owe a total of $1.3 trillion"</span></span>
-<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>    studebt</span>
-<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>        pct_prop<span class="op">=</span>pl.col(<span class="st">"pct"</span>) <span class="op">/</span> <span class="dv">100</span>,</span>
-<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>        Debtrc<span class="op">=</span>pl.col(<span class="st">"Debtrc"</span>).cast(pl.Enum(debt_order)),</span>
-<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"pct_prop"</span>, y<span class="op">=</span><span class="st">"Debtrc"</span>, fill<span class="op">=</span><span class="st">"type"</span>))</span>
-<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
-<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>    .scale_x_continuous(labels<span class="op">=</span>mf.percent_format())</span>
-<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>    .scale_fill_brewer(<span class="bu">type</span><span class="op">=</span><span class="st">"qual"</span>, palette<span class="op">=</span><span class="st">"Set2"</span>)</span>
-<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>    .add_guides(fill<span class="op">=</span><span class="st">"none"</span>)</span>
-<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a>    .facet_grid(<span class="st">". ~ type"</span>, labeller<span class="op">=</span><span class="bu">dict</span>(<span class="bu">zip</span>(f_labs.keys(), f_labs.values())))</span>
-<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a>    .labs(</span>
-<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="va">None</span>, y<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb31-28"><a href="#cb31-28" aria-hidden="true" tabindex="-1"></a>        caption<span class="op">=</span>p_caption, title<span class="op">=</span>p_title, subtitle<span class="op">=</span>p_subtitle,</span>
-<span id="cb31-29"><a href="#cb31-29" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb31-30"><a href="#cb31-30" aria-hidden="true" tabindex="-1"></a>    .add_theme(strip_text_x<span class="op">=</span>element_text(face<span class="op">=</span><span class="st">"bold"</span>))</span>
-<span id="cb31-31"><a href="#cb31-31" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="39">
-<div>
-<figure class="figure">
-<p><img src="08-polishing_files/figure-html/cell-41-output-1.png" width="600" height="350" class="figure-img"></p>
+<p>Because our labels contain <code>$</code>, we need to tell <code>matplotlib</code> not to parse these as mathematical symbols.</p>
+<div id="cc312cfb" class="cell" data-execution_count="40">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib <span class="im">as</span> mpl</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>mpl.rcParams[<span class="st">'text.parse_math'</span>] <span class="op">=</span> <span class="va">False</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="a973a476" class="cell" data-execution_count="41">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>debt_order <span class="op">=</span> [</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Under $5k"</span>, <span class="st">"$5k-$10k"</span>, <span class="st">"$10k-$25k"</span>, <span class="st">"$25k-$50k"</span>,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"$50k-$75k"</span>, <span class="st">"$75k-$100k"</span>, <span class="st">"$100k-$200k"</span>, <span class="st">"Over $200k"</span>,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>f_labs <span class="op">=</span> {</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Borrowers"</span>: <span class="st">"Percent of all Borrowers"</span>,</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Balances"</span>:  <span class="st">"Percent of all Balances"</span>,</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>p_caption <span class="op">=</span> <span class="st">"Source: FRB NY"</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>p_title   <span class="op">=</span> <span class="st">"Outstanding Student Loans"</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>p_subtitle <span class="op">=</span> <span class="st">"44 million borrowers owe a total of $1.3 trillion"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="cell-fig-ch-08-studentpie-02" class="cell" data-execution_count="42">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    studebt</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>        pct_prop<span class="op">=</span>pl.col(<span class="st">"pct"</span>) <span class="op">/</span> <span class="dv">100</span>,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        Debtrc<span class="op">=</span>pl.col(<span class="st">"Debtrc"</span>).cast(pl.Enum(debt_order)),</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"Debtrc"</span>, y<span class="op">=</span><span class="st">"pct_prop"</span>, fill<span class="op">=</span><span class="st">"type"</span>))</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    .scale_y_continuous(labels<span class="op">=</span>mf.percent_format())</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    .scale_fill_manual(values<span class="op">=</span>{<span class="st">"Balances"</span>: <span class="st">"#E69F00"</span>, <span class="st">"Borrowers"</span>: <span class="st">"#56B4E9"</span>})</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>    .add_guides(fill<span class="op">=</span><span class="st">"none"</span>)</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    .facet_grid(<span class="st">". ~ type"</span>, labeller<span class="op">=</span>f_labs)</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>    .labs(</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">""</span>, y<span class="op">=</span><span class="st">""</span>,</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>        caption<span class="op">=</span>p_caption, title<span class="op">=</span>p_title, subtitle<span class="op">=</span>p_subtitle,</span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>    .add_theme(strip_text_x<span class="op">=</span>element_text(face<span class="op">=</span><span class="st">"bold"</span>))</span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="170">
+<div id="fig-ch-08-studentpie-02" class="quarto-float quarto-figure quarto-figure-center anchored" height="350" width="600">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch-08-studentpie-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="08-polishing_files/figure-html/fig-ch-08-studentpie-02-output-1.png" id="fig-ch-08-studentpie-02" width="600" height="350" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-ch-08-studentpie-02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.14
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>A stacked horizontal bar is another option. It sacrifices within-bar comparisons (each segment is harder to read than in the faceted version) but makes it easier to see that the two distributions sum to 100% and to compare their shapes at a glance.</p>
-<div id="3ed23def" class="cell" data-execution_count="41">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    studebt</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>        pct_prop<span class="op">=</span>pl.col(<span class="st">"pct"</span>) <span class="op">/</span> <span class="dv">100</span>,</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>        Debtrc<span class="op">=</span>pl.col(<span class="st">"Debtrc"</span>).cast(pl.Enum(debt_order)),</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"pct_prop"</span>, y<span class="op">=</span><span class="st">"type"</span>, fill<span class="op">=</span><span class="st">"Debtrc"</span>))</span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    .geom_col(color<span class="op">=</span><span class="st">"white"</span>, position<span class="op">=</span><span class="st">"stack"</span>)</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    .scale_x_continuous(labels<span class="op">=</span>mf.percent_format())</span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    .scale_fill_brewer(<span class="bu">type</span><span class="op">=</span><span class="st">"qual"</span>, palette<span class="op">=</span><span class="st">"Set3"</span>, direction<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    .labs(</span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="va">None</span>, y<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>        fill<span class="op">=</span><span class="st">"Dollar amount owed"</span>,</span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>        caption<span class="op">=</span>p_caption, title<span class="op">=</span>p_title, subtitle<span class="op">=</span>p_subtitle,</span>
-<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>    .add_theme(legend_position<span class="op">=</span><span class="st">"top"</span>)</span>
-<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="40">
-<div>
-<figure class="figure">
-<p><img src="08-polishing_files/figure-html/cell-42-output-1.png" width="600" height="350" class="figure-img"></p>
+<p>A stacked horizontal bar is another option. It sacrifices within-bar comparisons (each segment is harder to read than in the faceted version) but makes it easier to see that the two distributions sum to 100% and to compare their shapes at a glance. The R version uses <code>guide_legend(label.position = "bottom")</code> to place the debt-band labels beneath each colour swatch, which makes the single-row legend much easier to read. Plotnine’s <code>guide_legend</code> does not support <code>label_position</code> or <code>title_position</code>, so the labels appear to the right of the swatches and the legend title sits to the left of the entries rather than above them. The R version also benefits from ggplot2 wrapping long axis tick labels automatically; plotnine has no equivalent, and matplotlib’s <code>wrap=True</code> text property is not exposed through plotnine’s scale API in a useful way, so line breaks must be inserted manually with <code>\n</code>.</p>
+<div id="cell-fig-ch-08-studentpie-03" class="cell page-columns page-full" data-execution_count="43">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    studebt</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>        pct_prop<span class="op">=</span>pl.col(<span class="st">"pct"</span>) <span class="op">/</span> <span class="dv">100</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>        Debtrc<span class="op">=</span>pl.col(<span class="st">"Debtrc"</span>).cast(pl.Enum(debt_order)),</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"type"</span>, y<span class="op">=</span><span class="st">"pct_prop"</span>, fill<span class="op">=</span><span class="st">"Debtrc"</span>))</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    .geom_col(color<span class="op">=</span><span class="st">"white"</span>, position<span class="op">=</span><span class="st">"stack"</span>)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    .scale_x_discrete(labels<span class="op">=</span>{</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Borrowers"</span>: <span class="st">"Percent of</span><span class="ch">\n</span><span class="st">all Borrowers"</span>,</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Balances"</span>:  <span class="st">"Percent of</span><span class="ch">\n</span><span class="st">all Balances"</span>,</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    .scale_y_continuous(labels<span class="op">=</span>mf.percent_format())</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>    .scale_fill_cmap_d(<span class="st">"viridis_r"</span>)</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>    .add_guides(fill<span class="op">=</span>p9.guide_legend(</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>        reverse<span class="op">=</span><span class="va">True</span>, nrow<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>    .labs(</span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">""</span>, y<span class="op">=</span><span class="st">""</span>,</span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>        fill<span class="op">=</span><span class="st">"Dollar Amount Owed"</span>,</span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>        caption<span class="op">=</span>p_caption, title<span class="op">=</span>p_title, subtitle<span class="op">=</span>p_subtitle,</span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>    .add_theme(legend_position<span class="op">=</span><span class="st">"top"</span>, figure_size<span class="op">=</span>(<span class="dv">10</span>, <span class="fl">2.5</span>))</span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="171">
+<div id="fig-ch-08-studentpie-03" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" height="250" width="1000">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-ch-08-studentpie-03-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
+<img src="08-polishing_files/figure-html/fig-ch-08-studentpie-03-output-1.png" id="fig-ch-08-studentpie-03" width="1000" height="250" class="figure-img column-page">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-ch-08-studentpie-03-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.15
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="build-more-complex-layouts" class="level3" data-number="8.4.3">
+<section id="build-more-complex-layouts" class="level3 page-columns page-full" data-number="8.4.3">
 <h3 data-number="8.4.3" class="anchored" data-anchor-id="build-more-complex-layouts"><span class="header-section-number">8.4.3</span> Build More Complex Layouts</h3>
-<p>The <code>patchwork</code> R package lets you arrange separate ggplot objects into a single figure with a shared layout. Python does not have a direct equivalent built into plotnine, but the same result can usually be achieved by reshaping data into a long format and using <code>facet_grid()</code> with <code>scales="free_y"</code>. The key constraint is that every panel shares the same geom; when you need genuinely different geoms per panel the matplotlib <code>gridspec</code> API or the <code>patchworklib</code> package are options worth exploring.</p>
-<p>The <code>okboomer</code> dataset contains a time-series decomposition of monthly U.S. birth rates from 1933 to 2015. We filter to the pre-1976 baby-boom period, pivot the three decomposition components into a long format, and facet by component.</p>
-<div id="0446f8f2" class="cell" data-execution_count="42">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>component_order <span class="op">=</span> [<span class="st">"trend"</span>, <span class="st">"seasonal"</span>, <span class="st">"remainder"</span>]</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>component_labels <span class="op">=</span> {</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"trend"</span>:     <span class="st">"Trend"</span>,</span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"seasonal"</span>:  <span class="st">"Seasonal"</span>,</span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"remainder"</span>: <span class="st">"Remainder"</span>,</span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>okboomer_long <span class="op">=</span> (</span>
-<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    okboomer</span>
-<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"date"</span>) <span class="op">&lt;</span> pl.date(<span class="dv">1976</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>    .unpivot(</span>
-<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>        index<span class="op">=</span>[<span class="st">"date"</span>],</span>
-<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>        on<span class="op">=</span>component_order,</span>
-<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>        variable_name<span class="op">=</span><span class="st">"component"</span>,</span>
-<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>        value_name<span class="op">=</span><span class="st">"value"</span>,</span>
-<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"component"</span>).cast(pl.Enum(component_order)),</span>
-<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>    okboomer_long</span>
-<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"date"</span>, y<span class="op">=</span><span class="st">"value"</span>))</span>
-<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a>    .geom_line(size<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a>    .facet_grid(</span>
-<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">"component ~ ."</span>,</span>
-<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># scales="free_y",</span></span>
-<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a>        labeller<span class="op">=</span><span class="bu">dict</span>(<span class="bu">zip</span>(component_order,</span>
-<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a>                          [component_labels[c] <span class="cf">for</span> c <span class="kw">in</span> component_order])),</span>
-<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a>    .scale_x_date(</span>
-<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a>        date_breaks<span class="op">=</span><span class="st">"10 years"</span>,</span>
-<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a>        date_labels<span class="op">=</span><span class="st">"%Y"</span>,</span>
-<span id="cb33-35"><a href="#cb33-35" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a>    .labs(</span>
-<span id="cb33-37"><a href="#cb33-37" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">"Year"</span>, y<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb33-38"><a href="#cb33-38" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"U.S. Birth Rates, 1933–1975"</span>,</span>
-<span id="cb33-39"><a href="#cb33-39" aria-hidden="true" tabindex="-1"></a>        caption<span class="op">=</span><span class="st">"Trend, seasonal, and remainder components of monthly births per million."</span>,</span>
-<span id="cb33-40"><a href="#cb33-40" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb33-41"><a href="#cb33-41" aria-hidden="true" tabindex="-1"></a>    .add_theme(</span>
-<span id="cb33-42"><a href="#cb33-42" aria-hidden="true" tabindex="-1"></a>        strip_text_y<span class="op">=</span>element_text(angle<span class="op">=</span><span class="dv">0</span>, ha<span class="op">=</span><span class="st">"left"</span>),</span>
-<span id="cb33-43"><a href="#cb33-43" aria-hidden="true" tabindex="-1"></a>        axis_text_y<span class="op">=</span>element_text(size<span class="op">=</span><span class="dv">7</span>),</span>
-<span id="cb33-44"><a href="#cb33-44" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb33-45"><a href="#cb33-45" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="41">
-<div>
-<figure class="figure">
-<p><img src="08-polishing_files/figure-html/cell-43-output-1.png" width="600" height="350" class="figure-img"></p>
+<p>The <code>patchwork</code> R package lets you arrange separate ggplot objects into a single figure with a shared layout. Plotnine offers the same capability through a composition API: <code>/</code> stacks plots vertically, <code>|</code> places them side by side, and <code>&amp;</code> applies a scale or theme element to every plot in the composition at once.</p>
+<p>The <code>okboomer</code> dataset contains a time-series decomposition of monthly U.S. birth rates from 1933 to 2015. We filter to the pre-1976 baby-boom period and build one plot per component, then stack them with <code>/</code>. The remainder component uses <code>geom_col()</code> rather than <code>geom_line()</code>, which a <code>facet_grid()</code> approach cannot accommodate.</p>
+<div id="cell-fig-ch-08-births" class="cell page-columns page-full" data-fig-height="7" data-fig-width="12" data-execution_count="44">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>okboomer <span class="op">=</span> (</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    sv.load_data(<span class="st">"okboomer"</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"date"</span>) <span class="op">&lt;</span> pl.date(<span class="dv">1976</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>p_trend <span class="op">=</span> (</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    okboomer</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"date"</span>, y<span class="op">=</span><span class="st">"trend"</span>))</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    .geom_line(size<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    .labs(x<span class="op">=</span><span class="st">""</span>, y<span class="op">=</span><span class="st">"Average daily births</span><span class="ch">\n</span><span class="st">per million"</span>, </span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>          title<span class="op">=</span><span class="st">"Trend Component"</span>)</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    .add_theme(</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>        axis_text_x<span class="op">=</span>p9.element_blank(),</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>        axis_text_y<span class="op">=</span>p9.element_text(size<span class="op">=</span><span class="dv">7</span>),</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>        axis_title_y<span class="op">=</span>p9.element_text(size<span class="op">=</span><span class="dv">7</span>),</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>p9.element_text(size<span class="op">=</span><span class="dv">9</span>, ha<span class="op">=</span><span class="st">"left"</span>, face<span class="op">=</span><span class="st">"bold"</span>),</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>p_seasonal <span class="op">=</span> (</span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>    okboomer</span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"date"</span>, y<span class="op">=</span><span class="st">"seasonal"</span>))</span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>    .geom_line(size<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>    .labs(x<span class="op">=</span><span class="st">""</span>, y<span class="op">=</span><span class="st">""</span>, title<span class="op">=</span><span class="st">"Seasonal Component"</span>)</span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>    .add_theme(</span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>        axis_text_x<span class="op">=</span>p9.element_blank(),</span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>        axis_text_y<span class="op">=</span>p9.element_text(size<span class="op">=</span><span class="dv">7</span>),</span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>p9.element_text(size<span class="op">=</span><span class="dv">9</span>, ha<span class="op">=</span><span class="st">"left"</span>, face<span class="op">=</span><span class="st">"bold"</span>),</span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a>p_remainder <span class="op">=</span> (</span>
+<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a>    okboomer</span>
+<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"date"</span>, y<span class="op">=</span><span class="st">"remainder"</span>))</span>
+<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
+<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a>    .labs(x<span class="op">=</span><span class="st">"Year"</span>, y<span class="op">=</span><span class="st">""</span>, title<span class="op">=</span><span class="st">"Remainder Component"</span>)</span>
+<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>    .add_theme(</span>
+<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a>        axis_text_x<span class="op">=</span>p9.element_text(size<span class="op">=</span><span class="dv">7</span>),</span>
+<span id="cb35-39"><a href="#cb35-39" aria-hidden="true" tabindex="-1"></a>        axis_text_y<span class="op">=</span>p9.element_text(size<span class="op">=</span><span class="dv">7</span>),</span>
+<span id="cb35-40"><a href="#cb35-40" aria-hidden="true" tabindex="-1"></a>        axis_title_x<span class="op">=</span>p9.element_text(size<span class="op">=</span><span class="dv">7</span>),</span>
+<span id="cb35-41"><a href="#cb35-41" aria-hidden="true" tabindex="-1"></a>        plot_title<span class="op">=</span>p9.element_text(size<span class="op">=</span><span class="dv">9</span>, ha<span class="op">=</span><span class="st">"left"</span>, face<span class="op">=</span><span class="st">"bold"</span>),</span>
+<span id="cb35-42"><a href="#cb35-42" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb35-43"><a href="#cb35-43" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-44"><a href="#cb35-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-45"><a href="#cb35-45" aria-hidden="true" tabindex="-1"></a>comp <span class="op">=</span> (</span>
+<span id="cb35-46"><a href="#cb35-46" aria-hidden="true" tabindex="-1"></a>    p_trend <span class="op">/</span> (p_seasonal <span class="op">/</span> p_remainder)</span>
+<span id="cb35-47"><a href="#cb35-47" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span> p9.scale_x_date(date_breaks<span class="op">=</span><span class="st">"10 years"</span>, date_labels<span class="op">=</span><span class="st">"%Y"</span>)</span>
+<span id="cb35-48"><a href="#cb35-48" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span> p9.theme(figure_size<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb35-49"><a href="#cb35-49" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-50"><a href="#cb35-50" aria-hidden="true" tabindex="-1"></a>comp <span class="op">+</span>  plot_annotation(title<span class="op">=</span><span class="st">"U.S. Birth Rates, 1933–1975"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="172">
+<div id="fig-ch-08-births" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" height="500" width="1000">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-ch-08-births-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="page-columns page-full">
+<img src="08-polishing_files/figure-html/fig-ch-08-births-output-1.png" id="fig-ch-08-births" width="1000" height="500" class="figure-img column-page">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-ch-08-births-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.16
+</figcaption>
 </figure>
 </div>
 </div>
