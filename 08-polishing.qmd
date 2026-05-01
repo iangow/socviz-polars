@@ -13,6 +13,7 @@ import plotnine_polars as p9
 import socviz_pl as sv
 import mizani.formatters as mf
 from plotnine_polars import aes
+from plotnine.composition import plot_annotation
 ```
 
 The default settings that ggplot (and plotnine) ship with are generally good enough for exploratory work.
@@ -610,7 +611,6 @@ from datetime import date
 
 farsinvolved = sv.load_data("farsinvolved")
 studebt = sv.load_data("studebt")
-okboomer = sv.load_data("okboomer")
 
 month_order = [
     "January", "February", "March", "April", "May", "June",
@@ -749,6 +749,14 @@ studebt.head(8)
 A faceted bar chart is a straightforward alternative to a pie chart.
 Each panel shows one distribution, and within each panel the bar lengths are directly comparable.
 
+Because our labels contain `$`, we need to tell `matplotlib` not to parse these as mathematical symbols.
+
+```{python}
+import matplotlib as mpl
+
+mpl.rcParams['text.parse_math'] = False
+```
+
 ```{python}
 debt_order = [
     "Under $5k", "$5k-$10k", "$10k-$25k", "$25k-$50k",
@@ -762,21 +770,25 @@ f_labs = {
 p_caption = "Source: FRB NY"
 p_title   = "Outstanding Student Loans"
 p_subtitle = "44 million borrowers owe a total of $1.3 trillion"
+```
 
+```{python}
+#| label: fig-ch-08-studentpie-02
 (
     studebt
     .with_columns(
         pct_prop=pl.col("pct") / 100,
         Debtrc=pl.col("Debtrc").cast(pl.Enum(debt_order)),
     )
-    .ggplot(aes(x="pct_prop", y="Debtrc", fill="type"))
+    .ggplot(aes(x="Debtrc", y="pct_prop", fill="type"))
     .geom_col()
-    .scale_x_continuous(labels=mf.percent_format())
-    .scale_fill_brewer(type="qual", palette="Set2")
+    .scale_y_continuous(labels=mf.percent_format())
+    .scale_fill_manual(values={"Balances": "#E69F00", "Borrowers": "#56B4E9"})
     .add_guides(fill="none")
-    .facet_grid(". ~ type", labeller=dict(zip(f_labs.keys(), f_labs.values())))
+    .facet_grid(". ~ type", labeller=f_labs)
+    .coord_flip()
     .labs(
-        x=None, y=None,
+        x="", y="",
         caption=p_caption, title=p_title, subtitle=p_subtitle,
     )
     .add_theme(strip_text_x=element_text(face="bold"))
@@ -785,80 +797,101 @@ p_subtitle = "44 million borrowers owe a total of $1.3 trillion"
 
 A stacked horizontal bar is another option.
 It sacrifices within-bar comparisons (each segment is harder to read than in the faceted version) but makes it easier to see that the two distributions sum to 100% and to compare their shapes at a glance.
+The R version uses `guide_legend(label.position = "bottom")` to place the debt-band labels beneath each colour swatch, which makes the single-row legend much easier to read.
+Plotnine's `guide_legend` does not support `label_position` or `title_position`, so the labels appear to the right of the swatches and the legend title sits to the left of the entries rather than above them.
+The R version also benefits from ggplot2 wrapping long axis tick labels automatically; plotnine has no equivalent, and matplotlib's `wrap=True` text property is not exposed through plotnine's scale API in a useful way, so line breaks must be inserted manually with `\n`.
 
 ```{python}
+#| label: fig-ch-08-studentpie-03
+#| column: page
 (
     studebt
     .with_columns(
         pct_prop=pl.col("pct") / 100,
         Debtrc=pl.col("Debtrc").cast(pl.Enum(debt_order)),
     )
-    .ggplot(aes(x="pct_prop", y="type", fill="Debtrc"))
+    .ggplot(aes(x="type", y="pct_prop", fill="Debtrc"))
     .geom_col(color="white", position="stack")
-    .scale_x_continuous(labels=mf.percent_format())
-    .scale_fill_brewer(type="qual", palette="Set3", direction=-1)
+    .scale_x_discrete(labels={
+        "Borrowers": "Percent of\nall Borrowers",
+        "Balances":  "Percent of\nall Balances",
+    })
+    .scale_y_continuous(labels=mf.percent_format())
+    .scale_fill_cmap_d("viridis_r")
+    .coord_flip()
+    .add_guides(fill=p9.guide_legend(
+        reverse=True, nrow=1,
+    ))
     .labs(
-        x=None, y=None,
-        fill="Dollar amount owed",
+        x="", y="",
+        fill="Dollar Amount Owed",
         caption=p_caption, title=p_title, subtitle=p_subtitle,
     )
-    .add_theme(legend_position="top")
+    .add_theme(legend_position="top", figure_size=(10, 2.5))
 )
 ```
 
 ### Build More Complex Layouts
 
 The `patchwork` R package lets you arrange separate ggplot objects into a single figure with a shared layout.
-Python does not have a direct equivalent built into plotnine, but the same result can usually be achieved by reshaping data into a long format and using `facet_grid()` with `scales="free_y"`.
-The key constraint is that every panel shares the same geom; when you need genuinely different geoms per panel the matplotlib `gridspec` API or the `patchworklib` package are options worth exploring.
+Plotnine offers the same capability through a composition API: `/` stacks plots vertically, `|` places them side by side, and `&` applies a scale or theme element to every plot in the composition at once.
 
 The `okboomer` dataset contains a time-series decomposition of monthly U.S. birth rates from 1933 to 2015.
-We filter to the pre-1976 baby-boom period, pivot the three decomposition components into a long format, and facet by component.
+We filter to the pre-1976 baby-boom period and build one plot per component, then stack them with `/`.
+The remainder component uses `geom_col()` rather than `geom_line()`, which a `facet_grid()` approach cannot accommodate.
 
 ```{python}
-component_order = ["trend", "seasonal", "remainder"]
-component_labels = {
-    "trend":     "Trend",
-    "seasonal":  "Seasonal",
-    "remainder": "Remainder",
-}
-
-okboomer_long = (
-    okboomer
+#| label: fig-ch-08-births
+#| column: page
+#| fig-width: 12
+#| fig-height: 7
+okboomer = (
+    sv.load_data("okboomer")
     .filter(pl.col("date") < pl.date(1976, 1, 1))
-    .unpivot(
-        index=["date"],
-        on=component_order,
-        variable_name="component",
-        value_name="value",
-    )
-    .with_columns(
-        pl.col("component").cast(pl.Enum(component_order)),
+)
+
+p_trend = (
+    okboomer
+    .ggplot(aes(x="date", y="trend"))
+    .geom_line(size=0.5)
+    .labs(x="", y="Average daily births\nper million", 
+          title="Trend Component")
+    .add_theme(
+        axis_text_x=p9.element_blank(),
+        axis_text_y=p9.element_text(size=7),
+        axis_title_y=p9.element_text(size=7),
+        plot_title=p9.element_text(size=9, ha="left", face="bold"),
     )
 )
 
-(
-    okboomer_long
-    .ggplot(aes(x="date", y="value"))
+p_seasonal = (
+    okboomer
+    .ggplot(aes(x="date", y="seasonal"))
     .geom_line(size=0.5)
-    .facet_grid(
-        "component ~ .",
-        # scales="free_y",
-        labeller=dict(zip(component_order,
-                          [component_labels[c] for c in component_order])),
-    )
-    .scale_x_date(
-        date_breaks="10 years",
-        date_labels="%Y",
-    )
-    .labs(
-        x="Year", y=None,
-        title="U.S. Birth Rates, 1933–1975",
-        caption="Trend, seasonal, and remainder components of monthly births per million.",
-    )
+    .labs(x="", y="", title="Seasonal Component")
     .add_theme(
-        strip_text_y=element_text(angle=0, ha="left"),
-        axis_text_y=element_text(size=7),
+        axis_text_x=p9.element_blank(),
+        axis_text_y=p9.element_blank(),
+        plot_title=p9.element_text(size=9, ha="left", face="bold"),
     )
 )
+
+p_remainder = (
+    okboomer
+    .ggplot(aes(x="date", y="remainder"))
+    .geom_col()
+    .labs(x="Year", y="", title="Remainder Component")
+    .add_theme(
+        axis_text_x=p9.element_text(size=7),
+        axis_text_y=p9.element_blank(),
+        axis_title_x=p9.element_text(size=7),
+        plot_title=p9.element_text(size=9, ha="left", face="bold"),
+    )
+)
+
+comp = (
+    p_trend / (p_seasonal / p_remainder)
+    & p9.scale_x_date(date_breaks="10 years", date_labels="%Y")
+)
+comp + plot_annotation(title="U.S. Birth Rates, 1933–1975")
 ```
