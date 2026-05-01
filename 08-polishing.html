@@ -477,7 +477,7 @@ div.csl-indent {
 
 
 <p>This chapter follows <a href="https://socviz.co/08-polishing.html">Chapter 8 of <span class="citation" data-cites="Healy2026">Healy (<span>2026</span>)</span></a>, translating the main examples to Python, Polars, and <code>plotnine_polars</code>.</p>
-<div id="a424da83" class="cell" data-execution_count="1">
+<div id="4dee975e" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotnine_polars <span class="im">as</span> p9</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> socviz_pl <span class="im">as</span> sv</span>
@@ -487,7 +487,7 @@ div.csl-indent {
 </div>
 <p>The default settings that ggplot (and plotnine) ship with are generally good enough for exploratory work. When you want to produce a figure for presentation or publication, though, you will need to make some adjustments. Refining a plot can mean several things: adjusting the look to match your personal taste, meeting the expectations of a journal or audience, or completely transforming the appearance. The grammar of graphics gives us a systematic way to think about these changes in terms of scales, themes, and geoms.</p>
 <p>The <code>asasec</code> dataset records membership and revenue information for American Sociological Association (ASA) special-interest sections.</p>
-<div id="55e344f8" class="cell" data-execution_count="2">
+<div id="00b56bcb" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>asasec <span class="op">=</span> sv.load_data(<span class="st">"asasec"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -694,11 +694,11 @@ Figure&nbsp;8.6: ColorBrewer diverging palettes.
 </div></div></div>
 <section id="qualitative-palettes" class="level3 page-columns page-full" data-number="8.1.1">
 <h3 data-number="8.1.1" class="anchored" data-anchor-id="qualitative-palettes"><span class="header-section-number">8.1.1</span> Qualitative Palettes</h3>
-<div id="346c6708" class="cell" data-execution_count="12">
+<div id="55491f86" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>organdata <span class="op">=</span> sv.load_data(<span class="st">"organdata"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The default discrete colour scale in plotnine (<code>scale_color_hue()</code>) spaces hues evenly around a circle in HCL space — the same approach ggplot2 uses. For three categories it usually looks fine; with more categories the hues can become hard to distinguish.</p>
-<div id="ba30011a" class="cell" data-execution_count="14">
+<div id="9efef365" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> (</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    organdata <span class="co">#.drop_nulls(subset=["donors", "roads", "world"])</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"roads"</span>, y<span class="op">=</span><span class="st">"donors"</span>, color<span class="op">=</span><span class="st">"world"</span>))</span>
@@ -733,7 +733,7 @@ Figure&nbsp;8.7: Some available palettes in use.
 <p>Plotnine’s layered grammar works strongly to our advantage here. A straightforward but effective technique is to draw a base layer of all observations in a muted color, then add a second layer that highlights only the cases of interest, and finally add a text layer to label the most notable ones.</p>
 <p>The same approach works whether you are producing a figure that stands alone or building a slide deck where you reveal layers one at a time to walk an audience through an argument.</p>
 <p>We illustrate the technique with county-level results from the 2024 US general election. We join <code>county_data</code> (which has demographic variables including total population and Black population) with <code>election24_county_df</code> on the county FIPS code. The <code>flipped</code> column records whether the winning party changed between 2020 and 2024.</p>
-<div id="f194ba58" class="cell" data-execution_count="17">
+<div id="610e59e3" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>county_data <span class="op">=</span> sv.load_data(<span class="st">"county_data"</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>election24 <span class="op">=</span> sv.load_data(<span class="st">"election24_county_df"</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -748,7 +748,7 @@ Figure&nbsp;8.7: Some available palettes in use.
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We start with a base layer: total county population on the x-axis (on a log scale, because county populations span several orders of magnitude) and the share of the population that is Black on the y-axis. All 3,000-plus counties are drawn in a mid-gray with low alpha so they form a neutral reference backdrop.</p>
-<div id="c0690c52" class="cell" data-execution_count="18">
+<div id="9060f40b" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>p0 <span class="op">=</span> (</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    flipped</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(x<span class="op">=</span><span class="st">"pop"</span>, y<span class="op">=</span><span class="st">"prop_black"</span>))</span>
@@ -814,7 +814,7 @@ Figure&nbsp;8.10: A third layer.
 </figure>
 </div>
 </div></div></div>
-<div id="0570a7a6" class="cell" data-execution_count="22">
+<div id="6bf8c8c5" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>labeled <span class="op">=</span> (</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    flipped</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(</span>
@@ -864,54 +864,48 @@ Figure&nbsp;8.11: Flipped counties by party, with state identifiers.
 <h3 data-number="8.3.1" class="anchored" data-anchor-id="built-in-themes"><span class="header-section-number">8.3.1</span> Built-in Themes</h3>
 <p>Plotnine ships more built-in themes than ggplot2 does. The default is <code>theme_gray()</code>, but <code>theme_bw()</code>, <code>theme_minimal()</code>, <code>theme_classic()</code>, <code>theme_light()</code>, <code>theme_dark()</code>, <code>theme_linedraw()</code>, <code>theme_void()</code>, <code>theme_538()</code>, <code>theme_seaborn()</code>, <code>theme_matplotlib()</code>, and <code>theme_tufte()</code> are all available without installing any extra packages.</p>
 <p>We build a base plot and apply several themes to it.</p>
-<div id="c4274a3c" class="cell" data-execution_count="26">
+<div id="227d8ed1" class="cell" data-execution_count="26">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>p_base <span class="op">=</span> p0.geom_point(data <span class="op">=</span> flipped_yes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="cell-fig-ch-08-theme-parade" class="cell page-columns page-full" data-execution_count="27">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>_sz <span class="op">=</span> {<span class="st">"figure_size"</span>: (<span class="fl">2.5</span>, <span class="dv">12</span>)}</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    (</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        p_base</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        .geom_point(data <span class="op">=</span> flipped_yes)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        .labs(title <span class="op">=</span> <span class="st">"theme_gray()"</span>)</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        .theme_gray(base_size<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        .add_theme(<span class="op">**</span>_sz)</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">/</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    (</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        p_base</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>        .geom_point(data <span class="op">=</span> flipped_yes)</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        .labs(title <span class="op">=</span> <span class="st">"theme_bw()"</span>)</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        .theme_bw(base_size<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>        .add_theme(<span class="op">**</span>_sz)</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">/</span></span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    (</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>        p_base</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>        .geom_point(data <span class="op">=</span> flipped_yes)</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>        .labs(title <span class="op">=</span> <span class="st">"theme_minimal()"</span>)</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>        .theme_minimal(base_size<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>        .add_theme(<span class="op">**</span>_sz)</span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">/</span></span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>    (</span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>        p_base</span>
-<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>        .geom_point(data <span class="op">=</span> flipped_yes)</span>
-<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>        .labs(title <span class="op">=</span> <span class="st">"theme_linedraw()"</span>)</span>
-<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>        .theme_linedraw(base_size<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>        .add_theme(<span class="op">**</span>_sz)</span>
-<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">/</span></span>
-<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>    (</span>
-<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>        p_base</span>
-<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>        .geom_point(data <span class="op">=</span> flipped_yes)</span>
-<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>        .labs(title <span class="op">=</span> <span class="st">"theme_tufte()"</span>)</span>
-<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>        .theme_tufte(base_size<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>        .add_theme(<span class="op">**</span>_sz)</span>
-<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        p_base</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        .geom_point(data <span class="op">=</span> flipped_yes)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        .labs(title <span class="op">=</span> <span class="st">"theme_gray()"</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        .theme_gray(base_size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">/</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        p_base</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        .geom_point(data <span class="op">=</span> flipped_yes)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        .labs(title <span class="op">=</span> <span class="st">"theme_bw()"</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>        .theme_bw(base_size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">/</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>        p_base</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>        .geom_point(data <span class="op">=</span> flipped_yes)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>        .labs(title <span class="op">=</span> <span class="st">"theme_minimal()"</span>)</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>        .theme_minimal(base_size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">/</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>        p_base</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>        .geom_point(data <span class="op">=</span> flipped_yes)</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>        .labs(title <span class="op">=</span> <span class="st">"theme_linedraw()"</span>)</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>        .theme_linedraw(base_size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">/</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>        p_base</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>        .geom_point(data <span class="op">=</span> flipped_yes)</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>        .labs(title <span class="op">=</span> <span class="st">"theme_tufte()"</span>)</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>        .theme_tufte(base_size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>) <span class="op">&amp;</span> p9.theme(figure_size<span class="op">=</span>(<span class="fl">2.5</span>, <span class="dv">12</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 <div class="no-row-height column-margin column-container"><div class="cell-output cell-output-display" data-execution_count="156">
-<div id="fig-ch-08-theme-parade" class="quarto-float quarto-figure quarto-figure-center anchored" height="1000" width="800">
+<div id="fig-ch-08-theme-parade" class="quarto-float quarto-figure quarto-figure-center anchored" height="1200" width="250">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ch-08-theme-parade-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="08-polishing_files/figure-html/fig-ch-08-theme-parade-output-1.png" id="fig-ch-08-theme-parade" width="800" height="1000" class="figure-img">
+<img src="08-polishing_files/figure-html/fig-ch-08-theme-parade-output-1.png" id="fig-ch-08-theme-parade" width="250" height="1200" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-ch-08-theme-parade-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;8.12
@@ -921,10 +915,10 @@ Figure&nbsp;8.12
 </div></div></div>
 <p><code>theme_tufte()</code> follows Edward Tufte’s principle of maximizing the data-ink ratio by removing all non-data ink that does not carry information.</p>
 <p>To apply a theme to every subsequent plot in a session, use <code>p9.theme_set()</code>. This is useful at the top of a document to establish a house style without repeating the theme call on every plot.</p>
-<div id="933eb98c" class="cell" data-execution_count="28">
+<div id="4bf25d7c" class="cell" data-execution_count="28">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>p9.theme_set(p9.theme_minimal())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="6b68048a" class="cell" data-execution_count="29">
+<div id="3b611188" class="cell" data-execution_count="29">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    p0</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .geom_point(color<span class="op">=</span><span class="st">"#d9e5ed"</span>)</span>
@@ -959,7 +953,7 @@ Figure&nbsp;8.12
 <li><code>element_blank()</code> to remove an element entirely</li>
 </ul>
 <p>The following example builds a faceted density plot of GSS respondent ages across survey years. We start from the data, define a mean-age annotation table, and then progressively apply theme adjustments to strip away non-essential ink and improve readability.</p>
-<div id="285faa5d" class="cell" data-execution_count="30">
+<div id="c8e9ad71" class="cell" data-execution_count="30">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> element_text, element_line, element_rect, element_blank</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>yrs <span class="op">=</span> (</span>
@@ -981,7 +975,7 @@ Figure&nbsp;8.12
 <span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>yr_labs <span class="op">=</span> pl.DataFrame({<span class="st">"x"</span>: <span class="dv">85</span>, <span class="st">"y"</span>: <span class="fl">0.6</span>, <span class="st">"year"</span>: yrs})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="849562d5" class="cell" data-execution_count="31">
+<div id="a583c07f" class="cell" data-execution_count="31">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>p_age <span class="op">=</span> (</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    gss_lon</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"year"</span>).is_in(yrs))</span>
@@ -1059,7 +1053,7 @@ Figure&nbsp;8.13: A customized small multiple.
 <section id="building-a-custom-theme" class="level3" data-number="8.3.3">
 <h3 data-number="8.3.3" class="anchored" data-anchor-id="building-a-custom-theme"><span class="header-section-number">8.3.3</span> Building a Custom Theme</h3>
 <p>Rather than adding the same <code>theme()</code> call to every plot, you can wrap your adjustments in a function. Plotnine themes compose with <code>+</code>, so the typical pattern is to start from a built-in theme and override specific elements.</p>
-<div id="cab72922" class="cell" data-execution_count="33">
+<div id="dbef4373" class="cell" data-execution_count="33">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> theme_clean(base_size<span class="op">=</span><span class="dv">11</span>):</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>        p9.theme_minimal(base_size<span class="op">=</span>base_size)</span>
@@ -1080,7 +1074,7 @@ Figure&nbsp;8.13: A customized small multiple.
 </div>
 </div>
 </div>
-<div id="69afb4e3" class="cell" data-execution_count="34">
+<div id="fb72744a" class="cell" data-execution_count="34">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>p_base <span class="op">+</span> theme_clean(base_size<span class="op">=</span><span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="162">
 <div>
@@ -1098,7 +1092,7 @@ Figure&nbsp;8.13: A customized small multiple.
 <section id="look-both-ways" class="level3 page-columns page-full" data-number="8.4.1">
 <h3 data-number="8.4.1" class="anchored" data-anchor-id="look-both-ways"><span class="header-section-number">8.4.1</span> Look Both Ways</h3>
 <p>The <code>farsinvolved</code> dataset records daily counts of child pedestrians (aged 0–17) involved in fatal motor vehicle crashes in the United States from 2009 to 2023. We are interested in the pattern across the calendar year, so we aggregate by month and day and take the mean count across years. Because we are averaging over many years, February 29th is included; we use year 2000 as a placeholder because 2000 was a leap year.</p>
-<div id="f511ac6e" class="cell" data-execution_count="35">
+<div id="25be5ea9" class="cell" data-execution_count="35">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> date</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>farsinvolved <span class="op">=</span> sv.load_data(<span class="st">"farsinvolved"</span>)</span>
@@ -1125,13 +1119,13 @@ Figure&nbsp;8.13: A customized small multiple.
 <span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Halloween (October 31) stands out as the single most dangerous day for child pedestrians. We flag it so we can color it differently in the plot.</p>
-<div id="65573c85" class="cell" data-execution_count="36">
+<div id="cadcc467" class="cell" data-execution_count="36">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>p9.theme_set(sv.theme_socviz())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="164">
-<pre><code>&lt;plotnine.themes.theme_minimal.theme_minimal at 0x140db7750&gt;</code></pre>
+<pre><code>&lt;plotnine.themes.theme_minimal.theme_minimal at 0x131c47430&gt;</code></pre>
 </div>
 </div>
-<div id="7eebed30" class="cell page-columns page-full" data-execution_count="37">
+<div id="699a79fa" class="cell page-columns page-full" data-execution_count="37">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>black_orange <span class="op">=</span> {<span class="va">True</span>: <span class="st">"#E06000"</span>, <span class="va">False</span>: <span class="st">"#222222"</span>}</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1171,7 +1165,7 @@ Figure&nbsp;8.13: A customized small multiple.
 </div>
 </div>
 <p>The R version of this section also shows a polar (radial) coordinate version of the same chart using <code>coord_radial()</code> and the <code>geomtextpath</code> package. For comparison, the <code>matplotlib</code> chart below routes through the native polar projection.</p>
-<div id="9498e651" class="cell" data-execution_count="38">
+<div id="0a0276e2" class="cell" data-execution_count="38">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1239,7 +1233,7 @@ Figure&nbsp;8.13: A customized small multiple.
 <section id="saying-no-to-pie" class="level3 page-columns page-full" data-number="8.4.2">
 <h3 data-number="8.4.2" class="anchored" data-anchor-id="saying-no-to-pie"><span class="header-section-number">8.4.2</span> Saying No to Pie</h3>
 <p>Pie charts ask readers to judge angles and arc lengths, which people do poorly compared to judging position along a common scale or the length of a bar. The <code>studebt</code> dataset describes the distribution of outstanding U.S. student loan debt, broken into debt-amount bands, with separate rows for the share of borrowers and the share of total balances in each band.</p>
-<div id="3acd2c4b" class="cell" data-execution_count="39">
+<div id="63f25a6c" class="cell" data-execution_count="39">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>studebt <span class="op">=</span> sv.load_data(<span class="st">"studebt"</span>)</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>studebt.head(<span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="167">
@@ -1322,12 +1316,12 @@ Figure&nbsp;8.13: A customized small multiple.
 </div>
 <p>A faceted bar chart is a straightforward alternative to a pie chart. Each panel shows one distribution, and within each panel the bar lengths are directly comparable.</p>
 <p>Because our labels contain <code>$</code>, we need to tell <code>matplotlib</code> not to parse these as mathematical symbols.</p>
-<div id="cc312cfb" class="cell" data-execution_count="40">
+<div id="52c25679" class="cell" data-execution_count="40">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib <span class="im">as</span> mpl</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>mpl.rcParams[<span class="st">'text.parse_math'</span>] <span class="op">=</span> <span class="va">False</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="a973a476" class="cell" data-execution_count="41">
+<div id="c80cdfcf" class="cell" data-execution_count="41">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>debt_order <span class="op">=</span> [</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Under $5k"</span>, <span class="st">"$5k-$10k"</span>, <span class="st">"$10k-$25k"</span>, <span class="st">"$25k-$50k"</span>,</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"$50k-$75k"</span>, <span class="st">"$75k-$100k"</span>, <span class="st">"$100k-$200k"</span>, <span class="st">"Over $200k"</span>,</span>
