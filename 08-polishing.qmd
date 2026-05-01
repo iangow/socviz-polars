@@ -388,7 +388,7 @@ p0 = (
 ```
 
 ```{python}
-p_base = p0.geom_point(data = flipped_yes) # .add_theme(figure_size=(2, 10))
+p_base = p0.geom_point(data = flipped_yes)
 ```
 
 ```{python}
@@ -610,7 +610,6 @@ Because we are averaging over many years, February 29th is included; we use year
 from datetime import date
 
 farsinvolved = sv.load_data("farsinvolved")
-studebt = sv.load_data("studebt")
 
 month_order = [
     "January", "February", "March", "April", "May", "June",
@@ -743,6 +742,7 @@ Pie charts ask readers to judge angles and arc lengths, which people do poorly c
 The `studebt` dataset describes the distribution of outstanding U.S. student loan debt, broken into debt-amount bands, with separate rows for the share of borrowers and the share of total balances in each band.
 
 ```{python}
+studebt = sv.load_data("studebt")
 studebt.head(8)
 ```
 
@@ -871,7 +871,7 @@ p_seasonal = (
     .labs(x="", y="", title="Seasonal Component")
     .add_theme(
         axis_text_x=p9.element_blank(),
-        axis_text_y=p9.element_blank(),
+        axis_text_y=p9.element_text(size=7),
         plot_title=p9.element_text(size=9, ha="left", face="bold"),
     )
 )
@@ -883,7 +883,7 @@ p_remainder = (
     .labs(x="Year", y="", title="Remainder Component")
     .add_theme(
         axis_text_x=p9.element_text(size=7),
-        axis_text_y=p9.element_blank(),
+        axis_text_y=p9.element_text(size=7),
         axis_title_x=p9.element_text(size=7),
         plot_title=p9.element_text(size=9, ha="left", face="bold"),
     )
@@ -892,6 +892,7 @@ p_remainder = (
 comp = (
     p_trend / (p_seasonal / p_remainder)
     & p9.scale_x_date(date_breaks="10 years", date_labels="%Y")
+    & p9.theme(figure_size=(10, 5))
 )
-comp + plot_annotation(title="U.S. Birth Rates, 1933–1975")
+comp +  plot_annotation(title="U.S. Birth Rates, 1933–1975")
 ```
