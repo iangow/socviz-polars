@@ -664,63 +664,112 @@ black_orange = {True: "#E06000", False: "#222222"}
 ```
 
 The R version of this section also shows a polar (radial) coordinate version of the same chart using `coord_radial()` and the `geomtextpath` package.
-For comparison, the `matplotlib` chart below routes through the native polar projection.
+Plotnine's `coord_radial()` lets us draw the same calendar-style chart without dropping down to Matplotlib's polar projection.
+The chart maps day-of-year to the angular axis and the daily mean count to the radius.
+In the current prerelease of Plotnine, the earlier `theta_labels` and `r_axis_inside` arguments are no longer part of `coord_radial()`, so the month and radial tick labels below are drawn as ordinary text layers while the scale breaks still supply the gridlines.
 
 ```{python}
-import matplotlib.pyplot as plt
-import numpy as np
-
-n_days = 366  # 2000 is a leap year
-
+#| label: fig-ch-08-fars-radial
+#| fig-cap: "Pedestrians aged 0–17 in Fatal Motor Vehicle Crashes. Daily average, 2009–2023."
 plot_data = (
     fars_agg
-    .with_columns(doy=pl.col("fake_yr").dt.ordinal_day())
-    .with_columns(angles = 2 * np.pi * (pl.col('doy') - 1) / n_days)
+    .with_columns(
+        doy=pl.col("fake_yr").dt.ordinal_day(),
+        day_type=pl.when(pl.col("flag"))
+                   .then(pl.lit("Halloween"))
+                   .otherwise(pl.lit("Other")),
+    )
 )
 
-fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(projection='polar'))
-ax.set_theta_zero_location('N')
-ax.set_theta_direction(-1)
+m_breaks = [date(2000, m, 15).timetuple().tm_yday for m in range(1, 13)]
+m_labels = ["January", "February", "March", "April",
+            "May", "June", "July", "August", "September",
+            "October", "November", "December"]
 
-ax.scatter(plot_data.filter(~pl.col('flag')).select('angles').to_series(),
-           plot_data.filter(~pl.col('flag')).select('n').to_series(),
-           s=15, facecolors='none', edgecolors='#222222', linewidths=0.5)
-ax.scatter(plot_data.filter(pl.col('flag')).select('angles').to_series(),
-           plot_data.filter(pl.col('flag')).select('n').to_series(),
-           s=40, color='#E06000', zorder=5)
+# The text layers mimic the old coord_radial(theta_labels=True,
+# r_axis_inside=True) behavior while avoiding the native radial-label
+# drawing bug in plotnine 0.16.0a12.
+def keep_oob(x, limits):
+    return x
 
-month_angles = [
-    2 * np.pi * (date(2000, m, 1).timetuple().tm_yday - 1) / n_days
-    for m in range(1, 13)
-]
-month_labels = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-]
-ax.set_xticks(month_angles)
-ax.set_xticklabels(month_labels, size=8)
-ax.set_ylim(-0.3, plot_data['n'].max() + 0.3)
-ax.yaxis.set_tick_params(labelsize=7)
-ax.grid(True, alpha=0.3, color='gray')
-ax.tick_params(axis='x', pad=8)
+month_labels = pl.DataFrame({
+    "doy": m_breaks,
+    "month": m_labels,
+    "r": [4.38] * 12,
+})
+r_labels = pl.DataFrame({
+    "doy": [365, 365, 365, 365, 365],
+    "r": [0, 1, 2, 3, 4],
+    "label": ["0", "1", "2", "3", "4"],
+})
+r_ticks = pl.DataFrame({
+    "x": [1, 1, 1, 1, 1],
+    "xend": [4, 4, 4, 4, 4],
+    "r": [0, 1, 2, 3, 4],
+    "rend": [0, 1, 2, 3, 4],
+})
 
-hw_angle = 2 * np.pi * (date(2000, 10, 31).timetuple().tm_yday - 1) / n_days
-hw_n = plot_data.filter(pl.col("flag")).select('n').to_series().item()
-ax.annotate(
-    'Halloween',
-    xy=(hw_angle, hw_n),
-    xytext=(hw_angle - 0.06, hw_n - 0.25),
-    color='#E06000',
-    fontsize=8,
-    ha='center',
+(
+    plot_data
+    .ggplot(p9.aes(x="doy", y="n", fill="day_type", color="day_type"))
+    .geom_point(shape="o", size=2.5, stroke=0.4)
+    .scale_fill_manual(values={"Halloween": "#E06000", "Other": "white"})
+    .scale_color_manual(values={"Halloween": "#333333", "Other": "#222222"})
+    .geom_segment(
+        data=r_ticks,
+        mapping=p9.aes(x="x", xend="xend", y="r", yend="rend"),
+        inherit_aes=False,
+        color="#444444",
+        size=0.5,
+    )
+    .geom_text(data=month_labels,
+               mapping=p9.aes(x="doy", y="r", label="month"),
+               color="#444444", size=7, inherit_aes=False)
+    .geom_text(data=r_labels,
+               mapping=p9.aes(x="doy", y="r", label="label"),
+               color="#444444", size=9, ha="right", inherit_aes=False)
+    .geom_text(data=plot_data.filter(pl.col("day_type") == "Halloween"),
+               mapping=p9.aes(x="doy", y="n", label="day_type"),
+               color="#E06000", size=7, nudge_x=2, nudge_y=-1,
+               ha="right", inherit_aes=False)
+    .scale_x_continuous(
+        limits=(1, 366),
+        breaks=m_breaks,
+        labels=[""] * len(m_breaks),
+    )
+    .scale_y_continuous(
+        limits=(0, 4.25),
+        breaks=[0, 1, 2, 3, 4],
+        labels=[""] * 5,
+        minor_breaks=[0.5, 1.5, 2.5, 3.5],
+        oob=keep_oob,
+    )
+    .labs(
+        x="",
+        y="",
+        title="Pedestrians aged 0–17 in Fatal Motor Vehicle Crashes",
+        subtitle="Daily average, 2009–2023\n\n",
+    )
+    .coord_radial(theta="x", inner_radius=0.25, expand=False)
+    .add_theme(
+        axis_title=p9.element_blank(),
+        axis_text_r=p9.element_blank(),
+        axis_text_theta=p9.element_blank(),
+        axis_ticks_major_r_start=p9.element_blank(),
+        axis_ticks_major_r_end=p9.element_blank(),
+        axis_ticks_major_theta=p9.element_blank(),
+        axis_ticks_length_major_r=0,
+        axis_ticks_length_major_theta=0,
+        legend_position="none",
+        figure_size=(5.5, 5.5),
+        panel_background=p9.element_rect(fill="#EBEBEB", color=None),
+        panel_grid_major=p9.element_line(color="white", size=0.7),
+        panel_grid_minor=p9.element_line(color="white", size=0.35),
+        plot_margin_bottom=0.04,
+        plot_margin_left=0.03,
+        plot_margin_right=0.03,
+    )
 )
-ax.set_title(
-    "Pedestrians aged 0–17 in Fatal Motor Vehicle Crashes\nDaily average, 2009–2023",
-    pad=15,
-    size=9,
-)
-plt.tight_layout()
-plt.show()
 ```
 
 The column chart above conveys the same information more directly: lengths are easier to judge than angles.

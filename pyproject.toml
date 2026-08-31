@@ -8,6 +8,7 @@ dependencies = [
     "geodatasets>=2026.1.0",
     "jupyter>=1.1.1",
     "numpy>=2.4.4",
+    "plotnine==0.16.0a12",
     "plotnine-polars>=0.2.0",
     "polars[pyarrow]>=1.39.3",
     "pyproj>=3.7.2",
@@ -18,5 +19,5 @@ dependencies = [
     "statsmodels>=0.14.6",
 ]
 
-[tool.uv.sources]
-plotnine-polars = { path = "/Users/igow/git/plotnine_polars", editable = true }
+[tool.uv]
+prerelease = "allow"
